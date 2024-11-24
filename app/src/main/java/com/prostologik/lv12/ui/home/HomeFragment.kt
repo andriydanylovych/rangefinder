@@ -30,7 +30,7 @@ import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-typealias LumaListener = (luma: Double, rotation: Int, xx: Int, count: Int) -> Unit
+typealias LumaListener = (infoString: String) -> Unit
 
 class HomeFragment : Fragment() {
 
@@ -142,10 +142,9 @@ class HomeFragment : Fragment() {
                 //.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma, rotation, xx, count ->
-                        //Log.d(TAG, "Average luminosity: $luma")
-                        val s = String.format("%.1f", luma)
-                        infoText = "luma=$s; count=$count; pixel(0)=$xx; rot=$rotation"
+                    it.setAnalyzer(cameraExecutor,
+                        LuminosityAnalyzer { infoString ->
+                            infoText = infoString
                     })
                 }
 
@@ -204,24 +203,11 @@ class HomeFragment : Fragment() {
 
     private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
 
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()    // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data)   // Copy the buffer into a byte array
-            return data // Return the byte array
-        }
-
         override fun analyze(image: ImageProxy) {
 
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
-            val xx = pixels.get(0)
-            val count = pixels.count()
-            val rotation = image.imageInfo.rotationDegrees //rotation
+            val myImageAnalyzer = MyImageAnalyzer()
 
-            listener(luma, rotation, xx, count)
+            listener(myImageAnalyzer.analyze(image))
 
             image.close()
         }
