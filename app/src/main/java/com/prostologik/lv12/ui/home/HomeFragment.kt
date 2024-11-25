@@ -20,7 +20,9 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import java.io.File
@@ -73,8 +75,9 @@ class HomeFragment : Fragment() {
         }
 
         val btnImage = binding.imageCaptureButton
-        val btnInfo = binding.infoButton
         btnImage.setOnClickListener { takePhoto() }
+
+        val btnInfo = binding.infoButton
         btnInfo.setOnClickListener { renderText(infoText) }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -82,42 +85,31 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        cameraExecutor.shutdown()
-        _binding = null
+    private fun requestPermissions() {
+        activityResultLauncher.launch(REQUIRED_PERMISSIONS)
     }
 
-    private fun getOutputDirectory(): File {
-        val mediaDir = activity?.externalMediaDirs?.firstOrNull()?.let {
-            File(it, "image").apply { mkdirs() } // resources.getString(R.string.app_name)
-        }
-        return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
-    }
-
-    private fun takePhoto() {
-        // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCapture ?: return
-
-        val outputDirectory = getOutputDirectory()
-        val photoFile = File(outputDirectory, SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-        // Set up image capture listener, which is triggered after photo has been taken
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(safeContext),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-                }
-                override fun onImageSaved(output: ImageCapture.OutputFileResults){
-                    val msg = "Photo capture succeeded: ${output.savedUri}"
-                    Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
-                }
+    private val activityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions())
+        { permissions ->
+            // Handle Permission granted/rejected
+            var permissionGranted = true
+            permissions.entries.forEach {
+                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
+                    permissionGranted = false
             }
-        )
+            if (!permissionGranted) {
+                Toast.makeText(safeContext,
+                    "Permission request denied",
+                    Toast.LENGTH_SHORT).show()
+            } else {
+                startCamera()
+            }
+        }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        context?.let { it1 -> ContextCompat.checkSelfPermission(it1, it) } == PackageManager.PERMISSION_GRANTED
     }
 
     private fun startCamera() {
@@ -145,7 +137,7 @@ class HomeFragment : Fragment() {
                     it.setAnalyzer(cameraExecutor,
                         LuminosityAnalyzer { infoString ->
                             infoText = infoString
-                    })
+                        })
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -160,17 +152,70 @@ class HomeFragment : Fragment() {
         }, ContextCompat.getMainExecutor(safeContext))
     }
 
-    private fun requestPermissions() {
-        activityResultLauncher.launch(REQUIRED_PERMISSIONS)
+    private fun takePhoto() {
+        // Get a stable reference of the modifiable image capture use case
+        val imageCapture = imageCapture ?: return
+
+        val outputDirectory = getOutputDirectory()
+        val photoFile = File(outputDirectory, SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+        // Set up image capture listener, which is triggered after photo has been taken
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(safeContext),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+                }
+                override fun onImageSaved(output: ImageCapture.OutputFileResults){
+                    // TBD: to show the captured photo here
+                    // imageCapture --> binding.viewFinder
+                    val c = binding.viewFinder
+
+
+                    val msg = "Photo capture succeeded: ${output.savedUri} OutputDir: $outputDirectory"
+                    Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, msg)
+                }
+            }
+        )
+
+        // to pass the output directory to ReviewFragment
+        val result = outputDirectory //"result"
+        setFragmentResult("requestKey", bundleOf("bundleKey" to result))
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        context?.let { it1 -> ContextCompat.checkSelfPermission(it1, it) } == PackageManager.PERMISSION_GRANTED
+    private fun getOutputDirectory(): File {
+        val mediaDir = activity?.externalMediaDirs?.firstOrNull()?.let {
+            File(it, "image").apply { mkdirs() } // resources.getString(R.string.app_name)
+        }
+        return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        cameraExecutor.shutdown()
+        _binding = null
+    }
+
+    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
+
+        override fun analyze(image: ImageProxy) {
+            val myImageAnalyzer = MyImageAnalyzer()
+            listener(myImageAnalyzer.analyze(image))
+            image.close()
+        }
+    }
+
+    private fun renderText(t : CharSequence) {
+        val textView: TextView = binding.textHome
+        textView.text = t
     }
 
     companion object {
         private const val TAG = "CameraXApp"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
                 Manifest.permission.CAMERA,
@@ -180,42 +225,6 @@ class HomeFragment : Fragment() {
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }.toTypedArray()
-    }
-
-    private val activityResultLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions())
-        { permissions ->
-            // Handle Permission granted/rejected
-            var permissionGranted = true
-            permissions.entries.forEach {
-                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
-                    permissionGranted = false
-            }
-            if (!permissionGranted) {
-                Toast.makeText(safeContext,
-                    "Permission request denied",
-                    Toast.LENGTH_SHORT).show()
-            } else {
-                startCamera()
-            }
-        }
-
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
-
-        override fun analyze(image: ImageProxy) {
-
-            val myImageAnalyzer = MyImageAnalyzer()
-
-            listener(myImageAnalyzer.analyze(image))
-
-            image.close()
-        }
-    }
-
-    private fun renderText(t : CharSequence) {
-        val textView: TextView = binding.textHome
-        textView.text = t
     }
 
 }
