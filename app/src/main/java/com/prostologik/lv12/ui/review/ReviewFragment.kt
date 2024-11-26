@@ -1,8 +1,7 @@
 package com.prostologik.lv12.ui.review
 
-import android.media.ThumbnailUtils
+import android.net.Uri
 import android.os.Bundle
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,19 +10,14 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
-import com.prostologik.lv12.R
 import com.prostologik.lv12.databinding.FragmentGalleryBinding
-import com.prostologik.lv12.ui.home.HomeFragment.Companion.FILENAME_FORMAT
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class ReviewFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private var result: String? = "test22"
@@ -39,9 +33,6 @@ class ReviewFragment : Fragment() {
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-
-
-
         // to get the output directory from HomeFragment
         setFragmentResultListener("requestKey") { requestKey, bundle ->
             // We use a String here, but any type that can be put in a Bundle is supported.
@@ -49,29 +40,57 @@ class ReviewFragment : Fragment() {
             // Do something with the result.
         }
 
-        val textView: TextView = binding.textGallery
-        galleryViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+        val btnNext = binding.nextButton
+        btnNext.setOnClickListener { nextPhoto() }
+
+        val btnDelete = binding.deleteButton
+        btnDelete.setOnClickListener { deletePhoto() }
+
+//        val textView: TextView = binding.textGallery
+//        galleryViewModel.text.observe(viewLifecycleOwner) {
+//            textView.text = it
+//        }
 
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Photo capture succeeded: file:///storage/emulated/0/Android/media/com.prostologik.lv12/image/2024-11-25-22-02-17-480.jpg
-
-        //val outputDirectory = activity?.externalMediaDirs?.firstOrNull()
-        val outputDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
-        val photoFile = File(outputDirectory, "cup.jpg")
-        val bitmap = ThumbnailUtils.createImageThumbnail(photoFile, Size(640, 480), null)
-        val imageView: ImageView = binding.imageView
-        imageView.setImageBitmap(bitmap)
+        nextPhoto()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private var counter = 0
+    private var selectedFile: File? = null
+
+    private fun nextPhoto() {
+        val imageView: ImageView = binding.imageView
+        val textView: TextView = binding.textGallery
+        val outputDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+        val uriDir = "file://$outputDirectory/"
+
+        val files = File(outputDirectory).listFiles()
+        val fileNames = arrayOfNulls<String>(files.size)
+        files?.mapIndexed { index, item ->
+            fileNames[index] = item?.name
+        }
+
+        selectedFile = files[counter]
+
+        val uri = Uri.parse(uriDir + fileNames[counter])
+        imageView.setImageURI(uri)
+
+        textView.text = fileNames[counter]
+        counter = (counter + 1) % files.size
+    }
+
+    private fun deletePhoto() {
+        if (selectedFile?.exists() == true) selectedFile!!.delete()
+        counter = 0
+        nextPhoto()
     }
 }
