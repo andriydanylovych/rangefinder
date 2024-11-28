@@ -22,6 +22,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import com.prostologik.lv12.databinding.FragmentHomeBinding
@@ -47,6 +48,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var safeContext: Context
 
+    private val homeViewModel: HomeViewModel by activityViewModels()
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         safeContext = context
@@ -58,7 +61,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         super.onCreate(savedInstanceState)
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+//        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -67,6 +70,10 @@ class HomeFragment : Fragment() {
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+        homeViewModel.changeValue(getOutputDirectory().toString())
+        //homeViewModel.addFile(getOutputDirectory())
+        //homeViewModel.setPhotoUiState(getOutputDirectory())
+
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -157,6 +164,8 @@ class HomeFragment : Fragment() {
         val imageCapture = imageCapture ?: return
 
         val outputDirectory = getOutputDirectory()
+        homeViewModel.addFile(outputDirectory)
+        //homeViewModel.photoDirectory2 = outputDirectory
         val photoFile = File(outputDirectory, SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
@@ -173,7 +182,7 @@ class HomeFragment : Fragment() {
                     // imageCapture --> binding.viewFinder
                     val c = binding.viewFinder
 
-
+//                    setPhotoUiState(outputDirectory, output.savedUri)
                     val msg = "Photo capture succeeded: ${output.savedUri} OutputDir: $outputDirectory"
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)

@@ -8,29 +8,40 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.prostologik.lv12.databinding.FragmentGalleryBinding
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.prostologik.lv12.databinding.FragmentReviewBinding
+import com.prostologik.lv12.ui.home.HomeViewModel
+import kotlinx.coroutines.launch
 import java.io.File
 
 class ReviewFragment : Fragment() {
 
-    private var _binding: FragmentGalleryBinding? = null
+    private var _binding: FragmentReviewBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private var result: String? = "test22"
 
+    private var dir: File? = null
+    private var test: String? = "111"
+
+    private val homeViewModel: HomeViewModel by activityViewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val galleryViewModel =
-            ViewModelProvider(this).get(ReviewViewModel::class.java)
+//        val galleryViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
-        _binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        _binding = FragmentReviewBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         // to get the output directory from HomeFragment
@@ -47,9 +58,19 @@ class ReviewFragment : Fragment() {
         btnDelete.setOnClickListener { deletePhoto() }
 
 //        val textView: TextView = binding.textGallery
-//        galleryViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
+//        homeViewModel.text.observe(viewLifecycleOwner) {
+//            test = it //textView.text = it
 //        }
+
+        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
+                x -> dir = x
+        }
+        homeViewModel.test.observe(viewLifecycleOwner) {
+            test = it
+        }
+//        homeViewModel.photoDirectory.observe(viewLifecycleOwner, Observer {
+//            x -> dir = x
+//        })
 
         return root
     }
@@ -70,7 +91,7 @@ class ReviewFragment : Fragment() {
     private fun nextPhoto() {
         val imageView: ImageView = binding.imageView
         val textView: TextView = binding.textGallery
-        val outputDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+        val outputDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image" // dir.toString() //
         val uriDir = "file://$outputDirectory/"
 
         val files = File(outputDirectory).listFiles()
@@ -84,7 +105,7 @@ class ReviewFragment : Fragment() {
         val uri = Uri.parse(uriDir + fileNames[counter])
         imageView.setImageURI(uri)
 
-        textView.text = fileNames[counter]
+        textView.text = test // fileNames[counter] // dir.toString()
         counter = (counter + 1) % files.size
     }
 
