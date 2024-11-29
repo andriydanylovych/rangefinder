@@ -9,28 +9,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.prostologik.lv12.databinding.FragmentReviewBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
-import kotlinx.coroutines.launch
 import java.io.File
 
 class ReviewFragment : Fragment() {
 
     private var _binding: FragmentReviewBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private var result: String? = "test22"
-
-    private var dir: File? = null
-    private var test: String? = "111"
+    private var photoDirectory: String = "/storage" // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
@@ -39,17 +28,14 @@ class ReviewFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        val galleryViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+
+        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
+            val temp: String? = it
+            if (temp != null) photoDirectory = temp
+        }
 
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
-        // to get the output directory from HomeFragment
-        setFragmentResultListener("requestKey") { requestKey, bundle ->
-            // We use a String here, but any type that can be put in a Bundle is supported.
-            result = bundle.getString("bundleKey")
-            // Do something with the result.
-        }
 
         val btnNext = binding.nextButton
         btnNext.setOnClickListener { nextPhoto() }
@@ -57,26 +43,12 @@ class ReviewFragment : Fragment() {
         val btnDelete = binding.deleteButton
         btnDelete.setOnClickListener { deletePhoto() }
 
-//        val textView: TextView = binding.textGallery
-//        homeViewModel.text.observe(viewLifecycleOwner) {
-//            test = it //textView.text = it
-//        }
-
-        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
-                x -> dir = x
-        }
-        homeViewModel.test.observe(viewLifecycleOwner) {
-            test = it
-        }
-//        homeViewModel.photoDirectory.observe(viewLifecycleOwner, Observer {
-//            x -> dir = x
-//        })
-
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         nextPhoto()
     }
 
@@ -89,24 +61,29 @@ class ReviewFragment : Fragment() {
     private var selectedFile: File? = null
 
     private fun nextPhoto() {
+
         val imageView: ImageView = binding.imageView
         val textView: TextView = binding.textGallery
-        val outputDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image" // dir.toString() //
+        val outputDirectory = photoDirectory // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
         val uriDir = "file://$outputDirectory/"
 
         val files = File(outputDirectory).listFiles()
-        val fileNames = arrayOfNulls<String>(files.size)
-        files?.mapIndexed { index, item ->
-            fileNames[index] = item?.name
+
+        if (files != null) {
+            val fileNames = arrayOfNulls<String>(files.size)
+            files.mapIndexed { index, item ->
+                fileNames[index] = item?.name
+            }
+
+            selectedFile = files[counter]
+
+            val uri = Uri.parse(uriDir + fileNames[counter])
+            imageView.setImageURI(uri)
+
+            textView.text = fileNames[counter]
+            counter = (counter + 1) % files.size
         }
 
-        selectedFile = files[counter]
-
-        val uri = Uri.parse(uriDir + fileNames[counter])
-        imageView.setImageURI(uri)
-
-        textView.text = test // fileNames[counter] // dir.toString()
-        counter = (counter + 1) % files.size
     }
 
     private fun deletePhoto() {

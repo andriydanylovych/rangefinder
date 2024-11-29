@@ -31,11 +31,11 @@
 
     <ImageButton
         android:id="@+id/delete_button"
-        android:contentDescription="Delete"
+        android:contentDescription="@string/delete"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/delete_24"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_gallery"
@@ -44,10 +44,11 @@
 
     <ImageButton
         android:id="@+id/save_button"
+        android:contentDescription="@string/save"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="24dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="64dp"
         android:backgroundTint="#00FF00"
         android:src="@drawable/save_24"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -58,7 +59,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="64dp"
         android:backgroundTint="#0000FF"
         android:src="@drawable/next_24"
         app:layout_constraintBottom_toBottomOf="parent"

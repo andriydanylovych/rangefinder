@@ -24,10 +24,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.ViewModelProvider
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import java.io.File
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -39,7 +37,6 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private var imageCapture: ImageCapture? = null
@@ -47,6 +44,8 @@ class HomeFragment : Fragment() {
     private var infoText: String = "no input"
 
     private lateinit var safeContext: Context
+
+    private lateinit var outputDirectory: File
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
@@ -61,19 +60,13 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         super.onCreate(savedInstanceState)
-//        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
-        homeViewModel.changeValue(getOutputDirectory().toString())
-        //homeViewModel.addFile(getOutputDirectory())
-        //homeViewModel.setPhotoUiState(getOutputDirectory())
-
+        outputDirectory = getOutputDirectory()
+        val photoDirectory = outputDirectory.toString()
+        homeViewModel.setPhotoDirectory(photoDirectory)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -163,9 +156,6 @@ class HomeFragment : Fragment() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        val outputDirectory = getOutputDirectory()
-        homeViewModel.addFile(outputDirectory)
-        //homeViewModel.photoDirectory2 = outputDirectory
         val photoFile = File(outputDirectory, SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
@@ -178,11 +168,9 @@ class HomeFragment : Fragment() {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
                 override fun onImageSaved(output: ImageCapture.OutputFileResults){
-                    // TBD: to show the captured photo here
-                    // imageCapture --> binding.viewFinder
-                    val c = binding.viewFinder
 
-//                    setPhotoUiState(outputDirectory, output.savedUri)
+                    binding.viewFinder
+
                     val msg = "Photo capture succeeded: ${output.savedUri} OutputDir: $outputDirectory"
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
@@ -191,13 +179,13 @@ class HomeFragment : Fragment() {
         )
 
         // to pass the output directory to ReviewFragment
-        val result = outputDirectory //"result"
+        val result = outputDirectory
         setFragmentResult("requestKey", bundleOf("bundleKey" to result))
     }
 
     private fun getOutputDirectory(): File {
         val mediaDir = activity?.externalMediaDirs?.firstOrNull()?.let {
-            File(it, "image").apply { mkdirs() } // resources.getString(R.string.app_name)
+            File(it, "image").apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
     }
