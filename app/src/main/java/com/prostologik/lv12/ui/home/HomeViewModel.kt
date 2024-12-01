@@ -30,4 +30,12 @@ class HomeViewModel : ViewModel() {
         _photoDirectory.value = dir
     }
 
+    private var _photoFileName = MutableLiveData<String>().apply {
+        value = null
+    }
+    val photoFileName: LiveData<String> = _photoFileName
+    fun setPhotoFileName(dir: String) {
+        _photoFileName.value = dir
+    }
+
 }

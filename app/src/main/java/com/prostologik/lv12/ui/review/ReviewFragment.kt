@@ -20,6 +20,7 @@ class ReviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var photoDirectory: String = "/storage" // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+    private var photoFileName: String = "default.jpg"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
@@ -32,6 +33,11 @@ class ReviewFragment : Fragment() {
         homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
             val temp: String? = it
             if (temp != null) photoDirectory = temp
+        }
+
+        homeViewModel.photoFileName.observe(viewLifecycleOwner) {
+            val temp: String? = it
+            if (temp != null) photoFileName = temp
         }
 
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
@@ -49,7 +55,7 @@ class ReviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        nextPhoto()
+        //if (photoDirectory != "/storage") nextPhoto()
     }
 
     override fun onDestroyView() {
@@ -57,38 +63,41 @@ class ReviewFragment : Fragment() {
         _binding = null
     }
 
-    private var counter = 0
-    private var selectedFile: File? = null
+    private var counter = -1
+    private var selectedFileName = photoFileName
+    private var newImage = true
 
     private fun nextPhoto() {
-
         val imageView: ImageView = binding.imageView
         val textView: TextView = binding.textGallery
-        val outputDirectory = photoDirectory // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
-        val uriDir = "file://$outputDirectory/"
 
-        val files = File(outputDirectory).listFiles()
-
-        if (files != null) {
+        if (newImage && photoFileName != "default.jpg") {
+            newImage = false
+            selectedFileName = photoFileName
+        } else {
+            val files = File(photoDirectory).listFiles()
+            counter = (counter + 1) % files.size
             val fileNames = arrayOfNulls<String>(files.size)
             files.mapIndexed { index, item ->
                 fileNames[index] = item?.name
             }
-
-            selectedFile = files[counter]
-
-            val uri = Uri.parse(uriDir + fileNames[counter])
-            imageView.setImageURI(uri)
-
-            textView.text = fileNames[counter]
-            counter = (counter + 1) % files.size
+            selectedFileName = fileNames[counter]!!
         }
-
+        val uri = Uri.parse("file://$photoDirectory/$selectedFileName")
+        imageView.setImageURI(uri)
+        textView.text = selectedFileName
     }
 
     private fun deletePhoto() {
-        if (selectedFile?.exists() == true) selectedFile!!.delete()
-        counter = 0
+        val files = File(photoDirectory).listFiles()
+        for (file in files) {
+            if (file.name == selectedFileName) {
+                file.delete()
+                counter -= 1
+                break
+            }
+        }
         nextPhoto()
     }
+
 }

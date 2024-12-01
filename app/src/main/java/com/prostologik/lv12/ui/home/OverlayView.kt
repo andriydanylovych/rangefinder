@@ -41,7 +41,7 @@ class OverlayView : View {
     companion object {
         var height: Int = 30
         var width: Int = 30
-        var text: String = "default text"
+        var text: String = "default overlay text"
     }
 }
 

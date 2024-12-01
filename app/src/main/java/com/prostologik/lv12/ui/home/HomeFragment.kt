@@ -156,7 +156,10 @@ class HomeFragment : Fragment() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        val photoFile = File(outputDirectory, SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
+        val photoFileName: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+        homeViewModel.setPhotoFileName(photoFileName)
+
+        val photoFile = File(outputDirectory, photoFileName)
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         // Set up image capture listener, which is triggered after photo has been taken
@@ -171,7 +174,7 @@ class HomeFragment : Fragment() {
 
                     binding.viewFinder
 
-                    val msg = "Photo capture succeeded: ${output.savedUri} OutputDir: $outputDirectory"
+                    val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
                 }

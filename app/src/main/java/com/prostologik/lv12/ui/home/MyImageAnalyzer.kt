@@ -13,8 +13,9 @@ class MyImageAnalyzer {
         val data = buffer.toByteArray()
         val pixels = data.map { it.toInt() and 0xFF }
         val luma = pixels.average()
-        val xx = pixels.get(0)
         val count = pixels.count()
+        val p0 = pixels.get(0)
+        val p1 = pixels.get(count / 2)
         val rotation = image.imageInfo.rotationDegrees
         if (!setImageSize) {
             OverlayView.height = image.height //image.getHeight()
@@ -22,8 +23,8 @@ class MyImageAnalyzer {
             setImageSize = true;
         }
         val s = String.format("%.1f", luma)
-        val viewBag = "luma=$s; count=$count; px(0)=$xx; rot=$rotation" //h=$height; w=$width
-        OverlayView.text = viewBag
+        val viewBag = "luma=$s; count=$count; px(0)=$p0; rot=$rotation"
+        OverlayView.text = "px(miggle)=$p1" //viewBag
         return viewBag
     }
 
