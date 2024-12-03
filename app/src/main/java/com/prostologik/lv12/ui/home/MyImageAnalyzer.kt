@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 
 class MyImageAnalyzer {
 
-    var setImageSize: Boolean = false;
+    var setImageSize: Boolean = false
 
     fun analyze(image: ImageProxy): String {
         val buffer0 = image.planes[0].buffer
@@ -15,14 +15,14 @@ class MyImageAnalyzer {
             OverlayView.height = image.height // 640
             OverlayView.width = image.width // 480
             OverlayView.text = "data=$count"
-            setImageSize = true;
+            setImageSize = true
         }
 
         val startPx = 153832
-        var sb: StringBuilder = StringBuilder("start=$startPx: ")
+        val sb: StringBuilder = StringBuilder("start=$startPx: ")
         var i = 0
         while (i < 16) {
-            var d = byteToPixel(data[startPx + i])
+            val d = byteToPixel(data[startPx + i])
             sb.append("$d.")
             i++
         }

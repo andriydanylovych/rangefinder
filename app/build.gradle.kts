@@ -55,13 +55,21 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    //def camerax_version = "1.2.2"
-    implementation("androidx.camera:camera-core:1.2.2")
-    implementation("androidx.camera:camera-camera2:1.2.2")
-    implementation("androidx.camera:camera-lifecycle:1.2.2")
-    implementation("androidx.camera:camera-video:1.2.2")
+    //def camerax_version = "1.4.0"
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
 
-    implementation("androidx.camera:camera-view:1.2.2")
-    implementation("androidx.camera:camera-extensions:1.2.2")
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
+
+//    implementation("androidx.camera:camera-core:1.2.2")
+//    implementation("androidx.camera:camera-camera2:1.2.2")
+//    implementation("androidx.camera:camera-lifecycle:1.2.2")
+//    implementation("androidx.camera:camera-video:1.2.2")
+//
+//    implementation("androidx.camera:camera-view:1.2.2")
+//    implementation("androidx.camera:camera-extensions:1.2.2")
 
 }

@@ -76,12 +76,15 @@ class ReviewFragment : Fragment() {
             selectedFileName = photoFileName
         } else {
             val files = File(photoDirectory).listFiles()
-            counter = (counter + 1) % files.size
-            val fileNames = arrayOfNulls<String>(files.size)
-            files.mapIndexed { index, item ->
-                fileNames[index] = item?.name
+            if (files != null) {
+                counter = (counter + 1) % files.size
+
+                val fileNames = arrayOfNulls<String>(files.size)
+                files.mapIndexed { index, item ->
+                    fileNames[index] = item?.name
+                }
+                selectedFileName = fileNames[counter]!!
             }
-            selectedFileName = fileNames[counter]!!
         }
         val uri = Uri.parse("file://$photoDirectory/$selectedFileName")
         imageView.setImageURI(uri)

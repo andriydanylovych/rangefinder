@@ -12,6 +12,7 @@
     <string name="menu_slideshow">Objects</string>
 
     <string name="take_photo">Take Photo</string>
+    <string name="photo">Photo</string>
     <string name="get_info">Info</string>
     <string name="next">Next</string>
     <string name="delete">Delete</string>

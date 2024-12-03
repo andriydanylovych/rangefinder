@@ -9,6 +9,7 @@
 
     <ImageView
         android:id="@+id/imageView"
+        android:contentDescription="@string/photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -57,6 +58,7 @@
 
     <ImageButton
         android:id="@+id/next_button"
+        android:contentDescription="@string/photo"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"
