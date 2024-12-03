@@ -41,11 +41,11 @@ class HomeFragment : Fragment() {
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
-    private var infoText: String = "no input"
 
     private lateinit var safeContext: Context
 
     private lateinit var outputDirectory: File
+    private var infoText: String = "no input"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
@@ -65,8 +65,7 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         outputDirectory = getOutputDirectory()
-        val photoDirectory = outputDirectory.toString()
-        homeViewModel.setPhotoDirectory(photoDirectory)
+        homeViewModel.setPhotoDirectory(outputDirectory.toString())
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -180,10 +179,6 @@ class HomeFragment : Fragment() {
                 }
             }
         )
-
-        // to pass the output directory to ReviewFragment
-        val result = outputDirectory
-        setFragmentResult("requestKey", bundleOf("bundleKey" to result))
     }
 
     private fun getOutputDirectory(): File {

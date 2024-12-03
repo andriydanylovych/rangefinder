@@ -14,6 +14,6 @@
     <string name="take_photo">Take Photo</string>
     <string name="get_info">Info</string>
     <string name="next">Next</string>
-    <string name="delete">Del</string>
+    <string name="delete">Delete</string>
     <string name="save">Save</string>
 </resources>

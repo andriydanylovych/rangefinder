@@ -28,7 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_menu_camera" />
+        android:layout_marginTop="64dp"
+        app:srcCompat="@drawable/camera_24"
+        android:contentDescription="@string/take_photo" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

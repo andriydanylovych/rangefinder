@@ -11,7 +11,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commit
 import com.prostologik.lv12.databinding.ActivityMainBinding
+import com.prostologik.lv12.ui.home.HomeFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,11 +28,13 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
-        binding.appBarMain.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
-        }
+//        binding.appBarMain.fab.setOnClickListener {
+//            //HomeFragment.renderText("123")
+//            view ->
+//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null)
+//                .setAnchorView(R.id.fab).show()
+//        }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -43,6 +47,23 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+
+
+        binding.appBarMain.fab.setOnClickListener {
+            //HomeFragment.renderText("123")
+            //navView.setupWithNavController(findNavController(R.id.nav_home))
+//            val transaction = supportFragmentManager.beginTransaction()
+            //transaction.replace(R.id.nav_home, HomeFragment)
+//            transaction.disallowAddToBackStack()
+//            transaction.commit()
+
+//            supportFragmentManager.commit {
+//                setReorderingAllowed(true)
+//                add<HomeFragment>(R.id.nav_host_fragment_content_main)
+//            }
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

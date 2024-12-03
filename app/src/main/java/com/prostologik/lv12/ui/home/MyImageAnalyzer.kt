@@ -5,27 +5,34 @@ import java.nio.ByteBuffer
 
 class MyImageAnalyzer {
 
-    //lateinit var _image: ImageProxy
     var setImageSize: Boolean = false;
 
     fun analyze(image: ImageProxy): String {
-        val buffer = image.planes[0].buffer
-        val data = buffer.toByteArray()
-        val pixels = data.map { it.toInt() and 0xFF }
-        val luma = pixels.average()
-        val count = pixels.count()
-        val p0 = pixels.get(0)
-        val p1 = pixels.get(count / 2)
-        val rotation = image.imageInfo.rotationDegrees
+        val buffer0 = image.planes[0].buffer
+        val data = buffer0.toByteArray()
+        val count = data.count()// 307200
         if (!setImageSize) {
-            OverlayView.height = image.height //image.getHeight()
-            OverlayView.width = image.width //image.getWidth()
+            OverlayView.height = image.height // 640
+            OverlayView.width = image.width // 480
+            OverlayView.text = "data=$count"
             setImageSize = true;
         }
-        val s = String.format("%.1f", luma)
-        val viewBag = "luma=$s; count=$count; px(0)=$p0; rot=$rotation"
-        OverlayView.text = "px(miggle)=$p1" //viewBag
+
+        val startPx = 153832
+        var sb: StringBuilder = StringBuilder("start=$startPx: ")
+        var i = 0
+        while (i < 16) {
+            var d = byteToPixel(data[startPx + i])
+            sb.append("$d.")
+            i++
+        }
+        val viewBag = sb.toString()
+
         return viewBag
+    }
+
+    private fun byteToPixel(b: Byte): Int {
+        return if (b < 0) (256 + b.toInt()) else b.toInt()
     }
 
     private fun ByteBuffer.toByteArray(): ByteArray {

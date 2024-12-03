@@ -93,7 +93,7 @@ class ReviewFragment : Fragment() {
         for (file in files) {
             if (file.name == selectedFileName) {
                 file.delete()
-                counter -= 1
+                if (counter > -1) counter -= 1
                 break
             }
         }

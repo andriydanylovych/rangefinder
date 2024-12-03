@@ -33,6 +33,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    kotlin {
+        tasks.register("testClasses")
+    }
     buildFeatures {
         viewBinding = true
     }
