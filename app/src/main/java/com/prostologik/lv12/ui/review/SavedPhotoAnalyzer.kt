@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.get
 import androidx.core.net.toFile
 
 class SavedPhotoAnalyzer {
@@ -21,7 +22,7 @@ class SavedPhotoAnalyzer {
         //val bm00 = bm[0, 0]
         // channel '49c68f com.prostologik.lv12/com.prostologik.lv12.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
 
-        return "source: $source size: $size bm00: 0"
+        return "source: $source size: $size"
     }
 }
 

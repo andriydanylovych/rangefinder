@@ -63,7 +63,7 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         outputDirectory = getOutputDirectory()
-        homeViewModel.setPhotoDirectory(outputDirectory.toString())
+//        homeViewModel.setPhotoDirectory(outputDirectory.toString())
 
         if (allPermissionsGranted()) {
             startCamera()

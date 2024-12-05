@@ -22,13 +22,13 @@ import androidx.lifecycle.ViewModel
 class HomeViewModel : ViewModel() {
 
 
-    private var _photoDirectory = MutableLiveData<String>().apply {
-        value = null
-    }
-    val photoDirectory: LiveData<String> = _photoDirectory
-    fun setPhotoDirectory(dir: String) {
-        _photoDirectory.value = dir
-    }
+//    private var _photoDirectory = MutableLiveData<String>().apply {
+//        value = null
+//    }
+//    val photoDirectory: LiveData<String> = _photoDirectory
+//    fun setPhotoDirectory(dir: String) {
+//        _photoDirectory.value = dir
+//    }
 
     private var _photoFileName = MutableLiveData<String>().apply {
         value = null
