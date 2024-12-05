@@ -6,13 +6,12 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.get
 import androidx.core.net.toFile
 
 class SavedPhotoAnalyzer {
 
     @RequiresApi(Build.VERSION_CODES.P)
-    public fun analyze(uri: Uri): String {
+    fun analyze(uri: Uri): String {
         val source: ImageDecoder.Source = ImageDecoder.createSource(uri.toFile())
         val drawable = ImageDecoder.decodeDrawable(source)
         val bm: Bitmap = drawable.toBitmap()
