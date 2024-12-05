@@ -93,7 +93,7 @@ class HomeFragment : Fragment() {
             // Handle Permission granted/rejected
             var permissionGranted = true
             permissions.entries.forEach {
-                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
+                if (it.key in REQUIRED_PERMISSIONS && !it.value) // if (it.key in REQUIRED_PERMISSIONS && it.value == false)
                     permissionGranted = false
             }
             if (!permissionGranted) {
@@ -120,7 +120,8 @@ class HomeFragment : Fragment() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                    it.surfaceProvider = binding.viewFinder.surfaceProvider
+                    //it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder().build()
@@ -132,7 +133,7 @@ class HomeFragment : Fragment() {
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor,
-                        LuminosityAnalyzer { infoString ->
+                        PhotoAnalyzer { infoString ->
                             infoText = infoString
                         })
                 }
@@ -192,7 +193,7 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
+    private class PhotoAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
 
         override fun analyze(image: ImageProxy) {
             val myImageAnalyzer = MyImageAnalyzer()

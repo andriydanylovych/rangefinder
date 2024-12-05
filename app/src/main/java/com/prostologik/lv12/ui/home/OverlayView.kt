@@ -8,14 +8,7 @@ import android.util.AttributeSet
 import android.view.View
 
 class OverlayView : View {
-    //public var height = 30;
-    //public var width = 30
 
-    private val textPaint = Paint().apply {
-        color = Color.BLACK
-        textSize = 50f
-        isAntiAlias = true
-    }
     private lateinit var myRedPaint: Paint
     constructor(c: Context?) : super(c) {
         init()
@@ -31,17 +24,15 @@ class OverlayView : View {
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        var w = 0.5f * width
-        var h = 0.5f * height
-        var a = 32f
+        val w = 0.5f * width
+        val h = 0.5f * height
+        val a = 32f
         canvas.drawRect(w - a, h - a,  w + a,h + a, myRedPaint)
-        canvas.drawText(text, 60f, 160f, textPaint)
     }
 
     companion object {
         var height: Int = 30
         var width: Int = 30
-        var text: String = "default overlay text"
     }
 }
 

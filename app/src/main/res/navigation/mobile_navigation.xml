@@ -22,4 +22,5 @@
         android:name="com.prostologik.lv12.ui.objects.ObjectsFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+
 </navigation>

@@ -1,17 +1,29 @@
 package com.prostologik.lv12.ui.review
 
+import android.R.attr.bitmap
+import android.R.attr.height
+import android.R.attr.width
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.get
+import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.databinding.FragmentReviewBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
+import com.prostologik.lv12.ui.home.MyImageAnalyzer
 import java.io.File
+
 
 class ReviewFragment : Fragment() {
 
@@ -19,11 +31,12 @@ class ReviewFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private var photoDirectory: String = "/storage" // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+    private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image" // "/storage" //
     private var photoFileName: String = "default.jpg"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,6 +62,9 @@ class ReviewFragment : Fragment() {
         val btnDelete = binding.deleteButton
         btnDelete.setOnClickListener { deletePhoto() }
 
+        val btnSave = binding.saveButton
+        btnSave.setOnClickListener { processPhoto() }
+
         return root
     }
 
@@ -67,9 +83,10 @@ class ReviewFragment : Fragment() {
     private var selectedFileName = photoFileName
     private var newImage = true
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private fun nextPhoto() {
         val imageView: ImageView = binding.imageView
-        val textView: TextView = binding.textGallery
+        val textView: TextView = binding.textReview
 
         if (newImage && photoFileName != "default.jpg") {
             newImage = false
@@ -88,12 +105,14 @@ class ReviewFragment : Fragment() {
         }
         val uri = Uri.parse("file://$photoDirectory/$selectedFileName")
         imageView.setImageURI(uri)
+
         textView.text = selectedFileName
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private fun deletePhoto() {
         val files = File(photoDirectory).listFiles()
-        for (file in files) {
+        for (file in files!!) {
             if (file.name == selectedFileName) {
                 file.delete()
                 if (counter > -1) counter -= 1
@@ -101,6 +120,14 @@ class ReviewFragment : Fragment() {
             }
         }
         nextPhoto()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun processPhoto() {
+        val textView: TextView = binding.textReview
+        val savedPhotoAnalyzer = SavedPhotoAnalyzer()
+        val uri = Uri.parse("file://$photoDirectory/$selectedFileName")
+        textView.text = savedPhotoAnalyzer.analyze(uri)
     }
 
 }
