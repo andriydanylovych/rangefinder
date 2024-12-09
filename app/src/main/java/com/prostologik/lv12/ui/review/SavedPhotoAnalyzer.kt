@@ -5,8 +5,6 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.get
 import androidx.core.net.toFile
 
 class SavedPhotoAnalyzer {
@@ -14,15 +12,29 @@ class SavedPhotoAnalyzer {
     @RequiresApi(Build.VERSION_CODES.P)
     fun analyze(uri: Uri): String {
         val source: ImageDecoder.Source = ImageDecoder.createSource(uri.toFile())
-        val drawable = ImageDecoder.decodeDrawable(source)
-        val bm: Bitmap = drawable.toBitmap()
-        val w = bm.width
-        val h = bm.height
+        val bm = ImageDecoder.decodeBitmap(source)
+//        val bm = ImageDecoder.decodeBitmap(source, ImageDecoder.OnHeaderDecodedListener(Any({ decoder, info, source ->
+//            decoder.setMutableRequired(true)
+//        })))
+        //val bm = BitmapFactory.decodeResource(null, R.drawable.shot_24)
+
+        //val bm2 = Bitmap.createBitmap(bm, 0, 0, 1, 1)
+
+        val config = bm.config
+
+        val conf = Bitmap.Config.ARGB_8888 // see other conf types
+        val bm3 = Bitmap.createBitmap(2, 2, conf)
+
+        //val str = bm3.toString()
+
+        val w = bm3.width
+        val h = bm3.height
         val size = "$w x $h"
-        //val bm00 = bm[0, 0]
+        val bm00 = bm3.getPixel(0, 0) //bm2[0, 0]
+        val bm11 = bm3.getPixel(1, 1) //bm2[0, 0]
         // channel '49c68f com.prostologik.lv12/com.prostologik.lv12.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
 
-        return "source: $source size: $size"
+        return "config: $config size: $size bm00: $bm00 bm11: $bm11"
     }
 }
 

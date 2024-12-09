@@ -138,6 +138,14 @@ class ReviewFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun processPhoto() {
+
+//        requireActivity().runOnUiThread { //No.1
+//            val textView: TextView = binding.textReview
+//            val savedPhotoAnalyzer = SavedPhotoAnalyzer()
+//            val uri = Uri.parse("file://$photoDirectory/$photoFileName")
+//            textView.text = savedPhotoAnalyzer.analyze(uri)
+//        }
+
         val textView: TextView = binding.textReview
         val savedPhotoAnalyzer = SavedPhotoAnalyzer()
         val uri = Uri.parse("file://$photoDirectory/$photoFileName")

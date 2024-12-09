@@ -29,7 +29,7 @@ import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-typealias LumaListener = (infoString: String) -> Unit
+typealias AnalyzerListener = (infoString: String) -> Unit
 
 class HomeFragment : Fragment() {
 
@@ -43,6 +43,7 @@ class HomeFragment : Fragment() {
     private lateinit var safeContext: Context
 
     private lateinit var outputDirectory: File
+    private lateinit var textView: TextView
     private var infoText: String = "no input"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
@@ -63,7 +64,6 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         outputDirectory = getOutputDirectory()
-//        homeViewModel.setPhotoDirectory(outputDirectory.toString())
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -74,8 +74,10 @@ class HomeFragment : Fragment() {
         val btnImage = binding.imageCaptureButton
         btnImage.setOnClickListener { takePhoto() }
 
+        textView = binding.textHome
+
         val btnInfo = binding.infoButton
-        btnInfo.setOnClickListener { renderText(infoText) }
+        btnInfo.setOnClickListener { textView.text = infoText }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -172,6 +174,7 @@ class HomeFragment : Fragment() {
 
                     binding.viewFinder
 
+                    textView.text = infoText
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
@@ -193,18 +196,13 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private class PhotoAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
+    private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
         override fun analyze(image: ImageProxy) {
             val myImageAnalyzer = MyImageAnalyzer()
             listener(myImageAnalyzer.analyze(image))
             image.close()
         }
-    }
-
-    private fun renderText(t : CharSequence) {
-        val textView: TextView = binding.textHome
-        textView.text = t
     }
 
     companion object {

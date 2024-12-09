@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.review.ReviewFragment">
 
-    <ImageView
+    <com.prostologik.lv12.ui.review.ZoomClass
         android:id="@+id/imageView"
         android:contentDescription="@string/photo"
         android:layout_width="match_parent"

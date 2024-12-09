@@ -21,7 +21,6 @@ import androidx.lifecycle.ViewModel
 
 class HomeViewModel : ViewModel() {
 
-
 //    private var _photoDirectory = MutableLiveData<String>().apply {
 //        value = null
 //    }
