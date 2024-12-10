@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -24,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -92,10 +94,9 @@ class HomeFragment : Fragment() {
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions())
         { permissions ->
-            // Handle Permission granted/rejected
             var permissionGranted = true
             permissions.entries.forEach {
-                if (it.key in REQUIRED_PERMISSIONS && !it.value) // if (it.key in REQUIRED_PERMISSIONS && it.value == false)
+                if (it.key in REQUIRED_PERMISSIONS && !it.value)
                     permissionGranted = false
             }
             if (!permissionGranted) {
@@ -123,7 +124,6 @@ class HomeFragment : Fragment() {
                 .build()
                 .also {
                     it.surfaceProvider = binding.viewFinder.surfaceProvider
-                    //it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder().build()
@@ -156,10 +156,11 @@ class HomeFragment : Fragment() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        val photoFileName: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+        val photoFileName: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) //+ ".jpg"
         homeViewModel.setPhotoFileName(photoFileName)
+        val photoFileNameJpg = "$photoFileName.jpg"
 
-        val photoFile = File(outputDirectory, photoFileName)
+        val photoFile = File(outputDirectory, photoFileNameJpg)
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         // Set up image capture listener, which is triggered after photo has been taken
@@ -170,11 +171,17 @@ class HomeFragment : Fragment() {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
+                @RequiresApi(Build.VERSION_CODES.O)
                 override fun onImageSaved(output: ImageCapture.OutputFileResults){
 
-                    binding.viewFinder
-
                     textView.text = infoText
+
+                    try {
+                        val filePath = "$outputDirectory/$photoFileName.txt"
+                        val file = File(filePath)
+                        file.writeText(infoText)
+                    } catch (_: IOException) {}
+
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
@@ -220,5 +227,3 @@ class HomeFragment : Fragment() {
     }
 
 }
-
-// https://gist.github.com/Rickyip/83108b2006023a2fd3730d350feb477f

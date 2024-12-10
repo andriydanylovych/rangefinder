@@ -17,14 +17,14 @@ class MyImageAnalyzer {
             setImageSize = true
         }
 
-        val snippetSize = 16
-        val step = 20
-        val startPx = 307200 / 2 + 640 / 2 - snippetSize / 2 * step // 153760
-        val sb: StringBuilder = StringBuilder(">") // "start=$startPx: "
+        val snippetSize = 64
+        val step = 1
+        val startPx = 307200 / 2 + 640 / 2 - snippetSize / 2 * step
+        val sb: StringBuilder = StringBuilder("")
         var i = 0
         while (i < snippetSize) {
             val d = byteToPixel(data[startPx + i * step])
-            sb.append("$d.")
+            sb.append("$d,")
             i++
         }
 
