@@ -22,7 +22,6 @@ class SetupFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        //val slideshowViewModel = ViewModelProvider(this).get(ObjectsViewModel::class.java)
 
         _binding = FragmentSetupBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -31,7 +30,8 @@ class SetupFragment : Fragment() {
 
         var snippetWidth = 64
         var snippetHeight = 1
-        textView.text = textWidthHeight(snippetWidth, snippetHeight)
+        var snippetLayer = 0
+        textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
 
         val editSnippetWidth = binding.editSnippetWidth
         //editSnippetWidth.setText(snippetWidth)
@@ -40,7 +40,7 @@ class SetupFragment : Fragment() {
             if (snippetWidth > 256) snippetWidth = 256
             if (snippetWidth < 1) snippetWidth = 1
             homeViewModel.setSnippetWidth(snippetWidth)
-            textView.text = textWidthHeight(snippetWidth, snippetHeight)
+            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
         }
 
         val editSnippetHeight = binding.editSnippetHeight
@@ -50,14 +50,24 @@ class SetupFragment : Fragment() {
             if (snippetHeight > 256) snippetHeight = 256
             if (snippetHeight < 1) snippetHeight = 1
             homeViewModel.setSnippetHeight(snippetHeight)
-            textView.text = textWidthHeight(snippetWidth, snippetHeight)
+            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
+        }
+
+        val editSnippetLayer = binding.editSnippetLayer
+        //editSnippetLayer.setText(snippetLayer)
+        editSnippetLayer.addTextChangedListener {
+            snippetLayer = stringToInteger(editSnippetLayer.text.toString())
+            if (snippetLayer > 2) snippetLayer = 2
+            if (snippetLayer < 0) snippetLayer = 0
+            homeViewModel.setSnippetLayer(snippetLayer)
+            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
         }
 
         return root
     }
 
-    private fun textWidthHeight(w: Int, h: Int): String {
-        return "W x H = $w x $h"
+    private fun textWidthHeight(w: Int, h: Int, l: Int): String {
+        return "W x H = $w x $h  L = $l"
     }
 
     private fun stringToInteger(s: String): Int {

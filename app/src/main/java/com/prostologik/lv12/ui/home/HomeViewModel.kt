@@ -38,7 +38,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private var _snippetWidth = MutableLiveData<Int>().apply {
-        value = 0
+        value = 64
     }
     val snippetWidth: LiveData<Int> = _snippetWidth
     fun setSnippetWidth(w: Int) {
@@ -46,11 +46,19 @@ class HomeViewModel : ViewModel() {
     }
 
     private var _snippetHeight = MutableLiveData<Int>().apply {
-        value = 0
+        value = 1
     }
     val snippetHeight: LiveData<Int> = _snippetHeight
     fun setSnippetHeight(h: Int) {
         _snippetHeight.value = h
+    }
+
+    private var _snippetLayer = MutableLiveData<Int>().apply {
+        value = 0
+    }
+    val snippetLayer: LiveData<Int> = _snippetLayer
+    fun setSnippetLayer(l: Int) {
+        _snippetLayer.value = l
     }
 
 }

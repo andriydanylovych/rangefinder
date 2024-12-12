@@ -15,6 +15,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="-164dp" />
 
+    <ImageView
+        android:id="@+id/imageSnippet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:ignore="ContentDescription"
+        android:background="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_review"
+        />
+
     <TextView
         android:id="@+id/text_review"
         android:layout_width="match_parent"
@@ -27,8 +37,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-
 
     <ImageButton
         android:id="@+id/delete_button"

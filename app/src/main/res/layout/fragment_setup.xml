@@ -13,57 +13,96 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="8dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
+    <TextView
+        android:id="@+id/labelWidth"
+        android:labelFor="@+id/editSnippetWidth"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:textSize="20sp"
+        android:text="W"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_setup"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
+        app:layout_constraintTop_toBottomOf="@+id/text_setup"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editSnippetWidth"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/labelWidth"
+        app:layout_constraintEnd_toStartOf="@id/labelHeight"
+        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+
+    <TextView
+        android:id="@+id/labelHeight"
+        android:labelFor="@id/editSnippetHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="H"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editSnippetWidth"
+        app:layout_constraintEnd_toStartOf="@id/editSnippetHeight"
+        app:layout_constraintTop_toBottomOf="@id/text_setup"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editSnippetHeight"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/labelHeight"
+        app:layout_constraintEnd_toStartOf="@id/labelLayer"
+        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+
+    <TextView
+        android:id="@+id/labelLayer"
+        android:labelFor="@id/editSnippetLayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="L"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editSnippetHeight"
+        app:layout_constraintEnd_toStartOf="@id/editSnippetLayer"
+        app:layout_constraintTop_toBottomOf="@id/text_setup"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editSnippetLayer"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="24dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        >
+        app:layout_constraintStart_toEndOf="@id/labelLayer"
+        app:layout_constraintTop_toBottomOf="@id/text_setup" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="W:"/>
-
-        <EditText
-            android:id="@+id/editSnippetWidth"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:autofillHints=""
-            android:ems="16"
-            android:padding="17dp"
-            android:hint="64"
-            android:inputType="number"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/editSnippetHeight"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="H:"/>
-
-        <EditText
-            android:id="@+id/editSnippetHeight"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:autofillHints=""
-            android:ems="16"
-            android:padding="17dp"
-            android:hint="1"
-            android:inputType="number"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/editSnippetWidth"
-            app:layout_constraintTop_toBottomOf="parent" />
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

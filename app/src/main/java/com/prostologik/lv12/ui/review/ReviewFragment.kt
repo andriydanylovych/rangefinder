@@ -1,5 +1,8 @@
 package com.prostologik.lv12.ui.review
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +30,11 @@ class ReviewFragment : Fragment() {
     private var fileName: String = "default"
 
     private val homeViewModel: HomeViewModel by activityViewModels()
+
+    private lateinit var mImageView: ImageView
+    private lateinit var bitmap: Bitmap
+    private lateinit var canvas: Canvas
+    private lateinit var paint: Paint
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -66,6 +74,13 @@ class ReviewFragment : Fragment() {
 
         fileName = getNextFileName(fileName, photoDirectory)
         renderPhoto(photoDirectory, fileName)
+
+
+        mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
+        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
+        canvas = Canvas(bitmap)
+        mImageView.setImageBitmap(bitmap)
+
 
         return root
     }

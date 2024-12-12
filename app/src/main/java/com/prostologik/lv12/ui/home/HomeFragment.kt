@@ -85,6 +85,14 @@ class HomeFragment : Fragment() {
             }
         }
 
+        snippetLayer = 0
+        homeViewModel.snippetLayer.observe(viewLifecycleOwner) {
+            val temp: Int? = it
+            if (temp != null && temp != 0) {
+                snippetLayer = temp
+            }
+        }
+
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -225,7 +233,7 @@ class HomeFragment : Fragment() {
 
         override fun analyze(image: ImageProxy) {
             val myImageAnalyzer = MyImageAnalyzer()
-            listener(myImageAnalyzer.analyze(image, snippetWidth, snippetHeight))
+            listener(myImageAnalyzer.analyze(image, snippetWidth, snippetHeight, snippetLayer))
             image.close()
         }
     }
@@ -245,6 +253,7 @@ class HomeFragment : Fragment() {
 
         private var snippetWidth = 64
         private var snippetHeight = 1
+        private var snippetLayer = 0
     }
 
 
