@@ -7,7 +7,7 @@ class MyImageAnalyzer {
 
     private var setImageSize: Boolean = false
 
-    fun analyze(image: ImageProxy): String {
+    fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 1): String {
         val buffer0 = image.planes[0].buffer
         val data = buffer0.toByteArray()
         //val count = data.count() // 307200
@@ -17,12 +17,13 @@ class MyImageAnalyzer {
             setImageSize = true
         }
 
-        val snippetSize = 64
+//        val snippetWidth = 64
+//        val snippetHeight = 1
         val step = 1
-        val startPx = 307200 / 2 + 640 / 2 - snippetSize / 2 * step
+        val startPx = 307200 / 2 + 640 / 2 - snippetWidth / 2 * step
         val sb: StringBuilder = StringBuilder("")
         var i = 0
-        while (i < snippetSize) {
+        while (i < snippetWidth) {
             val d = byteToPixel(data[startPx + i * step])
             sb.append("$d,")
             i++

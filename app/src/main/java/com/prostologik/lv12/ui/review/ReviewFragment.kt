@@ -14,6 +14,7 @@ import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.databinding.FragmentReviewBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
+import java.io.IOException
 
 
 class ReviewFragment : Fragment() {
@@ -34,13 +35,11 @@ class ReviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val outputDirectory = getOutputDirectory()
-        photoDirectory = outputDirectory.toString()
-
-//        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
-//            val temp: String? = it
-//            if (temp != null) photoDirectory = temp
-//        }
+        // 4 lines only needed because default fragment is ReviewFragment, not HomeFragment
+        var tempDir: String? = null
+        homeViewModel.photoDirectory.observe(viewLifecycleOwner) { tempDir = it }
+        photoDirectory = if (tempDir != null) tempDir!!
+                        else getOutputDirectory().toString()
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String? = it
@@ -79,12 +78,23 @@ class ReviewFragment : Fragment() {
     private fun renderPhoto(dir: String, file: String) {
 
         val uri = Uri.parse("file://$dir/$file.jpg")
+        // uri.toString() --> "file:///storage/emulated/0/Android/media/com.prostologik.lv12/image"
 
         val imageView: ImageView = binding.imageView
         imageView.setImageURI(uri)
 
+
+        var csvtext = "csv not available"
+        try {
+            val fileCsv = File("$dir/$file.csv")
+            fileCsv.forEachLine { line ->
+                val tokens = line.split(",")
+                csvtext = tokens[0]
+            }
+        } catch (_: IOException) {}
+
         val textView: TextView = binding.textReview
-        textView.text = file
+        "$file :: $csvtext".also { textView.text = it }
     }
 
     private fun getNextFileName(currentFileName: String, dir: String): String {

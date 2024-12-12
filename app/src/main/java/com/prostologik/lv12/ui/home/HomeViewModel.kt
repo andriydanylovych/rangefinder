@@ -21,20 +21,36 @@ import androidx.lifecycle.ViewModel
 
 class HomeViewModel : ViewModel() {
 
-//    private var _photoDirectory = MutableLiveData<String>().apply {
-//        value = null
-//    }
-//    val photoDirectory: LiveData<String> = _photoDirectory
-//    fun setPhotoDirectory(dir: String) {
-//        _photoDirectory.value = dir
-//    }
+    private var _photoDirectory = MutableLiveData<String>().apply {
+        value = null //"/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+    }
+    val photoDirectory: LiveData<String> = _photoDirectory
+    fun setPhotoDirectory(dir: String) {
+        _photoDirectory.value = dir
+    }
 
     private var _photoFileName = MutableLiveData<String>().apply {
         value = null
     }
     val photoFileName: LiveData<String> = _photoFileName
-    fun setPhotoFileName(dir: String) {
-        _photoFileName.value = dir
+    fun setPhotoFileName(fileName: String) {
+        _photoFileName.value = fileName
+    }
+
+    private var _snippetWidth = MutableLiveData<Int>().apply {
+        value = 0
+    }
+    val snippetWidth: LiveData<Int> = _snippetWidth
+    fun setSnippetWidth(w: Int) {
+        _snippetWidth.value = w
+    }
+
+    private var _snippetHeight = MutableLiveData<Int>().apply {
+        value = 0
+    }
+    val snippetHeight: LiveData<Int> = _snippetHeight
+    fun setSnippetHeight(h: Int) {
+        _snippetHeight.value = h
     }
 
 }

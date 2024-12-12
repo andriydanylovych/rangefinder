@@ -30,6 +30,7 @@
         android:layout_gravity="top|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginTop="96dp"
+        app:destination="@+id/nav_home"
         app:srcCompat="@drawable/camera_24"
         android:contentDescription="@string/take_photo" />
 

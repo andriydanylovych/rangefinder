@@ -48,6 +48,7 @@ class HomeFragment : Fragment() {
     private lateinit var textView: TextView
     private var infoText: String = "no input"
 
+
     private val homeViewModel: HomeViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
@@ -66,6 +67,23 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         outputDirectory = getOutputDirectory()
+        homeViewModel.setPhotoDirectory(outputDirectory.toString())
+
+        snippetWidth = 64
+        homeViewModel.snippetWidth.observe(viewLifecycleOwner) {
+            val temp: Int? = it
+            if (temp != null && temp != 0) {
+                snippetWidth = temp
+            }
+        }
+
+        snippetHeight = 1
+        homeViewModel.snippetHeight.observe(viewLifecycleOwner) {
+            val temp: Int? = it
+            if (temp != null && temp != 0) {
+                snippetHeight = temp
+            }
+        }
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -174,10 +192,10 @@ class HomeFragment : Fragment() {
                 @RequiresApi(Build.VERSION_CODES.O)
                 override fun onImageSaved(output: ImageCapture.OutputFileResults){
 
-                    textView.text = infoText
+                    //textView.text = infoText
 
                     try {
-                        val filePath = "$outputDirectory/$photoFileName.txt"
+                        val filePath = "$outputDirectory/$photoFileName.csv"
                         val file = File(filePath)
                         file.writeText(infoText)
                     } catch (_: IOException) {}
@@ -207,7 +225,7 @@ class HomeFragment : Fragment() {
 
         override fun analyze(image: ImageProxy) {
             val myImageAnalyzer = MyImageAnalyzer()
-            listener(myImageAnalyzer.analyze(image))
+            listener(myImageAnalyzer.analyze(image, snippetWidth, snippetHeight))
             image.close()
         }
     }
@@ -224,6 +242,10 @@ class HomeFragment : Fragment() {
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }.toTypedArray()
+
+        private var snippetWidth = 64
+        private var snippetHeight = 1
     }
+
 
 }

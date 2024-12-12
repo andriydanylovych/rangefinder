@@ -23,4 +23,10 @@
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 
+    <fragment
+        android:id="@+id/nav_setup"
+        android:name="com.prostologik.lv12.ui.setup.SetupFragment"
+        android:label="@string/menu_setup"
+        tools:layout="@layout/fragment_setup" />
+
 </navigation>
