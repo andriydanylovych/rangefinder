@@ -71,10 +71,10 @@ class SetupFragment : Fragment() {
     }
 
     private fun stringToInteger(s: String): Int {
-        try {
-            return s.toInt()
+        return try {
+            s.toInt()
         } catch (nfe: NumberFormatException) {
-            return 32
+            32
         }
     }
 

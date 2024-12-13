@@ -2,6 +2,7 @@ package com.prostologik.lv12.ui.review
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
@@ -12,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.databinding.FragmentReviewBinding
@@ -33,8 +35,8 @@ class ReviewFragment : Fragment() {
 
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
-    private lateinit var canvas: Canvas
-    private lateinit var paint: Paint
+    //private lateinit var canvas: Canvas
+    //private lateinit var paint: Paint
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -72,15 +74,15 @@ class ReviewFragment : Fragment() {
         val btnSave = binding.saveButton
         btnSave.setOnClickListener { processPhoto() }
 
-        fileName = getNextFileName(fileName, photoDirectory)
-        renderPhoto(photoDirectory, fileName)
-
 
         mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
-        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
-        canvas = Canvas(bitmap)
-        mImageView.setImageBitmap(bitmap)
+//        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
+//        canvas = Canvas(bitmap)
+//        mImageView.setImageBitmap(bitmap)
 
+
+        fileName = getNextFileName(fileName, photoDirectory)
+        renderPhoto(photoDirectory, fileName)
 
         return root
     }
@@ -90,6 +92,7 @@ class ReviewFragment : Fragment() {
         _binding = null
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun renderPhoto(dir: String, file: String) {
 
         val uri = Uri.parse("file://$dir/$file.jpg")
@@ -101,15 +104,33 @@ class ReviewFragment : Fragment() {
 
         var csvtext = "csv not available"
         try {
+            val bmWidth = 256
+            val bmHeight = 256
+            bitmap = Bitmap.createBitmap(bmWidth, bmHeight, Bitmap.Config.ARGB_8888)
             val fileCsv = File("$dir/$file.csv")
-            fileCsv.forEachLine { line ->
-                val tokens = line.split(",")
-                csvtext = tokens[0]
+            var x = 0
+            if(fileCsv.exists()) {
+                fileCsv.forEachLine { line ->
+                    val pixels = line.split(",")
+                    val listSize = pixels.size - 1
+                    csvtext = "$listSize"
+                    for (y in 0..listSize) {
+                        val color = -16777216 + stringToInteger(pixels[y]) * 65793 //Color.GRAY
+                        bitmap.setPixel(bmHeight-1-x*2, y*2, color)
+                        bitmap.setPixel(bmHeight-2-x*2, y*2, color)
+                        bitmap.setPixel(bmHeight-1-x*2, y*2+1, color)
+                        bitmap.setPixel(bmHeight-2-x*2, y*2+1, color)
+                    }
+                    x++
+                    mImageView.setImageBitmap(bitmap)
+                }
             }
         } catch (_: IOException) {}
 
         val textView: TextView = binding.textReview
+
         "$file :: $csvtext".also { textView.text = it }
+
     }
 
     private fun getNextFileName(currentFileName: String, dir: String): String {
@@ -149,6 +170,14 @@ class ReviewFragment : Fragment() {
             File(it, "image").apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
+    }
+
+    private fun stringToInteger(s: String): Int {
+        return try {
+            s.toInt()
+        } catch (nfe: NumberFormatException) {
+            32
+        }
     }
 
 }

@@ -6,25 +6,39 @@ import java.nio.ByteBuffer
 class MyImageAnalyzer {
 
     private var setImageSize: Boolean = false
+    private var imageHeight: Int = 480
+    private var imageWidth: Int = 640
 
     fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 1, snippetLayer: Int = 0): String {
-        val buffer0 = image.planes[snippetLayer].buffer
+        val buffer0 = image.planes[0].buffer // snippetLayer
         val data = buffer0.toByteArray()
         //val count = data.count() // 307200
         if (!setImageSize) { // landscape
-            OverlayView.height = image.height // 480
-            OverlayView.width = image.width // 640
+            imageHeight = image.height
+            imageWidth = image.width
+            OverlayView.height = imageHeight
+            OverlayView.width = imageWidth
             setImageSize = true
         }
 
         val step = 1
-        val startPx = 307200 / 2 + 640 / 2 - snippetWidth / 2 * step
+        //        val t1: String = "size=" + image.planes.size + "::"
+
         val sb: StringBuilder = StringBuilder("")
-        var i = 0
-        while (i < snippetWidth) {
-            val d = byteToPixel(data[startPx + i * step])
-            sb.append("$d,")
-            i++
+
+        var j = 0
+        while (j < snippetHeight) {
+            val startPx: Int = imageWidth * ((imageHeight - snippetHeight * step) / 2 + j * step) + imageWidth / 2 - snippetWidth / 2 * step
+            var i = 0
+            while (i < snippetWidth - 1) {
+                val d = byteToPixel(data[startPx + i * step])
+                sb.append("$d,")
+                i++
+            }
+            val dLast = byteToPixel(data[startPx + (snippetWidth - 1) * step])
+            sb.append("$dLast\n")
+            //sb.append("\n")
+            j++
         }
 
         return sb.toString()
