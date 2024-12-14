@@ -45,7 +45,7 @@ class ReviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        // 4 lines only needed because default fragment is ReviewFragment, not HomeFragment
+        // 4 lines only needed because ReviewFragment is now the entry point, not HomeFragment
         var tempDir: String? = null
         homeViewModel.photoDirectory.observe(viewLifecycleOwner) { tempDir = it }
         photoDirectory = if (tempDir != null) tempDir!!
@@ -101,30 +101,39 @@ class ReviewFragment : Fragment() {
         val imageView: ImageView = binding.imageView
         imageView.setImageURI(uri)
 
-
         var csvtext = "csv not available"
+        val linesOfPixels = mutableListOf<String>()
+        var x = 0
+
         try {
-            bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
             val fileCsv = File("$dir/$file.csv")
-            var y = 50
+
             if(fileCsv.exists()) {
                 fileCsv.forEachLine { line ->
-                    val pixels = line.split(",")
-                    val listSize = pixels.size - 1
-                    csvtext = "$listSize"
-                    for (x in 0..listSize) {
-                        val color = stringToInteger(pixels[x]) * -65793 //Color.GRAY
-                        //bitmap.setPixel(x, y, color)
-                        bitmap.setPixel(x*2, y*2, color)
-                        bitmap.setPixel(x*2+1, y*2, color)
-                        bitmap.setPixel(x*2, y*2+1, color)
-                        bitmap.setPixel(x*2+1, y*2+1, color)
-                    }
-                    y++
-                    mImageView.setImageBitmap(bitmap)
+                    linesOfPixels.add(line)
                 }
             }
         } catch (_: IOException) {}
+
+        // to get snippet dimensions
+        val firstLine = linesOfPixels[0].split(",")
+        val snippetY = firstLine.size
+        val snippetX = linesOfPixels.size
+
+        bitmap = Bitmap.createBitmap(snippetX * 2, snippetY * 2, Bitmap.Config.ARGB_8888)
+        for (line in linesOfPixels) {
+            val pixels = line.split(",")
+            csvtext = " X x Y = $snippetX x $snippetY"
+            for (y in 0..< snippetY) {
+                val color = stringToInteger(pixels[y]) * 65793 - 16777216
+                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2, color)
+                bitmap.setPixel(snippetX * 2 - 2 - x * 2, y * 2, color)
+                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2 + 1, color)
+                bitmap.setPixel(snippetX * 2 - 2 - x * 2, y * 2 + 1, color)
+            }
+            x++
+            mImageView.setImageBitmap(bitmap)
+        }
 
         val textView: TextView = binding.textReview
 

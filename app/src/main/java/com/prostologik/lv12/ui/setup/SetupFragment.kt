@@ -29,12 +29,12 @@ class SetupFragment : Fragment() {
         val textView: TextView = binding.textSetup
 
         var snippetWidth = 64
-        var snippetHeight = 1
+        var snippetHeight = 64
         var snippetLayer = 0
         textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
 
         val editSnippetWidth = binding.editSnippetWidth
-        //editSnippetWidth.setText(snippetWidth)
+        editSnippetWidth.setText(snippetWidth.toString())
         editSnippetWidth.addTextChangedListener {
             snippetWidth = stringToInteger(editSnippetWidth.text.toString())
             if (snippetWidth > 256) snippetWidth = 256
@@ -44,7 +44,7 @@ class SetupFragment : Fragment() {
         }
 
         val editSnippetHeight = binding.editSnippetHeight
-        //editSnippetHeight.setText(snippetHeight)
+        editSnippetHeight.setText(snippetHeight.toString())
         editSnippetHeight.addTextChangedListener {
             snippetHeight = stringToInteger(editSnippetHeight.text.toString())
             if (snippetHeight > 256) snippetHeight = 256
@@ -54,7 +54,7 @@ class SetupFragment : Fragment() {
         }
 
         val editSnippetLayer = binding.editSnippetLayer
-        //editSnippetLayer.setText(snippetLayer)
+        editSnippetLayer.setText(snippetLayer.toString())
         editSnippetLayer.addTextChangedListener {
             snippetLayer = stringToInteger(editSnippetLayer.text.toString())
             if (snippetLayer > 2) snippetLayer = 2
@@ -74,7 +74,7 @@ class SetupFragment : Fragment() {
         return try {
             s.toInt()
         } catch (nfe: NumberFormatException) {
-            32
+            0
         }
     }
 

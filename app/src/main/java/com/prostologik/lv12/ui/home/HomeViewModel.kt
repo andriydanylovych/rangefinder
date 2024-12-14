@@ -46,7 +46,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private var _snippetHeight = MutableLiveData<Int>().apply {
-        value = 1
+        value = 64
     }
     val snippetHeight: LiveData<Int> = _snippetHeight
     fun setSnippetHeight(h: Int) {
