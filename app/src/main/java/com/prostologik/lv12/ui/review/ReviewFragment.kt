@@ -103,6 +103,7 @@ class ReviewFragment : Fragment() {
 
         var csvtext = "csv not available"
         val linesOfPixels = mutableListOf<String>()
+        val step = 6
         var x = 0
 
         try {
@@ -120,20 +121,24 @@ class ReviewFragment : Fragment() {
         val snippetY = firstLine.size
         val snippetX = linesOfPixels.size
 
-        bitmap = Bitmap.createBitmap(snippetX * 2, snippetY * 2, Bitmap.Config.ARGB_8888)
+        bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
         for (line in linesOfPixels) {
             val pixels = line.split(",")
             csvtext = " X x Y = $snippetX x $snippetY"
             for (y in 0..< snippetY) {
                 val color = stringToInteger(pixels[y]) * 65793 - 16777216
-                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2, color)
-                bitmap.setPixel(snippetX * 2 - 2 - x * 2, y * 2, color)
-                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2 + 1, color)
-                bitmap.setPixel(snippetX * 2 - 2 - x * 2, y * 2 + 1, color)
+//                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2, color)
+                val size = step * step
+                val intArray = IntArray(size) { color }
+                bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
             }
             x++
-            mImageView.setImageBitmap(bitmap)
         }
+
+//        val intArray = IntArray(64) { -65536 }
+//        bitmap.setPixels(intArray,0,8,3, 3, 8, 8)
+
+        mImageView.setImageBitmap(bitmap)
 
         val textView: TextView = binding.textReview
 
