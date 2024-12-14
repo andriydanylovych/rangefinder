@@ -28,7 +28,7 @@ class MyImageAnalyzer {
 
         var j = 0
         while (j < snippetHeight) {
-            val startPx: Int = imageWidth * ((imageHeight - snippetHeight * step) / 2 + j * step) + imageWidth / 2 - snippetWidth / 2 * step
+            val startPx: Int = imageWidth * (imageHeight - j * step) / 2 + imageWidth / 2 - snippetWidth / 2 * step
             var i = 0
             while (i < snippetWidth - 1) {
                 val d = byteToPixel(data[startPx + i * step])

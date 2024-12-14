@@ -35,8 +35,8 @@ class ReviewFragment : Fragment() {
 
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
-    //private lateinit var canvas: Canvas
-    //private lateinit var paint: Paint
+    private lateinit var canvas: Canvas
+    private lateinit var paint: Paint
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -104,24 +104,23 @@ class ReviewFragment : Fragment() {
 
         var csvtext = "csv not available"
         try {
-            val bmWidth = 256
-            val bmHeight = 256
-            bitmap = Bitmap.createBitmap(bmWidth, bmHeight, Bitmap.Config.ARGB_8888)
+            bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
             val fileCsv = File("$dir/$file.csv")
-            var x = 0
+            var y = 50
             if(fileCsv.exists()) {
                 fileCsv.forEachLine { line ->
                     val pixels = line.split(",")
                     val listSize = pixels.size - 1
                     csvtext = "$listSize"
-                    for (y in 0..listSize) {
-                        val color = -16777216 + stringToInteger(pixels[y]) * 65793 //Color.GRAY
-                        bitmap.setPixel(bmHeight-1-x*2, y*2, color)
-                        bitmap.setPixel(bmHeight-2-x*2, y*2, color)
-                        bitmap.setPixel(bmHeight-1-x*2, y*2+1, color)
-                        bitmap.setPixel(bmHeight-2-x*2, y*2+1, color)
+                    for (x in 0..listSize) {
+                        val color = stringToInteger(pixels[x]) * -65793 //Color.GRAY
+                        //bitmap.setPixel(x, y, color)
+                        bitmap.setPixel(x*2, y*2, color)
+                        bitmap.setPixel(x*2+1, y*2, color)
+                        bitmap.setPixel(x*2, y*2+1, color)
+                        bitmap.setPixel(x*2+1, y*2+1, color)
                     }
-                    x++
+                    y++
                     mImageView.setImageBitmap(bitmap)
                 }
             }
