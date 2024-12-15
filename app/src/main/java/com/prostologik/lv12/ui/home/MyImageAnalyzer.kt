@@ -9,15 +9,15 @@ class MyImageAnalyzer {
     private var imageHeight: Int = 480
     private var imageWidth: Int = 640
 
-    fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 1, snippetLayer: Int = 0): String {
+    fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 64, snippetLayer: Int = 0): String {
         val buffer0 = image.planes[0].buffer // snippetLayer
         val data = buffer0.toByteArray()
         //val count = data.count() // 307200
         if (!setImageSize) { // landscape
             imageHeight = image.height
             imageWidth = image.width
-            OverlayView.height = imageHeight
-            OverlayView.width = imageWidth
+            OverlayView.imageHeight = imageHeight
+            OverlayView.imageWidth = imageWidth
             setImageSize = true
         }
 

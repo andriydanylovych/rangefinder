@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.databinding.FragmentSetupBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
+import com.prostologik.lv12.ui.home.OverlayView
 
 class SetupFragment : Fragment() {
     private var _binding: FragmentSetupBinding? = null
@@ -41,6 +42,7 @@ class SetupFragment : Fragment() {
             if (snippetWidth < 1) snippetWidth = 1
             homeViewModel.setSnippetWidth(snippetWidth)
             textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
+            OverlayView.snippetWidth = snippetWidth
         }
 
         val editSnippetHeight = binding.editSnippetHeight
@@ -51,6 +53,7 @@ class SetupFragment : Fragment() {
             if (snippetHeight < 1) snippetHeight = 1
             homeViewModel.setSnippetHeight(snippetHeight)
             textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
+            OverlayView.snippetHeight = snippetHeight
         }
 
         val editSnippetLayer = binding.editSnippetLayer

@@ -252,7 +252,7 @@ class HomeFragment : Fragment() {
             }.toTypedArray()
 
         private var snippetWidth = 64
-        private var snippetHeight = 1
+        private var snippetHeight = 64
         private var snippetLayer = 0
     }
 

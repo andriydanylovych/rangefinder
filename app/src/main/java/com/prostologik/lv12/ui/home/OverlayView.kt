@@ -24,17 +24,22 @@ class OverlayView : View {
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val w = 0.5f * width
-        val h = 0.5f * height
-        val a = 32f
-        canvas.drawRect(w - a, h - a,  w + a,h + a, myRedPaint)
+        val scaleFactor = height / imageHeight
+        val sh = snippetWidth * scaleFactor
+        val sw = snippetHeight * scaleFactor
+        canvas.drawRect(
+            0.5f * (width - sw),
+            0.5f * (height - sh),
+            0.5f * (width + sw),
+            0.5f * (height + sh),
+            myRedPaint
+        )
     }
 
     companion object {
-        var height: Int = 30
-        var width: Int = 30
+        var imageWidth: Int = 640
+        var imageHeight: Int = 480
+        var snippetWidth: Int = 64
+        var snippetHeight: Int = 64
     }
 }
-
-// canvas.drawBitmap(bitmap, null, rect, paint)
-// https://medium.com/over-engineering/getting-started-with-drawing-on-the-android-canvas-621cf512f4c7
