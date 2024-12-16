@@ -24,7 +24,8 @@ class OverlayView : View {
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val scaleFactor = height / imageHeight
+        //val scaleFactor = height / imageWidth
+        val scaleFactor = width.toFloat() / imageHeight
         val sh = snippetWidth * scaleFactor
         val sw = snippetHeight * scaleFactor
         canvas.drawRect(
@@ -34,9 +35,14 @@ class OverlayView : View {
             0.5f * (height + sh),
             myRedPaint
         )
+
+        myRedPaint.setTextSize(40F);
+        canvas.drawText("$height x $width", 100F, 150F, myRedPaint);
     }
 
     companion object {
+        // height = 1680 // viewHeight
+        // width = 1080 // viewWidth
         var imageWidth: Int = 640
         var imageHeight: Int = 480
         var snippetWidth: Int = 64

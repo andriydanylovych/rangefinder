@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.prostologik.lv12.Util
 import com.prostologik.lv12.databinding.FragmentReviewBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
@@ -103,8 +104,7 @@ class ReviewFragment : Fragment() {
 
         var csvtext = "csv not available"
         val linesOfPixels = mutableListOf<String>()
-        val step = 6
-        var x = 0
+        val step = 6 // to set size of the snippet
 
         try {
             val fileCsv = File("$dir/$file.csv")
@@ -122,21 +122,16 @@ class ReviewFragment : Fragment() {
         val snippetX = linesOfPixels.size
 
         bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
-        for (line in linesOfPixels) {
+        for ((x, line) in linesOfPixels.withIndex()) {
             val pixels = line.split(",")
             csvtext = " X x Y = $snippetX x $snippetY"
             for (y in 0..< snippetY) {
-                val color = stringToInteger(pixels[y]) * 65793 - 16777216
-//                bitmap.setPixel(snippetX * 2 - 1 - x * 2, y * 2, color)
+                val color = Util.stringToInteger(pixels[y]) * 65793 - 16777216
                 val size = step * step
                 val intArray = IntArray(size) { color }
                 bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
             }
-            x++
         }
-
-//        val intArray = IntArray(64) { -65536 }
-//        bitmap.setPixels(intArray,0,8,3, 3, 8, 8)
 
         mImageView.setImageBitmap(bitmap)
 
@@ -183,14 +178,6 @@ class ReviewFragment : Fragment() {
             File(it, "image").apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
-    }
-
-    private fun stringToInteger(s: String): Int {
-        return try {
-            s.toInt()
-        } catch (nfe: NumberFormatException) {
-            32
-        }
     }
 
 }
