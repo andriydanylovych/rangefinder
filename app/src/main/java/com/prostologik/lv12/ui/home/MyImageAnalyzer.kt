@@ -10,9 +10,7 @@ class MyImageAnalyzer {
     private var imageWidth: Int = 640
 
     fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 64, snippetLayer: Int = 0): String {
-        val buffer0 = image.planes[0].buffer // snippetLayer
-        val data = buffer0.toByteArray()
-        //val count = data.count() // 307200
+
         if (!setImageSize) { // landscape
             imageHeight = image.height
             imageWidth = image.width
@@ -21,27 +19,37 @@ class MyImageAnalyzer {
             setImageSize = true
         }
 
+        var uv = 1
+        if (snippetLayer > 0) uv = 2
+
+        val buffer0 = image.planes[snippetLayer].buffer
+        val data = buffer0.toByteArray() // data.count() => 307200, 153599
+
         val step = 1
-        //        val t1: String = "size=" + image.planes.size + "::"
 
         val sb: StringBuilder = StringBuilder("")
 
         var j = 0
-        while (j < snippetHeight) {
-            val startPx: Int = imageWidth * ((imageHeight - snippetHeight * step) / 2 + j * step) + imageWidth / 2 - snippetWidth / 2 * step
+        val startRaw = (imageHeight - snippetHeight * step) / 2 / uv
+        val startCol = (imageWidth - snippetWidth * step) / 2
+        while (j < snippetHeight / uv) {
+            val startPx: Int = imageWidth * (startRaw + j * step) + startCol
             var i = 0
             while (i < snippetWidth - 1) {
                 val d = byteToPixel(data[startPx + i * step])
                 sb.append("$d,")
-                i++
+                i += uv//i++
             }
             val dLast = byteToPixel(data[startPx + (snippetWidth - 1) * step])
             sb.append("$dLast\n")
-            //sb.append("\n")
             j++
         }
 
         return sb.toString()
+
+//        val r = d0 + (1.370705 * d2);
+//        val g = d0 - (0.698001 * d2) - (0.337633 * d1);
+//        val b = d0 + (1.732446 * d1);
     }
 
     private fun byteToPixel(b: Byte): Int {

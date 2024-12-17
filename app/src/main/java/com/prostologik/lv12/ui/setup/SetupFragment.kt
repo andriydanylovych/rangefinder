@@ -60,7 +60,7 @@ class SetupFragment : Fragment() {
         val editSnippetLayer = binding.editSnippetLayer
         editSnippetLayer.setText(snippetLayer.toString())
         editSnippetLayer.addTextChangedListener {
-            snippetLayer = Util.stringToInteger(editSnippetLayer.text.toString(), 0)
+            snippetLayer = Util.stringToInteger(editSnippetLayer.text.toString())
             if (snippetLayer > 2) snippetLayer = 2
             if (snippetLayer < 0) snippetLayer = 0
             homeViewModel.setSnippetLayer(snippetLayer)
