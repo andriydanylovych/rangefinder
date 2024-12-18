@@ -18,31 +18,49 @@ class MyImageAnalyzer {
             OverlayView.imageWidth = imageWidth
             setImageSize = true
         }
-
-        var uv = 1
-        if (snippetLayer > 0) uv = 2
-
-        val buffer0 = image.planes[snippetLayer].buffer
-        val data = buffer0.toByteArray() // data.count() => 307200, 153599
-
         val step = 1
 
         val sb: StringBuilder = StringBuilder("")
 
-        var j = 0
-        val startRaw = (imageHeight - snippetHeight * step) / 2 / uv
+        val startRaw = (imageHeight - snippetHeight * step) / 2
         val startCol = (imageWidth - snippetWidth * step) / 2
-        while (j < snippetHeight / uv) {
+
+        val bufferY = image.planes[0].buffer
+        val dataY = bufferY.toByteArray() // dataY.count() => 307200
+        var j = 0
+        while (j < snippetHeight) {
             val startPx: Int = imageWidth * (startRaw + j * step) + startCol
             var i = 0
             while (i < snippetWidth - 1) {
-                val d = byteToPixel(data[startPx + i * step])
+                val d = byteToPixel(dataY[startPx + i * step])
                 sb.append("$d,")
-                i += uv//i++
+                i++
             }
-            val dLast = byteToPixel(data[startPx + (snippetWidth - 1) * step])
+            val dLast = byteToPixel(dataY[startPx + (snippetWidth - 1) * step])
             sb.append("$dLast\n")
             j++
+        }
+
+        if (snippetLayer > 0) {
+            val bufferUV = image.planes[snippetLayer].buffer
+            val dataUV = bufferUV.toByteArray() // dataUV.count() => 153599
+            j = 0
+            while (j < snippetHeight / 2) {
+                val startPx: Int = imageWidth * (startRaw / 2 + j * step) + startCol
+                val sbV: StringBuilder = StringBuilder("")
+                var i = 0
+                while (i < snippetWidth - 1) {
+                    val d = byteToPixel(dataUV[startPx + i * step])
+                    if (i % 2 == 0) sb.append("$d,")
+                    else sbV.append("$d,")
+                    i++
+                }
+                sb.append(sbV)
+                val dLast = byteToPixel(dataUV[startPx + (snippetWidth - 1) * step])
+                sb.append("$dLast\n")
+                j++
+            }
+
         }
 
         return sb.toString()

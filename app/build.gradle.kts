@@ -72,4 +72,9 @@ dependencies {
 //    implementation("androidx.camera:camera-view:1.2.2")
 //    implementation("androidx.camera:camera-extensions:1.2.2")
 
+//    implementation(libs.play.services.location)
+//    implementation(libs.kotlin.coroutines.play)
+//    implementation(libs.androidx.work.runtime.ktx)
+
+
 }

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+//import com.prostologik.lv12.Manifest
 import com.prostologik.lv12.databinding.FragmentSlideshowBinding
 
 class ObjectsFragment : Fragment() {
@@ -39,4 +40,21 @@ class ObjectsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    //@Composable
+//    fun CurrentLocationScreen() {
+//        val permissions = listOf(
+//            Manifest.permission.ACCESS_COARSE_LOCATION,
+//            Manifest.permission.ACCESS_FINE_LOCATION,
+//        )
+//        PermissionBox(
+//            permissions = permissions,
+//            requiredPermissions = listOf(permissions.first()),
+//            onGranted = {
+//                CurrentLocationContent(
+//                    usePreciseLocation = it.contains(Manifest.permission.ACCESS_FINE_LOCATION),
+//                )
+//            },
+//        )
+//    }
 }
