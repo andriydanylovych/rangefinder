@@ -1,9 +1,6 @@
 package com.prostologik.lv12.ui.review
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.Util
@@ -36,8 +32,8 @@ class ReviewFragment : Fragment() {
 
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
-    private lateinit var canvas: Canvas
-    private lateinit var paint: Paint
+    //private lateinit var canvas: Canvas
+    //private lateinit var paint: Paint
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -120,13 +116,36 @@ class ReviewFragment : Fragment() {
         val firstLine = linesOfPixels[0].split(",")
         val snippetY = firstLine.size
         val snippetX = linesOfPixels.size
+        val snippetUV = snippetX - snippetY / 2
 
         bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
+        var schemaBlueRed = false
+        var colorM = 65793
+        var colorA = 16777216
         for ((x, line) in linesOfPixels.withIndex()) {
             val pixels = line.split(",")
             csvtext = " X x Y = $snippetX x $snippetY"
+            if (x == snippetUV) {
+                val y2 = Util.stringToInteger(pixels[snippetY / 2 - 2])
+                val y0 = Util.stringToInteger(pixels[snippetY / 2 - 1])
+                val y1 = Util.stringToInteger(pixels[snippetY / 2])
+                val y3 = Util.stringToInteger(pixels[snippetY / 2 + 1])
+                val d01 = y0 - y1
+                val d02 = y0 - y2
+                val d13 = y1 - y3
+                if (d01 * d01 > d02 * d02 + d13 * d13 && snippetX > snippetY) schemaBlueRed = true
+            }
             for (y in 0..< snippetY) {
-                val color = Util.stringToInteger(pixels[y]) * 65793 - 16777216
+                if (schemaBlueRed) {
+                    if (y < snippetY / 2) {
+                        colorM = 1
+                        colorA = 16777216
+                    } else {
+                        colorM = 256
+                        colorA = 65536
+                    }
+                }
+                val color = Util.stringToInteger(pixels[y]) * colorM - colorA
                 val size = step * step
                 val intArray = IntArray(size) { color }
                 bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
@@ -140,6 +159,10 @@ class ReviewFragment : Fragment() {
         "$file :: $csvtext".also { textView.text = it }
 
     }
+
+//        val r = d0 + (1.370705 * d2);
+//        val g = d0 - (0.698001 * d2) - (0.337633 * d1);
+//        val b = d0 + (1.732446 * d1);
 
     private fun getNextFileName(currentFileName: String, dir: String): String {
         val currentFileNameJpg = "$currentFileName.jpg"
@@ -169,8 +192,8 @@ class ReviewFragment : Fragment() {
 
         val textView: TextView = binding.textReview
         val savedPhotoAnalyzer = SavedPhotoAnalyzer()
-        val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
-        textView.text = savedPhotoAnalyzer.analyze(uri)
+        //val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
+        textView.text = savedPhotoAnalyzer.analyze()
     }
 
     private fun getOutputDirectory(): File {

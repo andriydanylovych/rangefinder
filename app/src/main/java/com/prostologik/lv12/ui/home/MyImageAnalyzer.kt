@@ -65,9 +65,6 @@ class MyImageAnalyzer {
 
         return sb.toString()
 
-//        val r = d0 + (1.370705 * d2);
-//        val g = d0 - (0.698001 * d2) - (0.337633 * d1);
-//        val b = d0 + (1.732446 * d1);
     }
 
     private fun byteToPixel(b: Byte): Int {
