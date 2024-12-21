@@ -16,9 +16,8 @@ class CapturedImageAnalysis {
         val sb: StringBuilder = StringBuilder("")
 
         val buffer = image.planes[0].buffer
-        val data = buffer.toByteArray() // data.size = 2-3mm
-        //val dataSize = data.size
-        val dataCount = data.count()
+        val data = buffer.toByteArray()
+        val dataCount = data.count() //val dataSize = data.size // = 2-3 millions
         sb.append("dataCount=$dataCount:: ")
         var j = 200
         var notNull = 0

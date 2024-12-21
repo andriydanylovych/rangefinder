@@ -238,38 +238,14 @@ class HomeFragment : Fragment() {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     super.onCaptureSuccess(image)
 
-//                    val bufferY = image.planes[0].buffer
-//                    val dataY = bufferY.toByteArray() // dataY.size = 2760180
-//                    val test0 = dataY[0]
-//                    val test1 = dataY[1]
-//                    val test2 = dataY[2]
-//                    val test3 = dataY[3]
-//                    val test4 = dataY[4]
-//                    val dd = dataY.size
-//                    textView.text = "0:$test0, 1:$test1, 2:$test2, 3:$test3, 4:$test4, data:$dd"
-
                     val capturedImageAnalyzer = CapturedImageAnalysis()
                     val test = capturedImageAnalyzer.analyze(image, 8, 8, 0)
                     textView.text = "$iii: $test"
                     iii++
 
-                    //val w = image.width // 2448
-                    //val h = image.height // 3264
-                    //textView.text = "w:$w h:$h"
-//                    parentFragmentManager.beginTransaction()
-//                        .replace(R.id.container, ImageViewFragment.newInstance(image))
-//                        .addToBackStack(null)
-//                        .commit()
                 }
             }
         )
-    }
-
-    private fun ByteBuffer.toByteArray(): ByteArray {
-        rewind()    // Rewind the buffer to zero
-        val data = ByteArray(remaining())
-        get(data)   // Copy the buffer into a byte array [cannot be dropped!]
-        return data // Return the byte array
     }
 
     override fun onDestroyView() {
@@ -305,5 +281,20 @@ class HomeFragment : Fragment() {
         private var snippetLayer = 0
     }
 
+    /**
+    * Release memory when the UI becomes hidden or when system resources become low.
+    * @param level the memory-related event that is raised.
+    */
+//    override fun onTrimMemory(level: Int) {
+//
+//        if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+//            // Release memory related to UI elements, such as bitmap caches.
+//        }
+//
+//        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+//            // Release memory related to background processing, such as by
+//            // closing a database connection.
+//        }
+//    }
 
 }

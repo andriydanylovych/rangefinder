@@ -18,7 +18,6 @@ import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
 import java.io.IOException
 
-
 class ReviewFragment : Fragment() {
 
     private var _binding: FragmentReviewBinding? = null
@@ -71,12 +70,10 @@ class ReviewFragment : Fragment() {
         val btnSave = binding.saveButton
         btnSave.setOnClickListener { processPhoto() }
 
-
         mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
 //        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
 //        canvas = Canvas(bitmap)
 //        mImageView.setImageBitmap(bitmap)
-
 
         fileName = getNextFileName(fileName, photoDirectory)
         renderPhoto(photoDirectory, fileName)
@@ -98,7 +95,6 @@ class ReviewFragment : Fragment() {
         val imageView: ImageView = binding.imageView
         imageView.setImageURI(uri)
 
-        var csvtext = "csv not available"
         val linesOfPixels = mutableListOf<String>()
         val step = 6 // to set size of the snippet
 
@@ -120,34 +116,28 @@ class ReviewFragment : Fragment() {
 
         bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
         var schemaBlueRed = false
-        var colorM = 65793
-        var colorA = 16777216
+        var layer = 0
         for ((x, line) in linesOfPixels.withIndex()) {
             val pixels = line.split(",")
-            csvtext = " X x Y = $snippetX x $snippetY"
+
             if (x == snippetUV) {
-                val y2 = Util.stringToInteger(pixels[snippetY / 2 - 2])
-                val y0 = Util.stringToInteger(pixels[snippetY / 2 - 1])
-                val y1 = Util.stringToInteger(pixels[snippetY / 2])
-                val y3 = Util.stringToInteger(pixels[snippetY / 2 + 1])
+                val y2 = Util.stringByteToPixel(pixels[snippetY / 2 - 2])
+                val y0 = Util.stringByteToPixel(pixels[snippetY / 2 - 1])
+                val y1 = Util.stringByteToPixel(pixels[snippetY / 2])
+                val y3 = Util.stringByteToPixel(pixels[snippetY / 2 + 1])
                 val d01 = y0 - y1
                 val d02 = y0 - y2
                 val d13 = y1 - y3
                 if (d01 * d01 > d02 * d02 + d13 * d13 && snippetX > snippetY) schemaBlueRed = true
             }
             for (y in 0..< snippetY) {
-                if (schemaBlueRed) {
-                    if (y < snippetY / 2) {
-                        colorM = 1
-                        colorA = 16777216
-                    } else {
-                        colorM = 256
-                        colorA = 65536
-                    }
-                }
-                val color = Util.stringToInteger(pixels[y]) * colorM - colorA
+
+                if (schemaBlueRed) layer = if (y < snippetY / 2) { 1 } else { 2 }
+
+                val color = Util.stringByteToColor(pixels[y], layer)
                 val size = step * step
                 val intArray = IntArray(size) { color }
+
                 bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
             }
         }
@@ -156,13 +146,9 @@ class ReviewFragment : Fragment() {
 
         val textView: TextView = binding.textReview
 
-        "$file :: $csvtext".also { textView.text = it }
+        "file: $file".also { textView.text = it }
 
     }
-
-//        val r = d0 + (1.370705 * d2);
-//        val g = d0 - (0.698001 * d2) - (0.337633 * d1);
-//        val b = d0 + (1.732446 * d1);
 
     private fun getNextFileName(currentFileName: String, dir: String): String {
         val currentFileNameJpg = "$currentFileName.jpg"

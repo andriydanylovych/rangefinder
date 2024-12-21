@@ -32,11 +32,11 @@ class MyImageAnalyzer {
             val startPx: Int = imageWidth * (startRaw + j * step) + startCol
             var i = 0
             while (i < snippetWidth - 1) {
-                val d = byteToPixel(dataY[startPx + i * step])
+                val d = (dataY[startPx + i * step])
                 sb.append("$d,")
                 i++
             }
-            val dLast = byteToPixel(dataY[startPx + (snippetWidth - 1) * step])
+            val dLast = (dataY[startPx + (snippetWidth - 1) * step])
             sb.append("$dLast\n")
             j++
         }
@@ -50,13 +50,13 @@ class MyImageAnalyzer {
                 val sbV: StringBuilder = StringBuilder("")
                 var i = 0
                 while (i < snippetWidth - 1) {
-                    val d = byteToPixel(dataUV[startPx + i * step])
+                    val d = (dataUV[startPx + i * step])
                     if (i % 2 == 0) sb.append("$d,")
                     else sbV.append("$d,")
                     i++
                 }
                 sb.append(sbV)
-                val dLast = byteToPixel(dataUV[startPx + (snippetWidth - 1) * step])
+                val dLast = (dataUV[startPx + (snippetWidth - 1) * step])
                 sb.append("$dLast\n")
                 j++
             }
@@ -65,10 +65,6 @@ class MyImageAnalyzer {
 
         return sb.toString()
 
-    }
-
-    private fun byteToPixel(b: Byte): Int {
-        return if (b < 0) (256 + b.toInt()) else b.toInt()
     }
 
     private fun ByteBuffer.toByteArray(): ByteArray {
