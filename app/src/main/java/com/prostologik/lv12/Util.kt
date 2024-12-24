@@ -42,6 +42,13 @@ object Util {
         return stringByteToPixel(s) * colorM - colorA
     }
 
+    fun limitValue(value: Int, minLimit: Int, maxLimit: Int): Int {
+        var v = value
+        if (value > maxLimit) v = maxLimit
+        else if (value < minLimit) v = minLimit
+        return v
+    }
+
 }
 
 //        val r = d0 + (1.370705 * d2);

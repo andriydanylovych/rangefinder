@@ -1,11 +1,13 @@
 package com.prostologik.lv12.ui.home
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +21,15 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.prostologik.lv12.R
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import com.prostologik.lv12.ui.review.SavedPhotoAnalyzer
 import java.io.File
@@ -71,26 +78,25 @@ class HomeFragment : Fragment() {
         outputDirectory = getOutputDirectory()
         homeViewModel.setPhotoDirectory(outputDirectory.toString())
 
-        snippetWidth = 64
+        getSharedPref()
+
         homeViewModel.snippetWidth.observe(viewLifecycleOwner) {
-            val temp: Int? = it
-            if (temp != null && temp != 0) {
+            val temp: Int = it ?: 0
+            if (temp in 1..256) {
                 snippetWidth = temp
             }
         }
 
-        snippetHeight = 1
         homeViewModel.snippetHeight.observe(viewLifecycleOwner) {
-            val temp: Int? = it
-            if (temp != null && temp != 0) {
+            val temp: Int = it ?: 0
+            if (temp in 1..256) {
                 snippetHeight = temp
             }
         }
 
-        snippetLayer = 0
         homeViewModel.snippetLayer.observe(viewLifecycleOwner) {
-            val temp: Int? = it
-            if (temp != null && temp != 0) {
+            val temp: Int = it ?: 0
+            if (temp in 0..2) {
                 snippetLayer = temp
             }
         }
@@ -115,6 +121,19 @@ class HomeFragment : Fragment() {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         return root
+    }
+
+    private fun getSharedPref() {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+
+        val trySnippetWidth = sharedPref?.getInt("snippet_width", 64)
+        if (trySnippetWidth != null) homeViewModel.setSnippetWidth(trySnippetWidth)
+
+        val trySnippetHeight = sharedPref?.getInt("snippet_height", 64)
+        if (trySnippetHeight != null) homeViewModel.setSnippetHeight(trySnippetHeight)
+
+        val trySnippetLayer = sharedPref?.getInt("saved_layer", 1) // getString(R.string.saved_layer)
+        if (trySnippetLayer != null) homeViewModel.setSnippetLayer(trySnippetLayer)
     }
 
     private fun requestPermissions() {
@@ -157,12 +176,40 @@ class HomeFragment : Fragment() {
                     it.surfaceProvider = binding.viewFinder.surfaceProvider
                 }
 
-            imageCapture = ImageCapture.Builder().build()
+            //imageCapture = ImageCapture.Builder().build()
+
+            imageCapture = ImageCapture.Builder()
+                .apply {
+                    //this.setTargetRotation(orientation)
+
+                    val resolutionSelectorBuilder = ResolutionSelector.Builder().apply {
+                        setResolutionStrategy(
+                            ResolutionStrategy(
+                                Size(
+                                    638,//640,
+                                    478//480
+                                ), ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                                //ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                            )
+                        )
+                    }
+
+                    this.setResolutionSelector(resolutionSelectorBuilder.build())
+
+//                    if (actualCameraIsMaxQuality) {
+//                        this.setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+//                    }
+
+//                    this.setFlashMode(flashLamp)
+                }
+                .build()
+
 
             val imageAnalyzer = ImageAnalysis.Builder()
-                //.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                //.setTargetResolution(Size(1280, 720))
-                //.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                //.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888) // YUV_420_888
+                //.setTargetResolution(Size(1280, 720)) // default (640, 480) // deprecated :(
+                //.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // STRATEGY_BLOCK_PRODUCER
+                .setImageQueueDepth(1)
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor,
@@ -283,7 +330,7 @@ class HomeFragment : Fragment() {
 
     /**
     * Release memory when the UI becomes hidden or when system resources become low.
-    * @param level the memory-related event that is raised.
+    * 'at' param level the memory-related event that is raised.
     */
 //    override fun onTrimMemory(level: Int) {
 //
@@ -297,4 +344,20 @@ class HomeFragment : Fragment() {
 //        }
 //    }
 
+    // https://developer.android.com/topic/performance/memory
+//    fun doSomethingMemoryIntensive() {
+//
+//        // Before doing something that requires a lot of memory,
+//        // check whether the device is in a low memory state.
+//        if (!getAvailableMemory().lowMemory) {
+//            // Do memory intensive work.
+//        }
+//    }
+//
+//    private fun getAvailableMemory(): ActivityManager.MemoryInfo {
+//        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager //  Context.ACTIVITY_SERVICE
+//        return ActivityManager.MemoryInfo().also { memoryInfo ->
+//            activityManager.getMemoryInfo(memoryInfo)
+//        }
+//    }
 }

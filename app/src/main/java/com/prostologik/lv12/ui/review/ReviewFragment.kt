@@ -41,15 +41,9 @@ class ReviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        // 4 lines only needed because ReviewFragment is now the entry point, not HomeFragment
-        var tempDir: String? = null
-        homeViewModel.photoDirectory.observe(viewLifecycleOwner) { tempDir = it }
-        photoDirectory = if (tempDir != null) tempDir!!
-                        else getOutputDirectory().toString()
-
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
-            val temp: String? = it
-            if (temp != null) {
+            val temp: String = it ?: ""
+            if (temp != "") {
                 fileName = temp
                 renderPhoto(photoDirectory, fileName)
             }
@@ -180,13 +174,6 @@ class ReviewFragment : Fragment() {
         val savedPhotoAnalyzer = SavedPhotoAnalyzer()
         //val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
         textView.text = savedPhotoAnalyzer.analyze()
-    }
-
-    private fun getOutputDirectory(): File {
-        val mediaDir = activity?.externalMediaDirs?.firstOrNull()?.let {
-            File(it, "image").apply { mkdirs() }
-        }
-        return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
     }
 
 }

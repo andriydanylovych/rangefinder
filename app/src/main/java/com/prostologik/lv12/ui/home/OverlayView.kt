@@ -36,8 +36,8 @@ class OverlayView : View {
             myRedPaint
         )
 
-        myRedPaint.setTextSize(40F)
-        canvas.drawText("$height x $width", 100F, 150F, myRedPaint)
+        myRedPaint.textSize = 40F
+        canvas.drawText("h$height x w$width :: w$imageWidth x h$imageHeight", 100F, 150F, myRedPaint)
     }
 
     companion object {
