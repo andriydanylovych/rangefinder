@@ -37,28 +37,40 @@ class HomeViewModel : ViewModel() {
         _photoFileName.value = fileName
     }
 
-    private var _snippetWidth = MutableLiveData<Int>().apply {
-        value = 64
-    }
+    private var _snippetWidth = MutableLiveData<Int>().apply { value = 64 }
     val snippetWidth: LiveData<Int> = _snippetWidth
-    fun setSnippetWidth(w: Int) {
-        _snippetWidth.value = w
+    fun setSnippetWidth(value: Int) {
+        if (value in 1..256) _snippetWidth.value = value
     }
 
-    private var _snippetHeight = MutableLiveData<Int>().apply {
-        value = 64
-    }
+    private var _snippetHeight = MutableLiveData<Int>().apply { value = 64 }
     val snippetHeight: LiveData<Int> = _snippetHeight
-    fun setSnippetHeight(h: Int) {
-        _snippetHeight.value = h
+    fun setSnippetHeight(value: Int) {
+        if (value in 1..256) _snippetHeight.value = value
     }
 
-    private var _snippetLayer = MutableLiveData<Int>().apply {
-        value = 0
-    }
+    private var _snippetLayer = MutableLiveData<Int>().apply { value = 0 }
     val snippetLayer: LiveData<Int> = _snippetLayer
-    fun setSnippetLayer(l: Int) {
-        _snippetLayer.value = l
+    fun setSnippetLayer(value: Int) {
+        if (value in 0..2) _snippetLayer.value = value
+    }
+
+    private var _analyzerOption = MutableLiveData<Int>().apply { value = 0 }
+    val analyzerOption: LiveData<Int> = _analyzerOption
+    fun setAnalyzerOption(value: Int) {
+        if (value in 0..2) _analyzerOption.value = value
+    }
+
+    private var _resolutionWidth = MutableLiveData<Int>().apply { value = 640 }
+    val resolutionWidth: LiveData<Int> = _resolutionWidth
+    fun setResolutionWidth(value: Int) {
+        if (value in 1..12800) _resolutionWidth.value = value
+    }
+
+    private var _resolutionHeight = MutableLiveData<Int>().apply { value = 480 }
+    val resolutionHeight: LiveData<Int> = _resolutionHeight
+    fun setResolutionHeight(value: Int) {
+        if (value in 1..9600) _resolutionHeight.value = value
     }
 
 }

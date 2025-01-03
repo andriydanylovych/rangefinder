@@ -80,26 +80,13 @@ class HomeFragment : Fragment() {
 
         getSharedPref()
 
-        homeViewModel.snippetWidth.observe(viewLifecycleOwner) {
-            val temp: Int = it ?: 0
-            if (temp in 1..256) {
-                snippetWidth = temp
-            }
-        }
+        snippetWidth = homeViewModel.snippetWidth.value ?: 64
+        snippetHeight = homeViewModel.snippetHeight.value ?: 64
+        snippetLayer = homeViewModel.snippetLayer.value ?: 0
 
-        homeViewModel.snippetHeight.observe(viewLifecycleOwner) {
-            val temp: Int = it ?: 0
-            if (temp in 1..256) {
-                snippetHeight = temp
-            }
-        }
-
-        homeViewModel.snippetLayer.observe(viewLifecycleOwner) {
-            val temp: Int = it ?: 0
-            if (temp in 0..2) {
-                snippetLayer = temp
-            }
-        }
+        analyzerOption = homeViewModel.analyzerOption.value ?: 0
+        resolutionWidth = homeViewModel.resolutionWidth.value ?: 640
+        resolutionHeight = homeViewModel.resolutionHeight.value ?: 480
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -108,7 +95,10 @@ class HomeFragment : Fragment() {
         }
 
         val btnImage = binding.imageCaptureButton
-        btnImage.setOnClickListener { takePhoto() }
+        btnImage.setOnClickListener {
+            if (analyzerOption == 1) takePhoto()
+            else displayAnalyzer()
+        }
 
         textView = binding.textHome
 
@@ -134,6 +124,16 @@ class HomeFragment : Fragment() {
 
         val trySnippetLayer = sharedPref?.getInt("saved_layer", 1) // getString(R.string.saved_layer)
         if (trySnippetLayer != null) homeViewModel.setSnippetLayer(trySnippetLayer)
+
+        val tryAnalyzerOption = sharedPref?.getInt("analyzer_option", 0)
+        if (tryAnalyzerOption != null) homeViewModel.setAnalyzerOption(tryAnalyzerOption)
+
+        val tryResolutionWidth = sharedPref?.getInt("resolution_width", 640)
+        if (tryResolutionWidth != null) homeViewModel.setResolutionWidth(tryResolutionWidth)
+
+        val tryResolutionHeight = sharedPref?.getInt("resolution_height", 480)
+        if (tryResolutionHeight != null) homeViewModel.setResolutionHeight(tryResolutionHeight)
+
     }
 
     private fun requestPermissions() {
@@ -186,10 +186,10 @@ class HomeFragment : Fragment() {
                         setResolutionStrategy(
                             ResolutionStrategy(
                                 Size(
-                                    638,//640,
-                                    478//480
-                                ), ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
-                                //ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                                    resolutionWidth,
+                                    resolutionHeight
+                                ), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                                //ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
                             )
                         )
                     }
@@ -234,29 +234,25 @@ class HomeFragment : Fragment() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        val photoFileName: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) //+ ".jpg"
+        val photoFileName = getPhotoFileName()
         homeViewModel.setPhotoFileName(photoFileName)
-        val photoFileNameJpg = "$photoFileName.jpg"
 
-        val photoFile = File(outputDirectory, photoFileNameJpg)
+        val photoFile = File(outputDirectory, "$photoFileName.jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         // Set up image capture listener, which is triggered after photo has been taken
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(safeContext),
-            object : ImageCapture.OnImageSavedCallback {
+            object : ImageCapture.OnImageSavedCallback { // OnImageSavedCallback
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
                 @RequiresApi(Build.VERSION_CODES.O)
                 override fun onImageSaved(output: ImageCapture.OutputFileResults){
 
-                    //textView.text = infoText
-
                     try {
-                        val filePath = "$outputDirectory/$photoFileName.csv"
-                        val file = File(filePath)
+                        val file = File("$outputDirectory/$photoFileName.csv")
                         file.writeText(infoText)
                     } catch (_: IOException) {}
 
@@ -264,8 +260,15 @@ class HomeFragment : Fragment() {
                     Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
                 }
+
             }
         )
+    }
+
+    private fun displayAnalyzer() {
+
+        textView.text = infoText
+
     }
 
     private fun getOutputDirectory(): File {
@@ -275,12 +278,16 @@ class HomeFragment : Fragment() {
         return if (mediaDir != null && mediaDir.exists()) mediaDir else activity?.filesDir!!
     }
 
+    private fun getPhotoFileName(): String {
+        return SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+    }
+
     var iii = 0
     private fun capturePhoto() {
         val imageCapture = imageCapture ?: return
 
         imageCapture.takePicture(
-            ContextCompat.getMainExecutor(requireContext()),
+            ContextCompat.getMainExecutor(safeContext),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     super.onCaptureSuccess(image)
@@ -304,8 +311,13 @@ class HomeFragment : Fragment() {
     private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
         override fun analyze(image: ImageProxy) {
-            val myImageAnalyzer = MyImageAnalyzer()
-            listener(myImageAnalyzer.analyze(image, snippetWidth, snippetHeight, snippetLayer))
+            if (analyzerOption == 0) {
+                val imageAnalyzer = MyImageAnalyzer()
+                listener(imageAnalyzer.analyze(image))
+            } else {
+                val imageAnalyzer = SnippetAnalyzer()
+                listener(imageAnalyzer.analyze(image, snippetWidth, snippetHeight, snippetLayer))
+            }
             image.close()
         }
     }
@@ -326,6 +338,10 @@ class HomeFragment : Fragment() {
         private var snippetWidth = 64
         private var snippetHeight = 64
         private var snippetLayer = 0
+
+        private var analyzerOption = 0
+        private var resolutionWidth = 640
+        private var resolutionHeight = 480
     }
 
     /**

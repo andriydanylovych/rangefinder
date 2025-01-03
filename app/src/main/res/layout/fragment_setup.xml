@@ -16,22 +16,22 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/labelWidth"
-        android:labelFor="@+id/editSnippetWidth"
+        android:id="@+id/labelLayer"
+        android:labelFor="@id/editSnippetLayer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:textSize="20sp"
-        android:text="W"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="L"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
+        app:layout_constraintEnd_toStartOf="@+id/editSnippetLayer"
         app:layout_constraintTop_toBottomOf="@+id/text_setup"
         tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/editSnippetWidth"
-        android:layout_width="72dp"
+        android:id="@+id/editSnippetLayer"
+        android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="12dp"
@@ -40,7 +40,37 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintEnd_toStartOf="@+id/labelWidth"
+        app:layout_constraintStart_toEndOf="@+id/labelLayer"
+        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+
+    <TextView
+        android:id="@+id/labelWidth"
+        android:labelFor="@+id/editSnippetWidth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="W"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
+        app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
+        app:layout_constraintTop_toBottomOf="@+id/text_setup"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editSnippetWidth"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/labelWidth"
         app:layout_constraintEnd_toStartOf="@id/labelHeight"
         app:layout_constraintTop_toBottomOf="@id/text_setup" />
@@ -53,7 +83,7 @@
         android:layout_marginStart="12dp"
         android:textSize="20sp"
         android:text="H"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/editSnippetWidth"
         app:layout_constraintEnd_toStartOf="@id/editSnippetHeight"
         app:layout_constraintTop_toBottomOf="@id/text_setup"
@@ -61,7 +91,40 @@
 
     <EditText
         android:id="@+id/editSnippetHeight"
-        android:layout_width="72dp"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="24dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintStart_toEndOf="@id/labelHeight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+
+
+
+
+    <TextView
+        android:id="@+id/labelAnalyzerOption"
+        android:labelFor="@+id/editAnalyzerOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:textSize="20sp"
+        android:text="op"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editAnalyzerOption"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editAnalyzerOption"
+        android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="12dp"
@@ -71,27 +134,59 @@
         android:textAlignment="center"
         android:inputType="number"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/labelHeight"
-        app:layout_constraintEnd_toStartOf="@id/labelLayer"
-        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+        app:layout_constraintStart_toEndOf="@id/labelAnalyzerOption"
+        app:layout_constraintEnd_toStartOf="@id/labelResolutionWidth"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
 
     <TextView
-        android:id="@+id/labelLayer"
-        android:labelFor="@id/editSnippetLayer"
+        android:id="@+id/labelResolutionWidth"
+        android:labelFor="@id/editResolutionWidth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:textSize="20sp"
-        android:text="L"
+        android:text="w"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/editSnippetHeight"
-        app:layout_constraintEnd_toStartOf="@id/editSnippetLayer"
-        app:layout_constraintTop_toBottomOf="@id/text_setup"
+        app:layout_constraintStart_toEndOf="@id/editAnalyzerOption"
+        app:layout_constraintEnd_toStartOf="@id/editResolutionWidth"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
         tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/editSnippetLayer"
-        android:layout_width="72dp"
+        android:id="@+id/editResolutionWidth"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/labelResolutionWidth"
+        app:layout_constraintEnd_toStartOf="@id/labelResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
+
+    <TextView
+        android:id="@+id/labelResolutionHeight"
+        android:labelFor="@id/editResolutionHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="h"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editResolutionWidth"
+        app:layout_constraintEnd_toStartOf="@id/editResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/editResolutionHeight"
+        android:layout_width="96dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="24dp"
@@ -102,7 +197,8 @@
         android:inputType="number"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/labelLayer"
-        app:layout_constraintTop_toBottomOf="@id/text_setup" />
+        app:layout_constraintStart_toEndOf="@id/labelResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

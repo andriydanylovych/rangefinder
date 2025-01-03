@@ -1,6 +1,12 @@
 package com.prostologik.lv12
 
+import android.Manifest
+import android.os.Build
+
 object Util {
+
+    const val INT_MIN = -2147483648
+    const val INT_MAX = 2147483647
 
     fun stringToInteger(s: String, num: Int = 0): Int {
         return try {
@@ -42,14 +48,20 @@ object Util {
         return stringByteToPixel(s) * colorM - colorA
     }
 
-    fun limitValue(value: Int, minLimit: Int, maxLimit: Int): Int {
+    fun limitValue(value: Int, minLimit: Int = INT_MIN, maxLimit: Int = INT_MAX): Int {
         var v = value
         if (value > maxLimit) v = maxLimit
         else if (value < minLimit) v = minLimit
         return v
     }
 
+    fun limitValue(value: Int?, minLimit: Int = INT_MIN, maxLimit: Int = INT_MAX): Int {
+        return if (value == null) limitValue(minLimit, minLimit, maxLimit)
+        else limitValue(value, minLimit, maxLimit)
+    }
+
 }
+
 
 //        val r = d0 + (1.370705 * d2);
 //        val g = d0 - (0.698001 * d2) - (0.337633 * d1);

@@ -38,6 +38,10 @@ class SetupFragment : Fragment() {
         var snippetHeight = homeViewModel.snippetHeight.value ?: 64
         var snippetLayer = homeViewModel.snippetLayer.value ?: 0
 
+        var analyzerOption = homeViewModel.analyzerOption.value ?: 0
+        var resolutionWidth = homeViewModel.resolutionWidth.value ?: 640
+        var resolutionHeight = homeViewModel.resolutionHeight.value ?: 480
+
         textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
 
         val editSnippetWidth = binding.editSnippetWidth
@@ -70,6 +74,33 @@ class SetupFragment : Fragment() {
             homeViewModel.setSnippetLayer(snippetLayer)
             textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
             savePreferences("saved_layer", snippetLayer) // getString(R.string.saved_layer)
+        }
+
+        val editAnalyzerOption = binding.editAnalyzerOption
+        editAnalyzerOption.setText(analyzerOption.toString())
+        editAnalyzerOption.addTextChangedListener {
+            analyzerOption = Util.stringToInteger(editAnalyzerOption.text.toString())
+            analyzerOption = Util.limitValue(analyzerOption, 0, 2)
+            homeViewModel.setAnalyzerOption(analyzerOption)
+            savePreferences("analyzer_option", analyzerOption)
+        }
+
+        val editResolutionWidth = binding.editResolutionWidth
+        editResolutionWidth.setText(resolutionWidth.toString())
+        editResolutionWidth.addTextChangedListener {
+            resolutionWidth = Util.stringToInteger(editResolutionWidth.text.toString())
+            resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
+            homeViewModel.setResolutionWidth(resolutionWidth)
+            savePreferences("resolution_width", resolutionWidth)
+        }
+
+        val editResolutionHeight = binding.editResolutionHeight
+        editResolutionHeight.setText(resolutionHeight.toString())
+        editResolutionHeight.addTextChangedListener {
+            resolutionHeight = Util.stringToInteger(editResolutionHeight.text.toString())
+            resolutionHeight = Util.limitValue(resolutionHeight, 1, 9600)
+            homeViewModel.setResolutionHeight(resolutionHeight)
+            savePreferences("resolution_height", resolutionHeight)
         }
 
         return root
