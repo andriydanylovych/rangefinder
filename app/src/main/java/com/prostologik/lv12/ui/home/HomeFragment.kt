@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +16,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -56,6 +61,7 @@ class HomeFragment : Fragment() {
     private lateinit var outputDirectory: File
     private lateinit var textView: TextView
     private var infoText: String = "no input"
+    private var infoText2: String = "dummy text"
 
 
     private val homeViewModel: HomeViewModel by activityViewModels()
@@ -223,6 +229,7 @@ class HomeFragment : Fragment() {
             try {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
+                infoText2 = listCameras(cameraProvider)
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -282,25 +289,92 @@ class HomeFragment : Fragment() {
         return SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
     }
 
-    var iii = 0
+    private var iii = 0
     private fun capturePhoto() {
-        val imageCapture = imageCapture ?: return
 
-        imageCapture.takePicture(
-            ContextCompat.getMainExecutor(safeContext),
-            object : ImageCapture.OnImageCapturedCallback() {
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    super.onCaptureSuccess(image)
+//        val camera = cameraProvider.bindToLifecycle(mainActivity, cameraSelector, CameraManager.imageAnalysis)
+//
+//        val cameraId = Camera2CameraInfo.from(camera.cameraInfo).cameraId
+//        val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//        val characteristics = cameraManager.getCameraCharacteristics(cameraId)
+//        val configs: StreamConfigurationMap? = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+//
+//        val imageAnalysisSizes = configs?.getOutputSizes(ImageFormat.YUV_420_888)
+//        imageAnalysisSizes?.forEach {
+//            Log.i("LOG", "Image capturing YUV_420_888 available output size: $it")
+//        }
+//
+//        val previewSizes = configs?.getOutputSizes(SurfaceTexture::class.java)
+//        previewSizes?.forEach {
+//            Log.i("LOG", "Preview available output size: $it")
+//        }
 
-                    val capturedImageAnalyzer = CapturedImageAnalysis()
-                    val test = capturedImageAnalyzer.analyze(image, 8, 8, 0)
-                    textView.text = "$iii: $test"
-                    iii++
+//        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+//
+//        val test = cameraSelector.toString()
+        textView.text = "$iii: $infoText2"
+        iii++
 
-                }
-            }
-        )
     }
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    fun listCameras(provider: ProcessCameraProvider):String {
+
+        val sb: StringBuilder = StringBuilder("")
+
+        val cam2Infos = provider.availableCameraInfos.map {
+            Camera2CameraInfo.from(it)
+        }.sortedByDescending {
+            it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+        }
+
+        for (c in cam2Infos) {
+            sb.append("$c\n")
+            val d = c.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            sb.append("$d\n")
+//            val msg = "Camera: $c Characteristics: $d"
+//            Log.d(TAG, msg)
+        }
+        Log.d(TAG, sb.toString())
+
+        return sb.toString()
+
+    }
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    fun selectExternalOrBestCamera(provider: ProcessCameraProvider):CameraSelector? {
+        val cam2Infos = provider.availableCameraInfos.map {
+            Camera2CameraInfo.from(it)
+        }.sortedByDescending {
+            // HARDWARE_LEVEL is Int type, with the order of:
+            // LEGACY < LIMITED < FULL < LEVEL_3 < EXTERNAL
+            it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+        }
+
+        return when {
+            cam2Infos.isNotEmpty() -> {
+                CameraSelector.Builder()
+                    .addCameraFilter {
+                        it.filter { camInfo ->
+                            // cam2Infos[0] is either EXTERNAL or best built-in camera
+                            val thisCamId = Camera2CameraInfo.from(camInfo).cameraId
+                            thisCamId == cam2Infos[0].cameraId
+                        }
+                    }.build()
+            }
+            else -> null
+        }
+    }
+
+//    @RequiresApi(Build.VERSION_CODES.M)
+//    fun getPossibleOutputSizes(id: String) {
+//        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//        val sizes = cameraManager?.getCameraCharacteristics(id)?.get(SCALER_STREAM_CONFIGURATION_MAP)?.getHighResolutionOutputSizes(ImageFormat.JPEG)
+//        if (sizes != null) {
+//            println("got possible resolutions:")
+//            println(sizes.joinToString("\n"))
+//        }
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
