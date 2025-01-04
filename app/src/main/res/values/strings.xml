@@ -23,4 +23,9 @@
     <string name="snippet_width">snippet_width</string>
     <string name="snippet_height">snippet_height</string>
 
+    <string-array name="analyzer_options">
+        <item>Analyzer</item>
+        <item>Snippet</item>
+    </string-array>
+
 </resources>

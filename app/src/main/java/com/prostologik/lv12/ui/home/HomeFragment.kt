@@ -8,6 +8,7 @@ import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
@@ -313,6 +314,7 @@ class HomeFragment : Fragment() {
 //
 //        val test = cameraSelector.toString()
         textView.text = "$iii: $infoText2"
+        textView.movementMethod = ScrollingMovementMethod()
         iii++
 
     }

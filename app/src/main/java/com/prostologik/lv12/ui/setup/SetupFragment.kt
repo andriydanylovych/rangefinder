@@ -1,10 +1,14 @@
 package com.prostologik.lv12.ui.setup
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -17,11 +21,18 @@ import com.prostologik.lv12.ui.home.HomeFragment.Companion
 import com.prostologik.lv12.ui.home.HomeViewModel
 import com.prostologik.lv12.ui.home.OverlayView
 
-class SetupFragment : Fragment() {
+class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private var _binding: FragmentSetupBinding? = null
     private val binding get() = _binding!!
 
     private val homeViewModel: HomeViewModel by activityViewModels()
+
+    private lateinit var safeContext: Context
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        safeContext = context
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -103,6 +114,21 @@ class SetupFragment : Fragment() {
             savePreferences("resolution_height", resolutionHeight)
         }
 
+        val spinnerAnalyzerOption: Spinner = binding.spinnerAnalyzerOption
+        // Create an ArrayAdapter using the string array and a default spinner layout.
+        ArrayAdapter.createFromResource(
+            safeContext,
+            R.array.analyzer_options,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears.
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner.
+            spinnerAnalyzerOption.adapter = adapter
+        }
+
+        spinnerAnalyzerOption.onItemSelectedListener = this
+
         return root
     }
 
@@ -121,6 +147,21 @@ class SetupFragment : Fragment() {
             putInt(key, value)
             apply()
         }
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+//        TODO("Not yet implemented")
+        // An item is selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos).
+        val editAnalyzerOption = binding.editAnalyzerOption
+        editAnalyzerOption.setText(id.toString())
+
+        homeViewModel.setAnalyzerOption(id.toInt())
+        savePreferences("analyzer_option", id.toInt())
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+//        TODO("Not yet implemented")
     }
 
 }

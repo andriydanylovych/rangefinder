@@ -116,7 +116,7 @@
         android:layout_marginStart="24dp"
         android:textSize="20sp"
         android:text="op"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/editAnalyzerOption"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
@@ -133,7 +133,7 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/labelAnalyzerOption"
         app:layout_constraintEnd_toStartOf="@id/labelResolutionWidth"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
@@ -147,7 +147,7 @@
         android:layout_marginStart="12dp"
         android:textSize="20sp"
         android:text="w"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/editAnalyzerOption"
         app:layout_constraintEnd_toStartOf="@id/editResolutionWidth"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
@@ -164,7 +164,7 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/labelResolutionWidth"
         app:layout_constraintEnd_toStartOf="@id/labelResolutionHeight"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
@@ -178,7 +178,7 @@
         android:layout_marginStart="12dp"
         android:textSize="20sp"
         android:text="h"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toEndOf="@id/editResolutionWidth"
         app:layout_constraintEnd_toStartOf="@id/editResolutionHeight"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
@@ -195,10 +195,21 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/labelResolutionHeight"
+        app:layout_constraintStart_toEndOf="@+id/labelResolutionHeight"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
+
+
+    <Spinner
+        android:id="@+id/spinnerAnalyzerOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelAnalyzerOption"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
