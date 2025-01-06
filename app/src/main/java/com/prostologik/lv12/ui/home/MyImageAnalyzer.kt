@@ -5,19 +5,10 @@ import java.nio.ByteBuffer
 
 class MyImageAnalyzer {
 
-    private var setImageSize: Boolean = false
-    private var imageHeight: Int = 480
-    private var imageWidth: Int = 640
-
     fun analyze(image: ImageProxy): String {
 
-        if (!setImageSize) { // landscape
-            imageHeight = image.height
-            imageWidth = image.width
-            OverlayView.imageHeight = imageHeight
-            OverlayView.imageWidth = imageWidth
-            setImageSize = true
-        }
+        val imageWidth = image.width
+        val imageHeight = image.height
 
         return "w $imageWidth x h $imageHeight"
 

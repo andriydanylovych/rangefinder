@@ -5,19 +5,11 @@ import java.nio.ByteBuffer
 
 class SnippetAnalyzer {
 
-    private var setImageSize: Boolean = false
-    private var imageHeight: Int = 480
-    private var imageWidth: Int = 640
-
     fun analyze(image: ImageProxy, snippetWidth: Int = 64, snippetHeight: Int = 64, snippetLayer: Int = 0): String {
 
-        if (!setImageSize) { // landscape
-            imageHeight = image.height
-            imageWidth = image.width
-            OverlayView.imageHeight = imageHeight
-            OverlayView.imageWidth = imageWidth
-            setImageSize = true
-        }
+        val imageWidth = image.width
+        val imageHeight = image.height
+
         val step = 1
 
         val sb: StringBuilder = StringBuilder("")

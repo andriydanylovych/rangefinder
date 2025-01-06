@@ -79,9 +79,6 @@ class HomeFragment : Fragment() {
     ): View {
         super.onCreate(savedInstanceState)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
         outputDirectory = getOutputDirectory()
         homeViewModel.setPhotoDirectory(outputDirectory.toString())
 
@@ -101,6 +98,9 @@ class HomeFragment : Fragment() {
             requestPermissions()
         }
 
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+
         val btnImage = binding.imageCaptureButton
         btnImage.setOnClickListener {
             if (analyzerOption == 1) takePhoto()
@@ -111,7 +111,6 @@ class HomeFragment : Fragment() {
 
         val btnInfo = binding.infoButton
         btnInfo.setOnClickListener {
-            //textView.text = infoText
             capturePhoto()
         }
 
@@ -263,7 +262,7 @@ class HomeFragment : Fragment() {
 
     private fun displayAnalyzer() {
 
-        textView.text = infoText
+        "w $imageWidth x h $imageHeight".also { textView.text = it }//infoText
 
     }
 
@@ -309,30 +308,30 @@ class HomeFragment : Fragment() {
 
     }
 
-    @OptIn(ExperimentalCamera2Interop::class)
-    fun selectExternalOrBestCamera(provider: ProcessCameraProvider):CameraSelector? {
-        val cam2Infos = provider.availableCameraInfos.map {
-            Camera2CameraInfo.from(it)
-        }.sortedByDescending {
-            // HARDWARE_LEVEL is Int type, with the order of:
-            // LEGACY < LIMITED < FULL < LEVEL_3 < EXTERNAL
-            it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-        }
-
-        return when {
-            cam2Infos.isNotEmpty() -> {
-                CameraSelector.Builder()
-                    .addCameraFilter {
-                        it.filter { camInfo ->
-                            // cam2Infos[0] is either EXTERNAL or best built-in camera
-                            val thisCamId = Camera2CameraInfo.from(camInfo).cameraId
-                            thisCamId == cam2Infos[0].cameraId
-                        }
-                    }.build()
-            }
-            else -> null
-        }
-    }
+//    @OptIn(ExperimentalCamera2Interop::class)
+//    fun selectExternalOrBestCamera(provider: ProcessCameraProvider):CameraSelector? {
+//        val cam2Infos = provider.availableCameraInfos.map {
+//            Camera2CameraInfo.from(it)
+//        }.sortedByDescending {
+//            // HARDWARE_LEVEL is Int type, with the order of:
+//            // LEGACY < LIMITED < FULL < LEVEL_3 < EXTERNAL
+//            it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+//        }
+//
+//        return when {
+//            cam2Infos.isNotEmpty() -> {
+//                CameraSelector.Builder()
+//                    .addCameraFilter {
+//                        it.filter { camInfo ->
+//                            // cam2Infos[0] is either EXTERNAL or best built-in camera
+//                            val thisCamId = Camera2CameraInfo.from(camInfo).cameraId
+//                            thisCamId == cam2Infos[0].cameraId
+//                        }
+//                    }.build()
+//            }
+//            else -> null
+//        }
+//    }
 
 //    @RequiresApi(Build.VERSION_CODES.M)
 //    fun getPossibleOutputSizes(id: String) {
@@ -353,6 +352,11 @@ class HomeFragment : Fragment() {
     private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
         override fun analyze(image: ImageProxy) {
+            imageWidth = image.width
+            imageHeight = image.height
+            OverlayView.imageWidth = imageWidth
+            OverlayView.imageHeight = imageHeight
+
             if (analyzerOption == 0) {
                 val imageAnalyzer = MyImageAnalyzer()
                 listener(imageAnalyzer.analyze(image))
@@ -384,6 +388,9 @@ class HomeFragment : Fragment() {
         private var analyzerOption = 0
         private var resolutionWidth = 800//640
         private var resolutionHeight = 600//480
+
+        private var imageWidth = 800
+        private var imageHeight = 600
     }
 
     /**

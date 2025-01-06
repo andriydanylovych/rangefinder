@@ -56,17 +56,24 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
 
         val editSnippetWidth = binding.editSnippetWidth
+        val editSnippetHeight = binding.editSnippetHeight
         editSnippetWidth.setText(snippetWidth.toString())
         editSnippetWidth.addTextChangedListener {
             snippetWidth = Util.stringToInteger(editSnippetWidth.text.toString(), 64)
             snippetWidth = Util.limitValue(snippetWidth, 1, 256)
             homeViewModel.setSnippetWidth(snippetWidth)
-            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
             OverlayView.snippetWidth = snippetWidth
             savePreferences("snippet_width", snippetWidth)
+
+            snippetHeight = snippetWidth
+            homeViewModel.setSnippetHeight(snippetHeight)
+            OverlayView.snippetHeight = snippetHeight
+            savePreferences("snippet_height", snippetHeight)
+            editSnippetHeight.setText(snippetHeight.toString())
+
+            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
         }
 
-        val editSnippetHeight = binding.editSnippetHeight
         editSnippetHeight.setText(snippetHeight.toString())
         editSnippetHeight.addTextChangedListener {
             snippetHeight = Util.stringToInteger(editSnippetHeight.text.toString(), 64)
@@ -97,15 +104,20 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         val editResolutionWidth = binding.editResolutionWidth
+        val editResolutionHeight = binding.editResolutionHeight
         editResolutionWidth.setText(resolutionWidth.toString())
         editResolutionWidth.addTextChangedListener {
             resolutionWidth = Util.stringToInteger(editResolutionWidth.text.toString())
             resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
             homeViewModel.setResolutionWidth(resolutionWidth)
             savePreferences("resolution_width", resolutionWidth)
+
+            resolutionHeight = resolutionWidth / 4 * 3
+            homeViewModel.setResolutionHeight(resolutionHeight)
+            savePreferences("resolution_height", resolutionHeight)
+            editResolutionHeight.setText(resolutionHeight.toString())
         }
 
-        val editResolutionHeight = binding.editResolutionHeight
         editResolutionHeight.setText(resolutionHeight.toString())
         editResolutionHeight.addTextChangedListener {
             resolutionHeight = Util.stringToInteger(editResolutionHeight.text.toString())
@@ -115,6 +127,7 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         val spinnerAnalyzerOption: Spinner = binding.spinnerAnalyzerOption
+        spinnerAnalyzerOption.setSelection(analyzerOption)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
             safeContext,
@@ -153,11 +166,12 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
 //        TODO("Not yet implemented")
         // An item is selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos).
+        homeViewModel.setAnalyzerOption(id.toInt())
+        savePreferences("analyzer_option", id.toInt())
+
         val editAnalyzerOption = binding.editAnalyzerOption
         editAnalyzerOption.setText(id.toString())
 
-        homeViewModel.setAnalyzerOption(id.toInt())
-        savePreferences("analyzer_option", id.toInt())
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
