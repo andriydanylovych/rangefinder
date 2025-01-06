@@ -177,55 +177,43 @@ class HomeFragment : Fragment() {
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
             val preview = Preview.Builder()
                 .build()
                 .also {
                     it.surfaceProvider = binding.viewFinder.surfaceProvider
                 }
 
-            //imageCapture = ImageCapture.Builder().build()
+            imageCapture = ImageCapture.Builder().build()
 
-            imageCapture = ImageCapture.Builder()
-                .apply {
-                    //this.setTargetRotation(orientation)
-
-                    val resolutionSelectorBuilder = ResolutionSelector.Builder().apply {
-                        setResolutionStrategy(
-                            ResolutionStrategy(
-                                Size(
-                                    resolutionWidth,
-                                    resolutionHeight
-                                ), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
-                                //ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
-                            )
-                        )
-                    }
-
-                    this.setResolutionSelector(resolutionSelectorBuilder.build())
-
-//                    if (actualCameraIsMaxQuality) {
-//                        this.setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-//                    }
-
-//                    this.setFlashMode(flashLamp)
-                }
+            val resolutionSelectorForAnalyzer = ResolutionSelector.Builder()
+                .setAllowedResolutionMode(ResolutionSelector.PREFER_HIGHER_RESOLUTION_OVER_CAPTURE_RATE)
+                //.setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                //.setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        Size(
+                            resolutionWidth,
+                            resolutionHeight
+                        ), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                        // FALLBACK_RULE_NONE
+                    )
+                )
                 .build()
-
 
             val imageAnalyzer = ImageAnalysis.Builder()
                 //.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888) // YUV_420_888
-                //.setTargetResolution(Size(1280, 720)) // default (640, 480) // deprecated :(
                 //.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // STRATEGY_BLOCK_PRODUCER
                 .setImageQueueDepth(1)
+                .setResolutionSelector(resolutionSelectorForAnalyzer)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor,
-                        PhotoAnalyzer { infoString ->
-                            infoText = infoString
-                        })
+                    it.setAnalyzer(
+                        cameraExecutor,
+                        PhotoAnalyzer { infoString -> infoText = infoString }
+                    )
                 }
-
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
@@ -292,31 +280,9 @@ class HomeFragment : Fragment() {
 
     private var iii = 0
     private fun capturePhoto() {
-
-//        val camera = cameraProvider.bindToLifecycle(mainActivity, cameraSelector, CameraManager.imageAnalysis)
-//
-//        val cameraId = Camera2CameraInfo.from(camera.cameraInfo).cameraId
-//        val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-//        val characteristics = cameraManager.getCameraCharacteristics(cameraId)
-//        val configs: StreamConfigurationMap? = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-//
-//        val imageAnalysisSizes = configs?.getOutputSizes(ImageFormat.YUV_420_888)
-//        imageAnalysisSizes?.forEach {
-//            Log.i("LOG", "Image capturing YUV_420_888 available output size: $it")
-//        }
-//
-//        val previewSizes = configs?.getOutputSizes(SurfaceTexture::class.java)
-//        previewSizes?.forEach {
-//            Log.i("LOG", "Preview available output size: $it")
-//        }
-
-//        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-//
-//        val test = cameraSelector.toString()
         textView.text = "$iii: $infoText2"
         textView.movementMethod = ScrollingMovementMethod()
         iii++
-
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -416,8 +382,8 @@ class HomeFragment : Fragment() {
         private var snippetLayer = 0
 
         private var analyzerOption = 0
-        private var resolutionWidth = 640
-        private var resolutionHeight = 480
+        private var resolutionWidth = 800//640
+        private var resolutionHeight = 600//480
     }
 
     /**

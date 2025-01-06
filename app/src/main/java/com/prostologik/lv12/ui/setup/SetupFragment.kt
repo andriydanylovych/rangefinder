@@ -50,8 +50,8 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         var snippetLayer = homeViewModel.snippetLayer.value ?: 0
 
         var analyzerOption = homeViewModel.analyzerOption.value ?: 0
-        var resolutionWidth = homeViewModel.resolutionWidth.value ?: 640
-        var resolutionHeight = homeViewModel.resolutionHeight.value ?: 480
+        var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
+        var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
 
         textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
 
