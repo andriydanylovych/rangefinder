@@ -1,6 +1,7 @@
 package com.prostologik.lv12.ui.home
 
 import androidx.camera.core.ImageProxy
+import com.prostologik.lv12.Util.byteToPixel
 import java.nio.ByteBuffer
 
 class MyImageAnalyzer {
@@ -10,7 +11,17 @@ class MyImageAnalyzer {
         val imageWidth = image.width
         val imageHeight = image.height
 
-        return "w $imageWidth x h $imageHeight"
+        val startRaw = imageHeight / 2
+        val startCol = imageWidth / 2
+
+        val bufferY = image.planes[0].buffer
+        val dataY = bufferY.toByteArray()
+
+        val centralPx: Int = imageWidth * startRaw + startCol
+
+        val d = byteToPixel(dataY[centralPx])
+
+        return "central px = $d\nw $imageWidth x h $imageHeight"
 
     }
 

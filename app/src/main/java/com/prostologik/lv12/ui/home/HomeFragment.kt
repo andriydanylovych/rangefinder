@@ -1,10 +1,8 @@
 package com.prostologik.lv12.ui.home
 
 import android.Manifest
-import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.os.Bundle
@@ -27,20 +25,15 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.prostologik.lv12.R
 import com.prostologik.lv12.databinding.FragmentHomeBinding
-import com.prostologik.lv12.ui.review.SavedPhotoAnalyzer
 import java.io.File
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -210,7 +203,17 @@ class HomeFragment : Fragment() {
                 .also {
                     it.setAnalyzer(
                         cameraExecutor,
-                        PhotoAnalyzer { infoString -> infoText = infoString }
+                        PhotoAnalyzer {
+                            infoString ->
+                            infoText = infoString
+
+                            if (analyzerOption == 0 && activity != null) {
+                                activity?.runOnUiThread {
+                                    textView.text = infoText
+                                }
+                            }
+
+                        }
                     )
                 }
 
@@ -262,7 +265,8 @@ class HomeFragment : Fragment() {
 
     private fun displayAnalyzer() {
 
-        "w $imageWidth x h $imageHeight".also { textView.text = it }//infoText
+        //"w $imageWidth x h $imageHeight".also { textView.text = it }//infoText
+        textView.text = infoText
 
     }
 
@@ -352,11 +356,14 @@ class HomeFragment : Fragment() {
     private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
         override fun analyze(image: ImageProxy) {
-            imageWidth = image.width
-            imageHeight = image.height
-            OverlayView.imageWidth = imageWidth
-            OverlayView.imageHeight = imageHeight
-
+            if (imageWidth != image.width) {
+                imageWidth = image.width
+                OverlayView.imageWidth = imageWidth
+            }
+            if (imageHeight != image.height) {
+                imageHeight = image.height
+                OverlayView.imageHeight = imageHeight
+            }
             if (analyzerOption == 0) {
                 val imageAnalyzer = MyImageAnalyzer()
                 listener(imageAnalyzer.analyze(image))

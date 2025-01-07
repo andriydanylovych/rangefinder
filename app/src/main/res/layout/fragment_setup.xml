@@ -47,15 +47,15 @@
 
     <TextView
         android:id="@+id/labelWidth"
-        android:labelFor="@+id/editSnippetWidth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:textSize="20sp"
+        android:labelFor="@+id/editSnippetWidth"
         android:text="W"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
         app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
+        app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
         app:layout_constraintTop_toBottomOf="@+id/text_setup"
         tools:ignore="HardcodedText" />
 
@@ -206,10 +206,43 @@
         android:id="@+id/spinnerAnalyzerOption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/radioGroupOption"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/labelAnalyzerOption"
         />
+
+    <RadioGroup
+        android:id="@+id/radioGroupOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tag="Option"
+        android:text="Analyzer option"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerAnalyzerOption">
+
+        <RadioButton
+            android:id="@+id/radioAnalyzer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analyzer"
+            app:layout_constraintBottom_toTopOf="@+id/radioSnippet"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioButton
+            android:id="@+id/radioSnippet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Snippet"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radioAnalyzer" />
+
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

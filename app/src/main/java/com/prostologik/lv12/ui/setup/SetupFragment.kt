@@ -1,6 +1,5 @@
 package com.prostologik.lv12.ui.setup
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,12 +15,10 @@ import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.R
 import com.prostologik.lv12.Util
 import com.prostologik.lv12.databinding.FragmentSetupBinding
-import com.prostologik.lv12.ui.home.HomeFragment
-import com.prostologik.lv12.ui.home.HomeFragment.Companion
 import com.prostologik.lv12.ui.home.HomeViewModel
 import com.prostologik.lv12.ui.home.OverlayView
 
-class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
+class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
     private var _binding: FragmentSetupBinding? = null
     private val binding get() = _binding!!
 
@@ -53,7 +50,7 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
         var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
 
-        textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
+        textView.text = "option: $analyzerOption"
 
         val editSnippetWidth = binding.editSnippetWidth
         val editSnippetHeight = binding.editSnippetHeight
@@ -70,8 +67,6 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
             OverlayView.snippetHeight = snippetHeight
             savePreferences("snippet_height", snippetHeight)
             editSnippetHeight.setText(snippetHeight.toString())
-
-            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
         }
 
         editSnippetHeight.setText(snippetHeight.toString())
@@ -79,7 +74,6 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
             snippetHeight = Util.stringToInteger(editSnippetHeight.text.toString(), 64)
             snippetHeight = Util.limitValue(snippetHeight, 1, 256)
             homeViewModel.setSnippetHeight(snippetHeight)
-            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
             OverlayView.snippetHeight = snippetHeight
             savePreferences("snippet_height", snippetHeight)
         }
@@ -90,7 +84,6 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
             snippetLayer = Util.stringToInteger(editSnippetLayer.text.toString())
             snippetLayer = Util.limitValue(snippetLayer, 0, 2)
             homeViewModel.setSnippetLayer(snippetLayer)
-            textView.text = textWidthHeight(snippetWidth, snippetHeight, snippetLayer)
             savePreferences("saved_layer", snippetLayer) // getString(R.string.saved_layer)
         }
 
@@ -101,6 +94,7 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
             analyzerOption = Util.limitValue(analyzerOption, 0, 2)
             homeViewModel.setAnalyzerOption(analyzerOption)
             savePreferences("analyzer_option", analyzerOption)
+            textView.text = "option: $analyzerOption"
         }
 
         val editResolutionWidth = binding.editResolutionWidth
@@ -138,15 +132,50 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner.
             spinnerAnalyzerOption.adapter = adapter
+
+            spinnerAnalyzerOption.onItemSelectedListener = object:
+                AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    homeViewModel.setAnalyzerOption(id.toInt())
+                    savePreferences("analyzer_option", id.toInt())
+                    editAnalyzerOption.setText(id.toString())
+                    textView.text = "option: $analyzerOption"
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    homeViewModel.setAnalyzerOption(0)
+                    savePreferences("analyzer_option", 0)
+                    editAnalyzerOption.setText(0)
+                    textView.text = "option: $analyzerOption"
+                }
+
+            }
         }
 
-        spinnerAnalyzerOption.onItemSelectedListener = this
+        //spinnerAnalyzerOption.onItemSelectedListener = this
+
+
+        val radioGroupOption = binding.radioGroupOption
+        radioGroupOption.setOnCheckedChangeListener { group, checkedId ->
+            if (checkedId == R.id.radioAnalyzer) {
+                homeViewModel.setAnalyzerOption(0)
+                savePreferences("analyzer_option", 0)
+                editAnalyzerOption.setText("0")
+                textView.text = "option: $analyzerOption"
+            } else {
+                homeViewModel.setAnalyzerOption(1)
+                savePreferences("analyzer_option", 1)
+                editAnalyzerOption.setText("1")
+                textView.text = "option: $analyzerOption"
+            }
+        }
 
         return root
-    }
-
-    private fun textWidthHeight(w: Int? = 64, h: Int? = 64, l: Int? = 0): String {
-        return "W x H = $w x $h  L = $l"
     }
 
     override fun onDestroyView() {
@@ -162,20 +191,20 @@ class SetupFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
     }
 
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-//        TODO("Not yet implemented")
-        // An item is selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos).
-        homeViewModel.setAnalyzerOption(id.toInt())
-        savePreferences("analyzer_option", id.toInt())
-
-        val editAnalyzerOption = binding.editAnalyzerOption
-        editAnalyzerOption.setText(id.toString())
-
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-//        TODO("Not yet implemented")
-    }
+//    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+////        TODO("Not yet implemented")
+//        // An item is selected. You can retrieve the selected item using
+//        // parent.getItemAtPosition(pos).
+//        homeViewModel.setAnalyzerOption(id.toInt())
+//        savePreferences("analyzer_option", id.toInt())
+//
+//        val editAnalyzerOption = binding.editAnalyzerOption
+//        editAnalyzerOption.setText(id.toString())
+//
+//    }
+//
+//    override fun onNothingSelected(parent: AdapterView<*>?) {
+////        TODO("Not yet implemented")
+//    }
 
 }

@@ -24,7 +24,7 @@ class SnippetAnalyzer {
             val startPx: Int = imageWidth * (startRaw + j * step) + startCol
             var i = 0
             while (i < snippetWidth - 1) {
-                val d = (dataY[startPx + i * step])
+                val d = dataY[startPx + i * step]
                 sb.append("$d,")
                 i++
             }

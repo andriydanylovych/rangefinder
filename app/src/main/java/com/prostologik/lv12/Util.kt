@@ -1,8 +1,5 @@
 package com.prostologik.lv12
 
-import android.Manifest
-import android.os.Build
-
 object Util {
 
     const val INT_MIN = -2147483648
@@ -14,6 +11,14 @@ object Util {
         } catch (nfe: NumberFormatException) {
             num
         }
+    }
+
+    fun byteToPixel(b: Byte): Int {
+        val byteAsInt = b.toInt()
+        return if (byteAsInt < -128) 0
+        else if (byteAsInt < 0) (256 + byteAsInt)
+        else if (byteAsInt > 127) 127
+        else byteAsInt
     }
 
     fun stringByteToPixel(s: String): Int {
@@ -56,7 +61,7 @@ object Util {
     }
 
     fun limitValue(value: Int?, minLimit: Int = INT_MIN, maxLimit: Int = INT_MAX): Int {
-        return if (value == null) limitValue(minLimit, minLimit, maxLimit)
+        return if (value == null) minLimit
         else limitValue(value, minLimit, maxLimit)
     }
 
