@@ -46,9 +46,11 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
         var snippetHeight = homeViewModel.snippetHeight.value ?: 64
         var snippetLayer = homeViewModel.snippetLayer.value ?: 0
 
-        var analyzerOption = homeViewModel.analyzerOption.value ?: 0
         var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
         var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
+        var ratio = (resolutionWidth * 1.0 / resolutionHeight)
+
+        var analyzerOption = homeViewModel.analyzerOption.value ?: 0
 
         textView.text = "option: $analyzerOption"
 
@@ -87,14 +89,13 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
             savePreferences("saved_layer", snippetLayer) // getString(R.string.saved_layer)
         }
 
-        val editAnalyzerOption = binding.editAnalyzerOption
-        editAnalyzerOption.setText(analyzerOption.toString())
-        editAnalyzerOption.addTextChangedListener {
-            analyzerOption = Util.stringToInteger(editAnalyzerOption.text.toString())
-            analyzerOption = Util.limitValue(analyzerOption, 0, 2)
-            homeViewModel.setAnalyzerOption(analyzerOption)
-            savePreferences("analyzer_option", analyzerOption)
-            textView.text = "option: $analyzerOption"
+        val editRatio = binding.editRatio
+        editRatio.setText(ratio.toString())
+        editRatio.addTextChangedListener {
+            ratio = 1.0
+//            homeViewModel.setAnalyzerOption(analyzerOption)
+//            savePreferences("analyzer_option", analyzerOption)
+//            textView.text = "option: $analyzerOption"
         }
 
         val editResolutionWidth = binding.editResolutionWidth
@@ -120,6 +121,17 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
             savePreferences("resolution_height", resolutionHeight)
         }
 
+
+        val radioAnalyzer = binding.radioAnalyzer
+        val radioSnippet = binding.radioSnippet
+        if (analyzerOption == 0) {
+            radioAnalyzer.isChecked = true
+            radioSnippet.isChecked = false
+        } else {
+            radioAnalyzer.isChecked = false
+            radioSnippet.isChecked = true
+        }
+
         val spinnerAnalyzerOption: Spinner = binding.spinnerAnalyzerOption
         spinnerAnalyzerOption.setSelection(analyzerOption)
         // Create an ArrayAdapter using the string array and a default spinner layout.
@@ -141,16 +153,23 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
                     position: Int,
                     id: Long
                 ) {
+                    analyzerOption = id.toInt()
                     homeViewModel.setAnalyzerOption(id.toInt())
                     savePreferences("analyzer_option", id.toInt())
-                    editAnalyzerOption.setText(id.toString())
                     textView.text = "option: $analyzerOption"
+
+                    if (analyzerOption == 0) {
+                        radioAnalyzer.isChecked = true
+                        radioSnippet.isChecked = false
+                    } else {
+                        radioAnalyzer.isChecked = false
+                        radioSnippet.isChecked = true
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                     homeViewModel.setAnalyzerOption(0)
                     savePreferences("analyzer_option", 0)
-                    editAnalyzerOption.setText(0)
                     textView.text = "option: $analyzerOption"
                 }
 
@@ -161,18 +180,14 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
 
 
         val radioGroupOption = binding.radioGroupOption
-        radioGroupOption.setOnCheckedChangeListener { group, checkedId ->
-            if (checkedId == R.id.radioAnalyzer) {
-                homeViewModel.setAnalyzerOption(0)
-                savePreferences("analyzer_option", 0)
-                editAnalyzerOption.setText("0")
-                textView.text = "option: $analyzerOption"
-            } else {
-                homeViewModel.setAnalyzerOption(1)
-                savePreferences("analyzer_option", 1)
-                editAnalyzerOption.setText("1")
-                textView.text = "option: $analyzerOption"
-            }
+
+//        radioGroupOption.setTag(analyzerOption, "tagTest")
+        radioGroupOption.setOnCheckedChangeListener { _, checkedId ->
+            analyzerOption = if (checkedId == R.id.radioAnalyzer) { 0 } else { 1 }
+            spinnerAnalyzerOption.setSelection(analyzerOption)
+            homeViewModel.setAnalyzerOption(analyzerOption)
+            savePreferences("analyzer_option", analyzerOption)
+            textView.text = "option: $analyzerOption"
         }
 
         return root

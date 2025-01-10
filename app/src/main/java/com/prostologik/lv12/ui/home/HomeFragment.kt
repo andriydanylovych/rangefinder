@@ -261,6 +261,9 @@ class HomeFragment : Fragment() {
 
             }
         )
+
+        homeViewModel.setResolutionWidth(imageWidth) // does not work
+        homeViewModel.setResolutionHeight(imageHeight) // does not work
     }
 
     private fun displayAnalyzer() {

@@ -23,7 +23,7 @@
         android:layout_marginStart="24dp"
         android:textSize="20sp"
         android:text="L"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/editSnippetLayer"
         app:layout_constraintTop_toBottomOf="@+id/text_setup"
@@ -40,7 +40,7 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintEnd_toStartOf="@+id/labelWidth"
         app:layout_constraintStart_toEndOf="@+id/labelLayer"
         app:layout_constraintTop_toBottomOf="@id/text_setup" />
@@ -53,7 +53,7 @@
         android:labelFor="@+id/editSnippetWidth"
         android:text="W"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
         app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
         app:layout_constraintTop_toBottomOf="@+id/text_setup"
@@ -70,7 +70,7 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintStart_toEndOf="@id/labelWidth"
         app:layout_constraintEnd_toStartOf="@id/labelHeight"
         app:layout_constraintTop_toBottomOf="@id/text_setup" />
@@ -83,7 +83,7 @@
         android:layout_marginStart="12dp"
         android:textSize="20sp"
         android:text="H"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintStart_toEndOf="@id/editSnippetWidth"
         app:layout_constraintEnd_toStartOf="@id/editSnippetHeight"
         app:layout_constraintTop_toBottomOf="@id/text_setup"
@@ -100,7 +100,7 @@
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
         app:layout_constraintStart_toEndOf="@id/labelHeight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_setup" />
@@ -109,8 +109,8 @@
 
 
     <TextView
-        android:id="@+id/labelAnalyzerOption"
-        android:labelFor="@+id/editAnalyzerOption"
+        android:id="@+id/labelRatio"
+        android:labelFor="@+id/editRatio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -118,12 +118,12 @@
         android:text="op"
         app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editAnalyzerOption"
+        app:layout_constraintEnd_toStartOf="@+id/editRatio"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
         tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/editAnalyzerOption"
+        android:id="@+id/editRatio"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
@@ -134,7 +134,7 @@
         android:textAlignment="center"
         android:inputType="number"
         app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/labelAnalyzerOption"
+        app:layout_constraintStart_toEndOf="@id/labelRatio"
         app:layout_constraintEnd_toStartOf="@id/labelResolutionWidth"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
         />
@@ -148,7 +148,7 @@
         android:textSize="20sp"
         android:text="w"
         app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/editAnalyzerOption"
+        app:layout_constraintStart_toEndOf="@id/editRatio"
         app:layout_constraintEnd_toStartOf="@id/editResolutionWidth"
         app:layout_constraintTop_toBottomOf="@+id/labelWidth"
         tools:ignore="HardcodedText" />
@@ -209,7 +209,7 @@
         app:layout_constraintBottom_toTopOf="@+id/radioGroupOption"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/labelAnalyzerOption"
+        app:layout_constraintTop_toBottomOf="@+id/labelRatio"
         />
 
     <RadioGroup
@@ -218,10 +218,10 @@
         android:layout_height="wrap_content"
         android:tag="Option"
         android:text="Analyzer option"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerAnalyzerOption">
+        app:layout_constraintTop_toBottomOf="@+id/spinnerAnalyzerOption"
+        app:layout_constraintBottom_toTopOf="@+id/text_bottom">
 
         <RadioButton
             android:id="@+id/radioAnalyzer"
@@ -238,11 +238,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Snippet"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/radioAnalyzer" />
+            app:layout_constraintTop_toBottomOf="@+id/radioAnalyzer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
 
     </RadioGroup>
+
+    <TextView
+        android:id="@+id/text_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:textSize="11sp"
+        android:scrollbars = "vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
