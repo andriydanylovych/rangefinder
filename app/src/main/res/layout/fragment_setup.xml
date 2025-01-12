@@ -13,203 +13,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/labelLayer"
-        android:labelFor="@id/editSnippetLayer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:textSize="20sp"
-        android:text="L"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editSnippetLayer"
-        app:layout_constraintTop_toBottomOf="@+id/text_setup"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editSnippetLayer"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="12dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintEnd_toStartOf="@+id/labelWidth"
-        app:layout_constraintStart_toEndOf="@+id/labelLayer"
-        app:layout_constraintTop_toBottomOf="@id/text_setup" />
-
-    <TextView
-        android:id="@+id/labelWidth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:labelFor="@+id/editSnippetWidth"
-        android:text="W"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
-        app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
-        app:layout_constraintTop_toBottomOf="@+id/text_setup"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editSnippetWidth"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="12dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintStart_toEndOf="@id/labelWidth"
-        app:layout_constraintEnd_toStartOf="@id/labelHeight"
-        app:layout_constraintTop_toBottomOf="@id/text_setup" />
-
-    <TextView
-        android:id="@+id/labelHeight"
-        android:labelFor="@id/editSnippetHeight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:textSize="20sp"
-        android:text="H"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintStart_toEndOf="@id/editSnippetWidth"
-        app:layout_constraintEnd_toStartOf="@id/editSnippetHeight"
-        app:layout_constraintTop_toBottomOf="@id/text_setup"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editSnippetHeight"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="24dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
-        app:layout_constraintStart_toEndOf="@id/labelHeight"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_setup" />
-
-
-
-
-    <TextView
-        android:id="@+id/labelRatio"
-        android:labelFor="@+id/editRatio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:textSize="20sp"
-        android:text="op"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editRatio"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editRatio"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="12dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/labelRatio"
-        app:layout_constraintEnd_toStartOf="@id/labelResolutionWidth"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        />
-
-    <TextView
-        android:id="@+id/labelResolutionWidth"
-        android:labelFor="@id/editResolutionWidth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:textSize="20sp"
-        android:text="w"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/editRatio"
-        app:layout_constraintEnd_toStartOf="@id/editResolutionWidth"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editResolutionWidth"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="12dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/labelResolutionWidth"
-        app:layout_constraintEnd_toStartOf="@id/labelResolutionHeight"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        />
-
-    <TextView
-        android:id="@+id/labelResolutionHeight"
-        android:labelFor="@id/editResolutionHeight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:textSize="20sp"
-        android:text="h"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintStart_toEndOf="@id/editResolutionWidth"
-        app:layout_constraintEnd_toStartOf="@id/editResolutionHeight"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/editResolutionHeight"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="24dp"
-        android:autofillHints=""
-        android:ems="16"
-        android:padding="17dp"
-        android:textAlignment="center"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/labelResolutionHeight"
-        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
-        />
-
-
-    <Spinner
-        android:id="@+id/spinnerAnalyzerOption"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/radioGroupOption"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/labelRatio"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <RadioGroup
@@ -220,8 +24,8 @@
         android:text="Analyzer option"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerAnalyzerOption"
-        app:layout_constraintBottom_toTopOf="@+id/text_bottom">
+        app:layout_constraintTop_toBottomOf="@+id/text_setup"
+        app:layout_constraintBottom_toTopOf="@+id/labelLayer">
 
         <RadioButton
             android:id="@+id/radioAnalyzer"
@@ -231,7 +35,8 @@
             app:layout_constraintBottom_toTopOf="@+id/radioSnippet"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
         <RadioButton
             android:id="@+id/radioSnippet"
@@ -247,15 +52,223 @@
     </RadioGroup>
 
     <TextView
+        android:id="@+id/labelLayer"
+        android:labelFor="@id/editSnippetLayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:textSize="20sp"
+        android:text="L"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editSnippetLayer"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editSnippetLayer"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintEnd_toStartOf="@+id/labelWidth"
+        app:layout_constraintStart_toEndOf="@+id/labelLayer"
+        />
+
+    <TextView
+        android:id="@+id/labelWidth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:labelFor="@+id/editSnippetWidth"
+        android:text="W"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintEnd_toStartOf="@+id/editSnippetWidth"
+        app:layout_constraintStart_toEndOf="@+id/editSnippetLayer"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editSnippetWidth"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintStart_toEndOf="@id/labelWidth"
+        app:layout_constraintEnd_toStartOf="@id/labelHeight"
+        />
+
+    <TextView
+        android:id="@+id/labelHeight"
+        android:labelFor="@id/editSnippetHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="H"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintStart_toEndOf="@id/editSnippetWidth"
+        app:layout_constraintEnd_toStartOf="@id/editSnippetHeight"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editSnippetHeight"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="24dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption"
+        app:layout_constraintBottom_toTopOf="@+id/labelRatio"
+        app:layout_constraintStart_toEndOf="@id/labelHeight"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+
+
+
+    <TextView
+        android:id="@+id/labelRatio"
+        android:labelFor="@+id/editRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="R"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editRatio"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editRatio"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintStart_toEndOf="@id/labelRatio"
+        app:layout_constraintEnd_toStartOf="@id/labelResolutionWidth"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
+
+    <TextView
+        android:id="@+id/labelResolutionWidth"
+        android:labelFor="@id/editResolutionWidth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="w"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintStart_toEndOf="@id/editRatio"
+        app:layout_constraintEnd_toStartOf="@id/editResolutionWidth"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editResolutionWidth"
+        android:layout_width="84dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintStart_toEndOf="@id/labelResolutionWidth"
+        app:layout_constraintEnd_toStartOf="@id/labelResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
+
+    <TextView
+        android:id="@+id/labelResolutionHeight"
+        android:labelFor="@id/editResolutionHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textSize="20sp"
+        android:text="h"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintStart_toEndOf="@id/editResolutionWidth"
+        app:layout_constraintEnd_toStartOf="@id/editResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        tools:ignore="HardcodedText"
+        />
+
+    <EditText
+        android:id="@+id/editResolutionHeight"
+        android:layout_width="84dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="12dp"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerInfoOption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/labelResolutionHeight"
+        app:layout_constraintTop_toBottomOf="@+id/labelWidth"
+        />
+
+
+    <Spinner
+        android:id="@+id/spinnerInfoOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/text_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelRatio" />
+
+    <TextView
         android:id="@+id/text_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:lines="6"
         android:background="#FFFFFF"
         android:textSize="11sp"
         android:scrollbars = "vertical"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerInfoOption"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroupOption" />
+         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,17 +21,14 @@ import androidx.lifecycle.ViewModel
 
 class HomeViewModel : ViewModel() {
 
-    private var _photoDirectory = MutableLiveData<String>().apply {
-        value = null //"/storage/emulated/0/Android/media/com.prostologik.lv12/image"
-    }
+    private var _photoDirectory = MutableLiveData<String>().apply { value = null }
+    // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
     val photoDirectory: LiveData<String> = _photoDirectory
     fun setPhotoDirectory(dir: String) {
         _photoDirectory.value = dir
     }
 
-    private var _photoFileName = MutableLiveData<String>().apply {
-        value = null
-    }
+    private var _photoFileName = MutableLiveData<String>().apply { value = null }
     val photoFileName: LiveData<String> = _photoFileName
     fun setPhotoFileName(fileName: String) {
         _photoFileName.value = fileName
@@ -73,4 +70,5 @@ class HomeViewModel : ViewModel() {
         if (value in 1..9600) _resolutionHeight.value = value
     }
 
+    public var info = "dummy info"
 }

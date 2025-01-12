@@ -2,6 +2,7 @@ package com.prostologik.lv12.ui.setup
 
 import android.content.Context
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,19 +41,40 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
         _binding = FragmentSetupBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+
+
+
+
+
+        var analyzerOption = homeViewModel.analyzerOption.value ?: 0
         val textView: TextView = binding.textSetup
+        textView.text = "option: $analyzerOption"
+
+        val radioAnalyzer = binding.radioAnalyzer
+        val radioSnippet = binding.radioSnippet
+        if (analyzerOption == 0) {
+            radioAnalyzer.isChecked = true
+            radioSnippet.isChecked = false
+        } else {
+            radioAnalyzer.isChecked = false
+            radioSnippet.isChecked = true
+        }
+
+        val radioGroupOption = binding.radioGroupOption
+        radioGroupOption.setOnCheckedChangeListener { _, checkedId ->
+            analyzerOption = if (checkedId == R.id.radioAnalyzer) { 0 } else { 1 }
+            homeViewModel.setAnalyzerOption(analyzerOption)
+            savePreferences("analyzer_option", analyzerOption)
+            textView.text = "option: $analyzerOption"
+        }
+
+
+
+
 
         var snippetWidth = homeViewModel.snippetWidth.value ?: 64
         var snippetHeight = homeViewModel.snippetHeight.value ?: 64
         var snippetLayer = homeViewModel.snippetLayer.value ?: 0
-
-        var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
-        var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
-        var ratio = (resolutionWidth * 1.0 / resolutionHeight)
-
-        var analyzerOption = homeViewModel.analyzerOption.value ?: 0
-
-        textView.text = "option: $analyzerOption"
 
         val editSnippetWidth = binding.editSnippetWidth
         val editSnippetHeight = binding.editSnippetHeight
@@ -86,20 +108,24 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
             snippetLayer = Util.stringToInteger(editSnippetLayer.text.toString())
             snippetLayer = Util.limitValue(snippetLayer, 0, 2)
             homeViewModel.setSnippetLayer(snippetLayer)
-            savePreferences("saved_layer", snippetLayer) // getString(R.string.saved_layer)
+            savePreferences("saved_layer", snippetLayer)
         }
 
-        val editRatio = binding.editRatio
-        editRatio.setText(ratio.toString())
-        editRatio.addTextChangedListener {
-            ratio = 1.0
-//            homeViewModel.setAnalyzerOption(analyzerOption)
-//            savePreferences("analyzer_option", analyzerOption)
-//            textView.text = "option: $analyzerOption"
-        }
+
+        var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
+        var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
+        resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
+        var ratio = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
 
         val editResolutionWidth = binding.editResolutionWidth
         val editResolutionHeight = binding.editResolutionHeight
+        val editRatio = binding.editRatio
+        editRatio.setText(ratio.toString())
+        editRatio.addTextChangedListener {
+            ratio = Util.stringToInteger(editRatio.text.toString())
+            ratio = Util.limitValue(ratio, 30, 300)
+        }
+
         editResolutionWidth.setText(resolutionWidth.toString())
         editResolutionWidth.addTextChangedListener {
             resolutionWidth = Util.stringToInteger(editResolutionWidth.text.toString())
@@ -107,7 +133,7 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
             homeViewModel.setResolutionWidth(resolutionWidth)
             savePreferences("resolution_width", resolutionWidth)
 
-            resolutionHeight = resolutionWidth / 4 * 3
+            resolutionHeight = Util.limitValue((resolutionWidth * ratio) / 100, 1, 9600)
             homeViewModel.setResolutionHeight(resolutionHeight)
             savePreferences("resolution_height", resolutionHeight)
             editResolutionHeight.setText(resolutionHeight.toString())
@@ -122,30 +148,23 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
         }
 
 
-        val radioAnalyzer = binding.radioAnalyzer
-        val radioSnippet = binding.radioSnippet
-        if (analyzerOption == 0) {
-            radioAnalyzer.isChecked = true
-            radioSnippet.isChecked = false
-        } else {
-            radioAnalyzer.isChecked = false
-            radioSnippet.isChecked = true
-        }
 
-        val spinnerAnalyzerOption: Spinner = binding.spinnerAnalyzerOption
-        spinnerAnalyzerOption.setSelection(analyzerOption)
+        var infoOption = 0
+        val textBottom = binding.textBottom
+        val spinnerInfoOption: Spinner = binding.spinnerInfoOption
+        spinnerInfoOption.setSelection(infoOption)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
             safeContext,
-            R.array.analyzer_options,
+            R.array.info_options,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears.
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner.
-            spinnerAnalyzerOption.adapter = adapter
+            spinnerInfoOption.adapter = adapter
 
-            spinnerAnalyzerOption.onItemSelectedListener = object:
+            spinnerInfoOption.onItemSelectedListener = object:
                 AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -153,42 +172,25 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
                     position: Int,
                     id: Long
                 ) {
-                    analyzerOption = id.toInt()
-                    homeViewModel.setAnalyzerOption(id.toInt())
-                    savePreferences("analyzer_option", id.toInt())
-                    textView.text = "option: $analyzerOption"
-
-                    if (analyzerOption == 0) {
-                        radioAnalyzer.isChecked = true
-                        radioSnippet.isChecked = false
-                    } else {
-                        radioAnalyzer.isChecked = false
-                        radioSnippet.isChecked = true
+                    var info = "dummy text"
+                    if (id.toInt() == 0) {
+                        info = homeViewModel.info
                     }
+                    textBottom.text = "id=$id position=$position info=$info"
+                    textBottom.movementMethod = ScrollingMovementMethod()
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    homeViewModel.setAnalyzerOption(0)
-                    savePreferences("analyzer_option", 0)
-                    textView.text = "option: $analyzerOption"
+
                 }
 
             }
         }
 
-        //spinnerAnalyzerOption.onItemSelectedListener = this
 
 
-        val radioGroupOption = binding.radioGroupOption
+        //textBottom.setText("test TextBottom")
 
-//        radioGroupOption.setTag(analyzerOption, "tagTest")
-        radioGroupOption.setOnCheckedChangeListener { _, checkedId ->
-            analyzerOption = if (checkedId == R.id.radioAnalyzer) { 0 } else { 1 }
-            spinnerAnalyzerOption.setSelection(analyzerOption)
-            homeViewModel.setAnalyzerOption(analyzerOption)
-            savePreferences("analyzer_option", analyzerOption)
-            textView.text = "option: $analyzerOption"
-        }
 
         return root
     }

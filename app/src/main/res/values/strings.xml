@@ -23,9 +23,9 @@
     <string name="snippet_width">snippet_width</string>
     <string name="snippet_height">snippet_height</string>
 
-    <string-array name="analyzer_options">
-        <item>Analyzer</item>
-        <item>Snippet</item>
+    <string-array name="info_options">
+        <item>Camera</item>
+        <item>Other</item>
     </string-array>
 
 </resources>

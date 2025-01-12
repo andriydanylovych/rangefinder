@@ -104,7 +104,9 @@ class HomeFragment : Fragment() {
 
         val btnInfo = binding.infoButton
         btnInfo.setOnClickListener {
-            capturePhoto()
+            //capturePhoto()
+            homeViewModel.info = "Camera info: $infoText2"
+            textView.text = "camera info available"
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
