@@ -1,8 +1,5 @@
 package com.prostologik.lv12.ui.home
 
-import androidx.camera.core.ImageProxy
-import java.nio.ByteBuffer
-
 class CapturedImageAnalysis {
 
 //    private var imageHeight: Int = 3264
