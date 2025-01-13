@@ -24,10 +24,12 @@ class ReviewFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
-    private var fileName: String = "default"
-
     private val homeViewModel: HomeViewModel by activityViewModels()
+
+    private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+        // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+        // homeViewModel.photoDirectory.toString()
+    private var fileName: String = "default"
 
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
@@ -40,6 +42,13 @@ class ReviewFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
+            val temp: String = it ?: ""
+            if (temp != "") {
+                photoDirectory = temp
+            }
+        }
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
@@ -61,8 +70,8 @@ class ReviewFragment : Fragment() {
         val btnDelete = binding.deleteButton
         btnDelete.setOnClickListener { deletePhoto() }
 
-        val btnSave = binding.saveButton
-        btnSave.setOnClickListener { processPhoto() }
+//        val btnSave = binding.saveButton
+//        btnSave.setOnClickListener { processPhoto() }
 
         mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
 //        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
@@ -167,13 +176,13 @@ class ReviewFragment : Fragment() {
         renderPhoto(photoDirectory, fileName)
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    private fun processPhoto() {
-
-        val textView: TextView = binding.textReview
-        val savedPhotoAnalyzer = SavedPhotoAnalyzer()
-        //val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
-        textView.text = savedPhotoAnalyzer.analyze()
-    }
+//    @RequiresApi(Build.VERSION_CODES.P)
+//    private fun processPhoto() {
+//
+//        val textView: TextView = binding.textReview
+//        val savedPhotoAnalyzer = SavedPhotoAnalyzer()
+//        //val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
+//        textView.text = savedPhotoAnalyzer.analyze()
+//    }
 
 }

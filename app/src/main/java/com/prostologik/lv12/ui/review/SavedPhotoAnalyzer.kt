@@ -5,8 +5,8 @@ import androidx.annotation.RequiresApi
 
 class SavedPhotoAnalyzer {
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    fun analyze(): String {
-        return "SavedPhotoAnalyzer.analyze"
-    }
+//    @RequiresApi(Build.VERSION_CODES.P)
+//    fun analyze(): String {
+//        return "SavedPhotoAnalyzer.analyze"
+//    }
 }

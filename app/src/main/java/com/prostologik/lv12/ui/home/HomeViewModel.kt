@@ -28,6 +28,11 @@ class HomeViewModel : ViewModel() {
         _photoDirectory.value = dir
     }
 
+//    var photoDirectory = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+//    fun setPhotoDirectory2(dir: String) {
+//        photoDirectory = dir
+//    }
+
     private var _photoFileName = MutableLiveData<String>().apply { value = null }
     val photoFileName: LiveData<String> = _photoFileName
     fun setPhotoFileName(fileName: String) {

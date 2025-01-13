@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.os.Bundle
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
@@ -106,6 +105,8 @@ class HomeFragment : Fragment() {
         btnInfo.setOnClickListener {
             //capturePhoto()
             homeViewModel.info = "Camera info: $infoText2"
+            homeViewModel.setResolutionWidth(imageWidth)
+            homeViewModel.setResolutionHeight(imageHeight)
             textView.text = "camera info available"
         }
 

@@ -170,6 +170,8 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
                     var info = "dummy text"
                     if (id.toInt() == 0) {
                         info = homeViewModel.info
+                    } else {
+                        info = homeViewModel.photoDirectory.toString()
                     }
                     textBottom.text = "id=$id position=$position info=$info"
                     textBottom.movementMethod = ScrollingMovementMethod()
