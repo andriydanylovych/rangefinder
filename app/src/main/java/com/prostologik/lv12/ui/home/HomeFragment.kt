@@ -286,12 +286,12 @@ class HomeFragment : Fragment() {
         return SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
     }
 
-    private var iii = 0
-    private fun capturePhoto() {
-        textView.text = "$iii: $infoText2"
-        textView.movementMethod = ScrollingMovementMethod()
-        iii++
-    }
+//    private var iii = 0
+//    private fun capturePhoto() {
+//        textView.text = "$iii: $infoText2"
+//        textView.movementMethod = ScrollingMovementMethod()
+//        iii++
+//    }
 
     @OptIn(ExperimentalCamera2Interop::class)
     fun listCameras(provider: ProcessCameraProvider):String {

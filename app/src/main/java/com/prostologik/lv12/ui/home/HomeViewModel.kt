@@ -70,5 +70,5 @@ class HomeViewModel : ViewModel() {
         if (value in 1..9600) _resolutionHeight.value = value
     }
 
-    public var info = "dummy info"
+    var info = "info placeholder"
 }

@@ -42,10 +42,6 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
         val root: View = binding.root
 
 
-
-
-
-
         var analyzerOption = homeViewModel.analyzerOption.value ?: 0
         val textView: TextView = binding.textSetup
         textView.text = "option: $analyzerOption"
@@ -69,8 +65,7 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
         }
 
 
-
-
+        ///////////////// snippet setup
 
         var snippetWidth = homeViewModel.snippetWidth.value ?: 64
         var snippetHeight = homeViewModel.snippetHeight.value ?: 64
@@ -111,6 +106,7 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
             savePreferences("saved_layer", snippetLayer)
         }
 
+        ///////////////// camera setup
 
         var resolutionWidth = homeViewModel.resolutionWidth.value ?: 800//640
         var resolutionHeight = homeViewModel.resolutionHeight.value ?: 600//480
@@ -149,10 +145,9 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
 
 
 
-        var infoOption = 0
         val textBottom = binding.textBottom
         val spinnerInfoOption: Spinner = binding.spinnerInfoOption
-        spinnerInfoOption.setSelection(infoOption)
+        spinnerInfoOption.setSelection(0)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
             safeContext,
@@ -181,7 +176,7 @@ class SetupFragment : Fragment() { // , AdapterView.OnItemSelectedListener
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-
+                    textBottom.text = "there is no info to display"
                 }
 
             }
