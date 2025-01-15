@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -37,6 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.atan
 
 typealias AnalyzerListener = (infoString: String) -> Unit
 
@@ -103,7 +105,6 @@ class HomeFragment : Fragment() {
 
         val btnInfo = binding.infoButton
         btnInfo.setOnClickListener {
-            //capturePhoto()
             homeViewModel.info = "Camera info: $infoText2"
             homeViewModel.setResolutionWidth(imageWidth)
             homeViewModel.setResolutionHeight(imageHeight)
@@ -220,10 +221,22 @@ class HomeFragment : Fragment() {
                     )
                 }
 
+            val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val cameraCharacteristics = cameraManager.getCameraCharacteristics("0")
+            val focalLength = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
+            val sensorSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
+            infoText2 = "\nfocalLength: $focalLength sensorSize: $sensorSize"
+            if (focalLength != null && focalLength != 0f && sensorSize != null) {
+                val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+                val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+                infoText2 += "\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle \n"
+            }
+
             try {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
-                infoText2 = listCameras(cameraProvider)
+
+                infoText2 += listCameras(cameraProvider).replace("[", "\n[")
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -271,7 +284,6 @@ class HomeFragment : Fragment() {
 
     private fun displayAnalyzer() {
 
-        //"w $imageWidth x h $imageHeight".also { textView.text = it }//infoText
         textView.text = infoText
 
     }
