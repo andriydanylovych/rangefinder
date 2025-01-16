@@ -221,22 +221,24 @@ class HomeFragment : Fragment() {
                     )
                 }
 
-            val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            val cameraCharacteristics = cameraManager.getCameraCharacteristics("0")
-            val focalLength = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
-            val sensorSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
-            infoText2 = "\nfocalLength: $focalLength sensorSize: $sensorSize"
-            if (focalLength != null && focalLength != 0f && sensorSize != null) {
-                val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
-                val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
-                infoText2 += "\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle \n"
-            }
+//            val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//            val cameraCharacteristics = cameraManager.getCameraCharacteristics("0")
+//            val focalLength = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
+//            val sensorSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
+//            infoText2 = "\nfocalLength: $focalLength sensorSize: $sensorSize"
+//            if (focalLength != null && focalLength != 0f && sensorSize != null) {
+//                val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+//                val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+//                infoText2 += "\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle \n"
+//            }
+
+            //infoText2 = getCameraProperties(0) + getCameraProperties(1)
 
             try {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
 
-                infoText2 += listCameras(cameraProvider).replace("[", "\n[")
+                infoText2 = listCameras(cameraProvider)//.replace("[", "\n[")
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -299,13 +301,6 @@ class HomeFragment : Fragment() {
         return SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
     }
 
-//    private var iii = 0
-//    private fun capturePhoto() {
-//        textView.text = "$iii: $infoText2"
-//        textView.movementMethod = ScrollingMovementMethod()
-//        iii++
-//    }
-
     @OptIn(ExperimentalCamera2Interop::class)
     fun listCameras(provider: ProcessCameraProvider):String {
 
@@ -317,18 +312,43 @@ class HomeFragment : Fragment() {
             it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
         }
 
+        var iii = 0
         for (c in cam2Infos) {
-            sb.append("$c\n")
+            iii++
+            sb.append("\nCAMERA $iii")
+            sb.append("\n$c")
+            val focalLength = c.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
+            val sensorSize = c.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
+            sb.append("\nfocalLength: $focalLength  sensorSize: $sensorSize")
+            if (focalLength != null && focalLength != 0f && sensorSize != null) {
+                val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+                val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+                sb.append("\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle")
+            }
             val d = c.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-            sb.append("$d\n")
+            sb.append("\n$d\n")
 //            val msg = "Camera: $c Characteristics: $d"
 //            Log.d(TAG, msg)
         }
         Log.d(TAG, sb.toString())
 
-        return sb.toString()
+        return sb.toString().replace("[", "\n[")
 
     }
+
+//    private fun getCameraProperties(cam: Int): String {
+//        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//        val cameraCharacteristics = cameraManager.getCameraCharacteristics("$cam")
+//        val focalLength = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
+//        val sensorSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
+//        var info = "\ncamera: $cam  focalLength: $focalLength  sensorSize: $sensorSize"
+//        if (focalLength != null && focalLength != 0f && sensorSize != null) {
+//            val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+//            val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
+//            info += "\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle \n"
+//        }
+//        return info
+//    }
 
 //    @OptIn(ExperimentalCamera2Interop::class)
 //    fun selectExternalOrBestCamera(provider: ProcessCameraProvider):CameraSelector? {
@@ -418,36 +438,4 @@ class HomeFragment : Fragment() {
         private var imageHeight = 600
     }
 
-    /**
-    * Release memory when the UI becomes hidden or when system resources become low.
-    * 'at' param level the memory-related event that is raised.
-    */
-//    override fun onTrimMemory(level: Int) {
-//
-//        if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-//            // Release memory related to UI elements, such as bitmap caches.
-//        }
-//
-//        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
-//            // Release memory related to background processing, such as by
-//            // closing a database connection.
-//        }
-//    }
-
-    // https://developer.android.com/topic/performance/memory
-//    fun doSomethingMemoryIntensive() {
-//
-//        // Before doing something that requires a lot of memory,
-//        // check whether the device is in a low memory state.
-//        if (!getAvailableMemory().lowMemory) {
-//            // Do memory intensive work.
-//        }
-//    }
-//
-//    private fun getAvailableMemory(): ActivityManager.MemoryInfo {
-//        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager //  Context.ACTIVITY_SERVICE
-//        return ActivityManager.MemoryInfo().also { memoryInfo ->
-//            activityManager.getMemoryInfo(memoryInfo)
-//        }
-//    }
 }
