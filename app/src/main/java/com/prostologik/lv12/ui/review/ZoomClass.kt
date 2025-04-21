@@ -99,10 +99,8 @@ class ZoomClass : AppCompatImageView, View.OnTouchListener,
         mMatrix!!.setScale(scale, scale)
 
         // Center the image
-        var redundantYSpace = (viewHeight.toFloat()
-                - scale * imageHeight.toFloat())
-        var redundantXSpace = (viewWidth.toFloat()
-                - scale * imageWidth.toFloat())
+        var redundantYSpace = (viewHeight.toFloat() - scale * imageHeight.toFloat())
+        var redundantXSpace = (viewWidth.toFloat() - scale * imageWidth.toFloat())
         redundantYSpace /= 2.toFloat()
         redundantXSpace /= 2.toFloat()
         mMatrix!!.postTranslate(redundantXSpace, redundantYSpace)
@@ -151,14 +149,10 @@ class ZoomClass : AppCompatImageView, View.OnTouchListener,
         viewHeight = MeasureSpec.getSize(heightMeasureSpec)
         if (mSaveScale == 1f) {
 
-            // Fit to screen.
             fitToScreen()
         }
     }
 
-    /*
-        Ontouch
-     */
     override fun onTouch(view: View?, event: MotionEvent): Boolean {
         mScaleDetector!!.onTouchEvent(event)
         mGestureDetector!!.onTouchEvent(event)

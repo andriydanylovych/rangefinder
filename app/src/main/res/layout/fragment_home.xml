@@ -30,11 +30,49 @@
         android:background="#FFFFFF"
         android:textSize="11sp"
         android:scrollbars = "vertical"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/option_button"
+        android:contentDescription="Switch analysis with snippet capture"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="#00FF00"
+        android:src="@drawable/cameraswitch_24"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_height"
+        android:contentDescription="@string/get_info"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
+        android:valueFrom="28"
+        android:valueTo="128"
+        android:value="64"
+        android:stepSize="2"
+        app:layout_constraintBottom_toTopOf="@+id/image_capture_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_width"
+        android:contentDescription="@string/get_info"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
+        android:rotation="90"
+        android:valueFrom="28"
+        android:valueTo="128"
+        android:value="64"
+        android:layout_gravity="end"
+        android:stepSize="2"
+        app:layout_constraintTop_toTopOf="@+id/option_button"
+        app:layout_constraintBottom_toTopOf="@+id/slider_height"
+        app:layout_constraintLeft_toRightOf="@+id/slider_height"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
         android:id="@+id/image_capture_button"
@@ -59,5 +97,9 @@
         android:src="@drawable/camera_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

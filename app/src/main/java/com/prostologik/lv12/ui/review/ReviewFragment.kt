@@ -33,8 +33,6 @@ class ReviewFragment : Fragment() {
 
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
-    //private lateinit var canvas: Canvas
-    //private lateinit var paint: Paint
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -43,12 +41,7 @@ class ReviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        homeViewModel.photoDirectory.observe(viewLifecycleOwner) {
-            val temp: String = it ?: ""
-            if (temp != "") {
-                photoDirectory = temp
-            }
-        }
+        photoDirectory = homeViewModel.photoDirectory
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
@@ -59,28 +52,30 @@ class ReviewFragment : Fragment() {
         }
 
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
+        mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
+
+        val btnDelete = binding.deleteButton
         val btnNext = binding.nextButton
-        btnNext.setOnClickListener {
+        val btnPrev = binding.prevButton
+
+        btnDelete.setOnClickListener { deletePhoto() }
+
+        fun renderNext() {
             fileName = getNextFileName(fileName, photoDirectory)
             renderPhoto(photoDirectory, fileName)
         }
 
-        val btnDelete = binding.deleteButton
-        btnDelete.setOnClickListener { deletePhoto() }
+        renderNext()
 
-//        val btnSave = binding.saveButton
-//        btnSave.setOnClickListener { processPhoto() }
+        btnNext.setOnClickListener { renderNext() }
 
-        mImageView = binding.imageSnippet //findViewById(R.id.imageSnippet)
-//        bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
-//        canvas = Canvas(bitmap)
-//        mImageView.setImageBitmap(bitmap)
+        btnPrev.setOnClickListener {
+            fileName = getPrevFileName(fileName, photoDirectory)
+            renderPhoto(photoDirectory, fileName)
+        }
 
-        fileName = getNextFileName(fileName, photoDirectory)
-        renderPhoto(photoDirectory, fileName)
-
+        val root: View = binding.root
         return root
     }
 
@@ -115,7 +110,7 @@ class ReviewFragment : Fragment() {
         val firstLine = linesOfPixels[0].split(",")
         val snippetY = firstLine.size
         val snippetX = linesOfPixels.size
-        val snippetUV = snippetX - snippetY / 2
+        val snippetUV = snippetX * 2 / 3 // bug: snippetX - snippetY / 2
 
         bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
         var schemaBlueRed = false
@@ -131,7 +126,7 @@ class ReviewFragment : Fragment() {
                 val d01 = y0 - y1
                 val d02 = y0 - y2
                 val d13 = y1 - y3
-                if (d01 * d01 > d02 * d02 + d13 * d13 && snippetX > snippetY) schemaBlueRed = true
+                if (d01 * d01 > d02 * d02 + d13 * d13) schemaBlueRed = true //  && snippetX > snippetY
             }
             for (y in 0..< snippetY) {
 
@@ -149,20 +144,32 @@ class ReviewFragment : Fragment() {
 
         val textView: TextView = binding.textReview
 
-        "file: $file".also { textView.text = it }
+        "file: $file  $snippetUV x $snippetY".also { textView.text = it }
 
     }
 
-    private fun getNextFileName(currentFileName: String, dir: String): String {
-        val currentFileNameJpg = "$currentFileName.jpg"
+    private fun getSortedJpgFiles(dir: String): List<File>? {
         val filesAll = File(dir).listFiles()
         filesAll?.sort()
-        val filesJpg = filesAll?.filter { it.name.substringAfter(".") == "jpg" }
-        var nextFileNameJpg = filesJpg?.get(0)?.name
-        val followingFiles = filesJpg?.filter { it.name > currentFileNameJpg }
-        if(followingFiles?.isNotEmpty() == true) nextFileNameJpg = followingFiles[0].name
+        return filesAll?.filter { it.name.substringAfter(".") == "jpg" }
+    }
+
+    private fun getNextFileName(currentFileName: String, dir: String): String {
+        val filesJpg = getSortedJpgFiles(dir)
+        var nextFileNameJpg = filesJpg?.first()?.name // in case it is the last one
+        val followingFiles = filesJpg?.filter { it.name > "$currentFileName.jpg" }
+        if(followingFiles?.isNotEmpty() == true) nextFileNameJpg = followingFiles.first().name
 
         return nextFileNameJpg?.substringBefore(".") ?: "default"
+    }
+
+    private fun getPrevFileName(currentFileName: String, dir: String): String {
+        val filesJpg = getSortedJpgFiles(dir)
+        var prevFileNameJpg = filesJpg?.last()?.name
+        val previousFiles = filesJpg?.filter { it.name < "$currentFileName.jpg" }
+        if(previousFiles?.isNotEmpty() == true) prevFileNameJpg = previousFiles.last().name
+
+        return prevFileNameJpg?.substringBefore(".") ?: "default"
     }
 
     @RequiresApi(Build.VERSION_CODES.P)

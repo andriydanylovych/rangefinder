@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.prostologik.lv12.databinding.ActivityMainBinding
+import com.prostologik.lv12.ui.home.HomeFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,9 +40,12 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        var analyzerOption = HomeFragment.info
+        val note = "Dummy text: $analyzerOption"
+
         binding.appBarMain.fab.setOnClickListener {
             view ->
-            Snackbar.make(view, "Dummy text", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, note, Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
         }
