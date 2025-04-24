@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,9 +28,10 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.util.component1
+import androidx.core.util.component2
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.prostologik.lv12.Util
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import java.io.File
 import java.io.IOException
@@ -57,8 +57,6 @@ class HomeFragment : Fragment() {
     private lateinit var outputDirectory: File
     private lateinit var textView: TextView
     private var infoText: String = "no input"
-    private var infoText2: String = "dummy text"
-
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
@@ -77,9 +75,9 @@ class HomeFragment : Fragment() {
         outputDirectory = getOutputDirectory()
         homeViewModel.photoDirectory = outputDirectory.toString() // photoDirectory
 
-        if (homeViewModel.modelNotYetPopulated){
+        if (!homeViewModel.modelAlreadyPopulated){
             getSharedPref()
-            homeViewModel.modelNotYetPopulated = false
+            homeViewModel.modelAlreadyPopulated = true
         }
 
         snippetLayer = homeViewModel.snippetLayer
@@ -88,8 +86,6 @@ class HomeFragment : Fragment() {
         analyzerOption = homeViewModel.analyzerOption
         resolutionWidth = homeViewModel.resolutionWidth
         resolutionHeight = homeViewModel.resolutionHeight
-
-        info = homeViewModel.info
 
         OverlayView.snippetWidth = snippetWidth
         OverlayView.snippetHeight = snippetHeight
@@ -113,7 +109,6 @@ class HomeFragment : Fragment() {
         textView = binding.textHome
 
         val btnImage = binding.imageCaptureButton
-        val btnInfo = binding.infoButton
         val btnOption = binding.optionButton
 
         val sliderWidth = binding.sliderWidth
@@ -121,10 +116,6 @@ class HomeFragment : Fragment() {
 
         fun renderView() {
             if (analyzerOption == 0) {
-                btnImage.setOnClickListener {
-                    displayAnalyzer()
-                }
-                btnInfo.visibility = View.INVISIBLE
                 sliderWidth.visibility = View.INVISIBLE
                 sliderHeight.visibility = View.INVISIBLE
             } else {
@@ -142,12 +133,8 @@ class HomeFragment : Fragment() {
                 btnImage.setOnClickListener {
                     takePhoto()
                 }
-                btnInfo.setOnClickListener {
-                    homeViewModel.info = "Camera info: $infoText2"
-                    textView.text = "camera info available"
-                }
 
-                btnInfo.visibility = View.VISIBLE
+                btnOption.visibility = View.VISIBLE
                 sliderWidth.visibility = View.VISIBLE
                 sliderHeight.visibility = View.VISIBLE
 
@@ -193,14 +180,14 @@ class HomeFragment : Fragment() {
         val tryPatchHeight = sharedPref?.getInt("patch_height", 28)
         if (tryPatchHeight != null) homeViewModel.patchHeight = tryPatchHeight
 
-        val trySnippetLayer = sharedPref?.getInt("saved_layer", 1) // getString(R.string.saved_layer)
-        if (trySnippetLayer != null) homeViewModel.snippetLayer = trySnippetLayer //homeViewModel.setSnippetLayer(trySnippetLayer)
+        val trySnippetLayer = sharedPref?.getInt("saved_layer", 1)
+        if (trySnippetLayer != null) homeViewModel.snippetLayer = trySnippetLayer
 
         val tryResolutionWidth = sharedPref?.getInt("resolution_width", 640)
-        if (tryResolutionWidth != null) homeViewModel.resolutionWidth = tryResolutionWidth //setResolutionWidth(tryResolutionWidth)
+        if (tryResolutionWidth != null) homeViewModel.resolutionWidth = tryResolutionWidth
 
         val tryResolutionHeight = sharedPref?.getInt("resolution_height", 480)
-        if (tryResolutionHeight != null) homeViewModel.resolutionHeight = tryResolutionHeight //homeViewModel.setResolutionHeight(tryResolutionHeight)
+        if (tryResolutionHeight != null) homeViewModel.resolutionHeight = tryResolutionHeight
 
     }
 
@@ -280,12 +267,7 @@ class HomeFragment : Fragment() {
                                 activity?.runOnUiThread {
                                     textView.text = infoText
                                 }
-                            } //else if (analyzerOption == 1 && activity != null) {
-//                                activity?.runOnUiThread {
-//                                    textView.text = "analyzerOption = 1; WxH = $snippetWidth x $snippetHeight"
-//                                }
-//                            }
-
+                            }
                         }
                     )
                 }
@@ -294,7 +276,9 @@ class HomeFragment : Fragment() {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
 
-                infoText2 = listCameras(cameraProvider)//.replace("[", "\n[")
+                listCameras(cameraProvider)
+                //homeViewModel.cameraInfo = listCameras(cameraProvider) //.replace("[", "\n[")
+
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -337,13 +321,6 @@ class HomeFragment : Fragment() {
         )
     }
 
-    private fun displayAnalyzer() {
-
-        //textView.text = infoText
-        info = infoText
-
-    }
-
     private fun getOutputDirectory(): File {
         val mediaDir = activity?.externalMediaDirs?.firstOrNull()?.let {
             File(it, "image").apply { mkdirs() }
@@ -383,63 +360,30 @@ class HomeFragment : Fragment() {
             }
             val d = c.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
             sb.append("\n$d\n")
-//            val msg = "Camera: $c Characteristics: $d"
-//            Log.d(TAG, msg)
+            val e = d?.getOutputSizes(35)
+            e.isNullOrEmpty()
+            if (e.isNullOrEmpty()) {
+                sb.append("\n outputSize[0]=null\n")
+            } else {
+//                e.forEach {
+//                    val e01 = it.component1()
+//                    val e02 = it.component2()
+//                    val e0 = it.toString()
+//                    sb.append("outputSize=$e0 coponent1=$e01 coponent2=$e02\n")
+//                }
+
+                homeViewModel.arrayOutputSize = (e.map { it.toString() }).toTypedArray()
+                homeViewModel.arrayOutputWidth = (e.map { it.component1() }).toTypedArray()
+                homeViewModel.arrayOutputHeight = (e.map { it.component2() }).toTypedArray()
+
+            }
         }
         Log.d(TAG, sb.toString())
 
+        homeViewModel.cameraInfo = sb.toString().replace("[", "\n[")
         return sb.toString().replace("[", "\n[")
 
     }
-
-//    private fun getCameraProperties(cam: Int): String {
-//        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-//        val cameraCharacteristics = cameraManager.getCameraCharacteristics("$cam")
-//        val focalLength = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() //?: return
-//        val sensorSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) //?: return
-//        var info = "\ncamera: $cam  focalLength: $focalLength  sensorSize: $sensorSize"
-//        if (focalLength != null && focalLength != 0f && sensorSize != null) {
-//            val horizontalAngle = (2f * atan((sensorSize.width / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
-//            val verticalAngle = (2f * atan((sensorSize.height / (focalLength * 2f)).toDouble())) * 180.0 / Math.PI
-//            info += "\nhorizontalAngle: $horizontalAngle verticalAngle: $verticalAngle \n"
-//        }
-//        return info
-//    }
-
-//    @OptIn(ExperimentalCamera2Interop::class)
-//    fun selectExternalOrBestCamera(provider: ProcessCameraProvider):CameraSelector? {
-//        val cam2Infos = provider.availableCameraInfos.map {
-//            Camera2CameraInfo.from(it)
-//        }.sortedByDescending {
-//            // HARDWARE_LEVEL is Int type, with the order of:
-//            // LEGACY < LIMITED < FULL < LEVEL_3 < EXTERNAL
-//            it.getCameraCharacteristic(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-//        }
-//
-//        return when {
-//            cam2Infos.isNotEmpty() -> {
-//                CameraSelector.Builder()
-//                    .addCameraFilter {
-//                        it.filter { camInfo ->
-//                            // cam2Infos[0] is either EXTERNAL or best built-in camera
-//                            val thisCamId = Camera2CameraInfo.from(camInfo).cameraId
-//                            thisCamId == cam2Infos[0].cameraId
-//                        }
-//                    }.build()
-//            }
-//            else -> null
-//        }
-//    }
-
-//    @RequiresApi(Build.VERSION_CODES.M)
-//    fun getPossibleOutputSizes(id: String) {
-//        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-//        val sizes = cameraManager?.getCameraCharacteristics(id)?.get(SCALER_STREAM_CONFIGURATION_MAP)?.getHighResolutionOutputSizes(ImageFormat.JPEG)
-//        if (sizes != null) {
-//            println("got possible resolutions:")
-//            println(sizes.joinToString("\n"))
-//        }
-//    }
 
     override fun onDestroyView() {
         super.onDestroyView()

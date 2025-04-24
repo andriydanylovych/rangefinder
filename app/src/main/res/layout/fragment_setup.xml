@@ -239,6 +239,23 @@
 
     </LinearLayout>
 
+    <Spinner
+        android:id="@+id/spinnerOutputSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center|center"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        />
+
+    <TextView
+        android:id="@+id/text_home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:textSize="11sp"
+        />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -255,8 +272,7 @@
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
         android:textSize="20sp"
-        android:text="info"
-
+        android:text="Select info display:"
         tools:ignore="HardcodedText"
         />
 
@@ -273,14 +289,10 @@
         android:id="@+id/text_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:lines="6"
-        android:gravity="center|center"
         android:background="#FFFFFF"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="24dp"
         android:textSize="11sp"
-        android:scrollbars = "vertical"
-
          />
     </LinearLayout>
 </ScrollView >

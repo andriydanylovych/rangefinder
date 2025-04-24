@@ -1,7 +1,5 @@
 package com.prostologik.lv12.ui.home
 
-import android.Manifest
-import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +14,7 @@ class HomeViewModel : ViewModel() {
         _photoFileName.value = fileName
     }
 
-    var modelNotYetPopulated = true
+    var modelAlreadyPopulated = false
 
     var analyzerOption = 0
 
@@ -31,6 +29,8 @@ class HomeViewModel : ViewModel() {
     var resolutionWidth = 640 // sharedPref
     var resolutionHeight = 480 // sharedPref
 
-    var info = "info placeholder 1" // will be used to display fragmentState
-
+    var cameraInfo = "dummy"
+    var arrayOutputSize = arrayOf<String>( "352 x 288", "640 x 480", "800 x 600" )
+    var arrayOutputWidth = arrayOf<Int>(352, 640, 800)
+    var arrayOutputHeight = arrayOf<Int>(288, 480, 600)
 }

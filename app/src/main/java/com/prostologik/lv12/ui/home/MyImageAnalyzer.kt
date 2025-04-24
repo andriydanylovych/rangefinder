@@ -1,6 +1,5 @@
 package com.prostologik.lv12.ui.home
 
-import android.graphics.Rect
 import androidx.camera.core.ImageProxy
 import com.prostologik.lv12.Util.byteToPixel
 import java.nio.ByteBuffer
@@ -22,11 +21,11 @@ class MyImageAnalyzer {
 
         val d = byteToPixel(dataY[centralPx])
 
-        val info = image.imageInfo.toString()
-        val format = image.format.toString()
-
-        //image.setCropRect(Rect(1, 1, 959, 719))
-        val cropRect = image.cropRect.toString()
+//        val info = image.imageInfo.toString()
+//        val format = image.format.toString()
+//
+//        //image.setCropRect(Rect(1, 1, 959, 719))
+//        val cropRect = image.cropRect.toString()
 
         //return "central px = $d\nw $imageWidth x h $imageHeight\n\ninfo: $info\n\nformat: $format\n\ncropRect: $cropRect"
         return "central px = $d\nw $imageWidth x h $imageHeight"

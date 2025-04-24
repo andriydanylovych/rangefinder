@@ -33,18 +33,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/option_button"
-        android:contentDescription="Switch analysis with snippet capture"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginBottom="40dp"
-        android:backgroundTint="#00FF00"
-        android:src="@drawable/cameraswitch_24"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-
     <com.google.android.material.slider.Slider
         android:id="@+id/slider_height"
         android:contentDescription="@string/get_info"
@@ -69,7 +57,7 @@
         android:value="64"
         android:layout_gravity="end"
         android:stepSize="2"
-        app:layout_constraintTop_toTopOf="@+id/option_button"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/slider_height"
         app:layout_constraintLeft_toRightOf="@+id/slider_height"
         app:layout_constraintRight_toRightOf="parent" />
@@ -87,14 +75,14 @@
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <ImageButton
-        android:id="@+id/info_button"
-        android:contentDescription="@string/get_info"
+        android:id="@+id/option_button"
+        android:contentDescription="Switch analysis with snippet capture"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="40dp"
         android:backgroundTint="#0000FF"
-        android:src="@drawable/camera_24"
+        android:src="@drawable/cameraswitch_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

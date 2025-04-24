@@ -2,8 +2,6 @@ package com.prostologik.lv12.ui.setup
 
 import android.content.Context
 import android.os.Bundle
-import android.text.InputFilter
-import android.text.Spanned
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +10,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -49,6 +46,8 @@ class SetupFragment : Fragment() {
 
         _binding = FragmentSetupBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        val textBottom = binding.textBottom
 
         val radioGroupLayers = binding.radioGroupLayers
         val radioLayerY = binding.radioLayerY
@@ -145,9 +144,66 @@ class SetupFragment : Fragment() {
         }
 
 
+        // OutputSize spinner:
 
-        val textBottom = binding.textBottom
+        val arrayOfItemNames = homeViewModel.arrayOutputSize //arrayOf<String>( "352 x 288", "640 x 480", "800 x 600" )
+
+        val spinnerOutputSize: Spinner = binding.spinnerOutputSize
+
+        // Create an ArrayAdapter using a simple spinner layout and languages array
+        val aa = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfItemNames)
+        // Set layout to use when the list of choices appear
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Set Adapter to Spinner
+        spinnerOutputSize.setAdapter(aa)
+
+//        spinnerOutputSize.onItemClickListener = object : AdapterView.OnItemClickListener {
+//            override fun onItemClick(
+//                parent: AdapterView<*>?,
+//                view: View?,
+//                position: Int,
+//                id: Long
+//            ) {
+//                val textHome = binding.textHome
+//                textHome.text = "test onItemClick position = $position"
+//                TODO("Failing")
+//            }
+//        }
+
+//        spinnerOutputSize.onItemSelectedListener = object :
+//                AdapterView.OnItemSelectedListener {
+//                override fun onItemSelected(parent: AdapterView<*>,
+//                                            view: View, position: Int, id: Long) {
+////
+////                    resolutionWidth = homeViewModel.arrayOutputWidth[position]
+////                    resolutionHeight = homeViewModel.arrayOutputHeight[position]
+////                    homeViewModel.resolutionWidth = resolutionWidth
+////                    homeViewModel.resolutionHeight = resolutionHeight
+////                    savePreferences("resolution_width", resolutionWidth)
+////                    savePreferences("resolution_height", resolutionHeight)
+////
+////                    if (resolutionWidth < 1) resolutionWidth = 1
+////                    var ratio2 = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
+////                    val textHome = binding.textHome
+////                    textHome.text = "textHome.text position = $position; W x H = $resolutionWidth x $resolutionHeight; ratio = $ratio2%"
+//
+//                }
+//
+//                override fun onNothingSelected(parent: AdapterView<*>) {
+////                    homeViewModel.resolutionWidth = 640
+////                    homeViewModel.resolutionHeight = 480
+////                    val wLoc = homeViewModel.resolutionWidth
+////                    val hLoc = homeViewModel.resolutionHeight
+////                    val textHome = binding.textHome
+////                    textHome.text = "NothingSelected: W x H = $wLoc x $hLoc"
+//                }
+//            }
+
+//        // end of OutputSize spinner
+
+
         val spinnerInfoOption: Spinner = binding.spinnerInfoOption
+
         spinnerInfoOption.setSelection(0)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
@@ -168,13 +224,11 @@ class SetupFragment : Fragment() {
                     position: Int,
                     id: Long
                 ) {
-                    var info: String
                     if (id.toInt() == 0) {
-                        info = homeViewModel.info
+                        textBottom.text = "listCameras(cameraProvider):  " + homeViewModel.cameraInfo
                     } else {
-                        info = homeViewModel.photoDirectory
+                        textBottom.text = "photoDirectory:  " + homeViewModel.photoDirectory
                     }
-                    textBottom.text = "id=$id position=$position info=$info"
                     textBottom.movementMethod = ScrollingMovementMethod()
                 }
 
@@ -201,6 +255,10 @@ class SetupFragment : Fragment() {
         }
     }
 
+}
+
+
+
 //    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
 ////        TODO("Not yet implemented")
 //        // An item is selected. You can retrieve the selected item using
@@ -217,47 +275,33 @@ class SetupFragment : Fragment() {
 ////        TODO("Not yet implemented")
 //    }
 
-//    override fun onResume() {
-//        super.onResume()
-////        val editSnippetWidth = binding.editSnippetWidth
-////        val editSnippetHeight = binding.editSnippetHeight
-////        val textView = binding.textBottom
-////        val w = homeViewModel.w
-////        val h = homeViewModel.h
-////        textView.text = "$w x $h"
-////        editSnippetWidth.setText(w.toString())
-////        editSnippetHeight.setText(h.toString())
-//        //setSnippetWidthHeight()
+// Custom class to define min and max for the edit text
+//    inner class MinMaxFilter() : InputFilter {
+//        private var intMin: Int = 0
+//        private var intMax: Int = 0
+//
+//        // Initialized
+//        constructor(minValue: Int, maxValue: Int) : this() {
+//            this.intMin = minValue
+//            this.intMax = maxValue
+//        }
+//
+//        override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dStart: Int, dEnd: Int): CharSequence? {
+//            try {
+//                val input = Integer.parseInt(dest.toString() + source.toString())
+//                if (isInRange(intMin, intMax, input)) {
+//                    return null
+//                }
+//            } catch (e: NumberFormatException) {
+//                e.printStackTrace()
+//            }
+//            return ""
+//        }
+//
+//        // Check if input c is in between min a and max b and
+//        // returns corresponding boolean
+//        private fun isInRange(a: Int, b: Int, c: Int): Boolean {
+//            return if (b > a) c in a..b else c in b..a
+//        }
 //    }
-
-    // Custom class to define min and max for the edit text
-    inner class MinMaxFilter() : InputFilter {
-        private var intMin: Int = 0
-        private var intMax: Int = 0
-
-        // Initialized
-        constructor(minValue: Int, maxValue: Int) : this() {
-            this.intMin = minValue
-            this.intMax = maxValue
-        }
-
-        override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dStart: Int, dEnd: Int): CharSequence? {
-            try {
-                val input = Integer.parseInt(dest.toString() + source.toString())
-                if (isInRange(intMin, intMax, input)) {
-                    return null
-                }
-            } catch (e: NumberFormatException) {
-                e.printStackTrace()
-            }
-            return ""
-        }
-
-        // Check if input c is in between min a and max b and
-        // returns corresponding boolean
-        private fun isInRange(a: Int, b: Int, c: Int): Boolean {
-            return if (b > a) c in a..b else c in b..a
-        }
-    }
-
-}
+//                    Toast.makeText(this@MainActivity, resolutionWidth, Toast.LENGTH_SHORT).show()
