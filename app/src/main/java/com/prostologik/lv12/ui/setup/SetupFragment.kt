@@ -146,65 +146,56 @@ class SetupFragment : Fragment() {
 
         // OutputSize spinner:
 
-        val arrayOfItemNames = homeViewModel.arrayOutputSize //arrayOf<String>( "352 x 288", "640 x 480", "800 x 600" )
+        //val arrayOfItemNames = arrayOf( "352 x 288", "640 x 480", "800 x 600" )
+        val arrayOfItemNames = homeViewModel.arrayOutputSize
 
         val spinnerOutputSize: Spinner = binding.spinnerOutputSize
 
-        // Create an ArrayAdapter using a simple spinner layout and languages array
+        // Create an ArrayAdapter using a simple spinner layout
         val aa = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfItemNames)
+
         // Set layout to use when the list of choices appear
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
         // Set Adapter to Spinner
         spinnerOutputSize.setAdapter(aa)
 
-//        spinnerOutputSize.onItemClickListener = object : AdapterView.OnItemClickListener {
-//            override fun onItemClick(
-//                parent: AdapterView<*>?,
-//                view: View?,
-//                position: Int,
-//                id: Long
-//            ) {
-//                val textHome = binding.textHome
-//                textHome.text = "test onItemClick position = $position"
-//                TODO("Failing")
-//            }
-//        }
+        spinnerOutputSize.onItemSelectedListener = object:
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                resolutionWidth = homeViewModel.arrayOutputWidth[position]
+                resolutionHeight = homeViewModel.arrayOutputHeight[position]
+                homeViewModel.resolutionWidth = resolutionWidth
+                homeViewModel.resolutionHeight = resolutionHeight
+                savePreferences("resolution_width", resolutionWidth)
+                savePreferences("resolution_height", resolutionHeight)
 
-//        spinnerOutputSize.onItemSelectedListener = object :
-//                AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(parent: AdapterView<*>,
-//                                            view: View, position: Int, id: Long) {
-////
-////                    resolutionWidth = homeViewModel.arrayOutputWidth[position]
-////                    resolutionHeight = homeViewModel.arrayOutputHeight[position]
-////                    homeViewModel.resolutionWidth = resolutionWidth
-////                    homeViewModel.resolutionHeight = resolutionHeight
-////                    savePreferences("resolution_width", resolutionWidth)
-////                    savePreferences("resolution_height", resolutionHeight)
-////
-////                    if (resolutionWidth < 1) resolutionWidth = 1
-////                    var ratio2 = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
-////                    val textHome = binding.textHome
-////                    textHome.text = "textHome.text position = $position; W x H = $resolutionWidth x $resolutionHeight; ratio = $ratio2%"
-//
-//                }
-//
-//                override fun onNothingSelected(parent: AdapterView<*>) {
-////                    homeViewModel.resolutionWidth = 640
-////                    homeViewModel.resolutionHeight = 480
-////                    val wLoc = homeViewModel.resolutionWidth
-////                    val hLoc = homeViewModel.resolutionHeight
-////                    val textHome = binding.textHome
-////                    textHome.text = "NothingSelected: W x H = $wLoc x $hLoc"
-//                }
-//            }
+                if (resolutionWidth < 1) resolutionWidth = 1
+                val ratio2 = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
+                val textHome = binding.textHome
+                textHome.text = "textHome.text position = $position; W x H = $resolutionWidth x $resolutionHeight; ratio = $ratio2%"
+            }
 
-//        // end of OutputSize spinner
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                homeViewModel.resolutionWidth = 640
+                homeViewModel.resolutionHeight = 480
+                val wLoc = homeViewModel.resolutionWidth
+                val hLoc = homeViewModel.resolutionHeight
+                val textHome = binding.textHome
+                textHome.text = "NothingSelected: W x H = $wLoc x $hLoc"
+            }
+
+        }
 
 
         val spinnerInfoOption: Spinner = binding.spinnerInfoOption
 
-        spinnerInfoOption.setSelection(0)
+        //spinnerInfoOption.setSelection(0)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
             safeContext,

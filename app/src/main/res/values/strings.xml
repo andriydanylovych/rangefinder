@@ -28,4 +28,10 @@
         <item>Other</item>
     </string-array>
 
+    <string-array name="output_size">
+        <item>352 x 288</item>
+        <item>640 x 480</item>
+        <item>800 x 600</item>
+    </string-array>
+
 </resources>

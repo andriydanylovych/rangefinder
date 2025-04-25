@@ -391,13 +391,13 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun savePreferences(key: String, value: Int = 0) {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        with (sharedPref.edit()) {
-            putInt(key, value)
-            apply()
-        }
-    }
+//    private fun savePreferences(key: String, value: Int = 0) {
+//        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+//        with (sharedPref.edit()) {
+//            putInt(key, value)
+//            apply()
+//        }
+//    }
 
     private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
