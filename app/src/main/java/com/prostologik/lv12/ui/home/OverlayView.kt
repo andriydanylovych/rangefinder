@@ -39,7 +39,7 @@ class OverlayView : View {
                 myRedPaint
             )
             myRedPaint.textSize = 40F
-            val textToDraw = "h$height x w$width : image $imageWidth x $imageHeight : patch $patchWidth x $patchHeight"
+            val textToDraw = "h$height x w$width"
             canvas.drawText(textToDraw, 100F, 150F, myRedPaint)
         } else { // Snippet (analyzerOption == 0)
             val sh = snippetWidth * scaleFactor

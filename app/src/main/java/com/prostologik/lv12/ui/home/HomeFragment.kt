@@ -138,8 +138,7 @@ class HomeFragment : Fragment() {
                 sliderWidth.visibility = View.VISIBLE
                 sliderHeight.visibility = View.VISIBLE
 
-                textView.text =
-                    "WxH = $snippetWidth x $snippetHeight :: Patch = $patchWidth x $patchHeight"
+                setSnippetWidthHeight()
             }
         }
 
@@ -159,12 +158,18 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    private fun setSnippetWidthHeight() {
+        val temp = snippetWidth * snippetHeight
+        textView.text = "WxH = $snippetWidth x $snippetHeight = $temp"
+    }
+
     private fun processWidthHeight() {
         homeViewModel.snippetWidth = snippetWidth
         homeViewModel.snippetHeight = snippetHeight
         OverlayView.snippetWidth = snippetWidth
         OverlayView.snippetHeight = snippetHeight
-        textView.text = "WxH = $snippetWidth x $snippetHeight"
+
+        setSnippetWidthHeight()
 
         val overlayView = binding.overlayview
         overlayView.invalidate()
@@ -265,7 +270,8 @@ class HomeFragment : Fragment() {
 
                             if (analyzerOption == 0 && activity != null) {
                                 activity?.runOnUiThread {
-                                    textView.text = infoText
+                                    // to prevent the entire bitmap leaking from analyzerOption = 1:
+                                    if (infoText.length < 99) textView.text = infoText
                                 }
                             }
                         }
@@ -277,7 +283,6 @@ class HomeFragment : Fragment() {
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
 
                 listCameras(cameraProvider)
-                //homeViewModel.cameraInfo = listCameras(cameraProvider) //.replace("[", "\n[")
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -365,17 +370,8 @@ class HomeFragment : Fragment() {
             if (e.isNullOrEmpty()) {
                 sb.append("\n outputSize[0]=null\n")
             } else {
-//                e.forEach {
-//                    val e01 = it.component1()
-//                    val e02 = it.component2()
-//                    val e0 = it.toString()
-//                    sb.append("outputSize=$e0 coponent1=$e01 coponent2=$e02\n")
-//                }
-
-                homeViewModel.arrayOutputSize = (e.map { it.toString() }).toTypedArray()
                 homeViewModel.arrayOutputWidth = (e.map { it.component1() }).toTypedArray()
                 homeViewModel.arrayOutputHeight = (e.map { it.component2() }).toTypedArray()
-
             }
         }
         Log.d(TAG, sb.toString())
@@ -390,14 +386,6 @@ class HomeFragment : Fragment() {
         cameraExecutor.shutdown()
         _binding = null
     }
-
-//    private fun savePreferences(key: String, value: Int = 0) {
-//        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-//        with (sharedPref.edit()) {
-//            putInt(key, value)
-//            apply()
-//        }
-//    }
 
     private class PhotoAnalyzer(private val listener: AnalyzerListener) : ImageAnalysis.Analyzer {
 
@@ -439,13 +427,13 @@ class HomeFragment : Fragment() {
         private var snippetHeight = 64
 
         private var analyzerOption = 0
-        private var resolutionWidth = 800//640
-        private var resolutionHeight = 600//480
+        private var resolutionWidth = 640
+        private var resolutionHeight = 480
 
-        private var imageWidth = 800
-        private var imageHeight = 600
+        private var imageWidth = 640
+        private var imageHeight = 480
 
-        var info = "test 123"
+        var homeFragmentInfo = " Layer: $snippetLayer  WxH: $resolutionWidth x $resolutionHeight  :  $snippetWidth x $snippetHeight"
     }
 
 }

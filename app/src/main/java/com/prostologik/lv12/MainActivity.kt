@@ -40,8 +40,8 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        var analyzerOption = HomeFragment.info
-        val note = "Dummy text: $analyzerOption"
+        //var homeFragmentInfo = HomeFragment.homeFragmentInfo
+        val note = HomeFragment.homeFragmentInfo
 
         binding.appBarMain.fab.setOnClickListener {
             view ->

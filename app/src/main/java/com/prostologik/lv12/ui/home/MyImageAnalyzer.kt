@@ -28,7 +28,7 @@ class MyImageAnalyzer {
 //        val cropRect = image.cropRect.toString()
 
         //return "central px = $d\nw $imageWidth x h $imageHeight\n\ninfo: $info\n\nformat: $format\n\ncropRect: $cropRect"
-        return "central px = $d\nw $imageWidth x h $imageHeight"
+        return "central px = $d"
     }
 
     private fun ByteBuffer.toByteArray(): ByteArray {

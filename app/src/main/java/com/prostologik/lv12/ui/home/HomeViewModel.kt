@@ -30,7 +30,7 @@ class HomeViewModel : ViewModel() {
     var resolutionHeight = 480 // sharedPref
 
     var cameraInfo = "dummy"
-    var arrayOutputSize = arrayOf<String>( "352 x 288", "640 x 480", "800 x 600" )
-    var arrayOutputWidth = arrayOf<Int>(352, 640, 800)
-    var arrayOutputHeight = arrayOf<Int>(288, 480, 600)
+
+    var arrayOutputWidth = arrayOf<Int>(320, 640, 800)
+    var arrayOutputHeight = arrayOf<Int>(240, 480, 600)
 }

@@ -27,9 +27,8 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginTop="64dp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="@dimen/fab_margin"
         app:destination="@+id/nav_home"
         app:srcCompat="@drawable/camera_24"
         android:contentDescription="@string/take_photo" />

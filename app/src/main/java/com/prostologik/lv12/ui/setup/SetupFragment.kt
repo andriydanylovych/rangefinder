@@ -10,6 +10,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.core.util.component1
+import androidx.core.util.component2
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,6 +19,7 @@ import com.prostologik.lv12.R
 import com.prostologik.lv12.Util
 import com.prostologik.lv12.databinding.FragmentSetupBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
+import kotlin.math.absoluteValue
 
 class SetupFragment : Fragment() {
     private var _binding: FragmentSetupBinding? = null
@@ -110,17 +113,20 @@ class SetupFragment : Fragment() {
 
         var resolutionWidth = homeViewModel.resolutionWidth//.value ?: 800//640
         var resolutionHeight = homeViewModel.resolutionHeight//.value ?: 600//480
+
+        // KILL THE BELOW
+
         resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
-        var ratio = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
+//        var ratio = 75
 
         val editResolutionWidth = binding.editResolutionWidth
         val editResolutionHeight = binding.editResolutionHeight
-        val editRatio = binding.editRatio
-        editRatio.setText(ratio.toString())
-        editRatio.addTextChangedListener {
-            ratio = Util.stringToInteger(editRatio.text.toString())
-            ratio = Util.limitValue(ratio, 30, 300)
-        }
+//        val editRatio = binding.editRatio
+//        editRatio.setText(ratio.toString())
+//        editRatio.addTextChangedListener {
+//            ratio = Util.stringToInteger(editRatio.text.toString())
+//            ratio = Util.limitValue(ratio, 30, 300)
+//        }
 
         editResolutionWidth.setText(resolutionWidth.toString())
         editResolutionWidth.addTextChangedListener {
@@ -129,7 +135,7 @@ class SetupFragment : Fragment() {
             homeViewModel.resolutionWidth = resolutionWidth //setResolutionWidth(resolutionWidth)
             savePreferences("resolution_width", resolutionWidth)
 
-            resolutionHeight = Util.limitValue((resolutionWidth * ratio) / 100, 1, 9600)
+            resolutionHeight = (resolutionWidth * 3) / 4
             homeViewModel.resolutionHeight = resolutionHeight //setResolutionHeight(resolutionHeight)
             savePreferences("resolution_height", resolutionHeight)
             editResolutionHeight.setText(resolutionHeight.toString())
@@ -147,18 +153,40 @@ class SetupFragment : Fragment() {
         // OutputSize spinner:
 
         //val arrayOfItemNames = arrayOf( "352 x 288", "640 x 480", "800 x 600" )
-        val arrayOfItemNames = homeViewModel.arrayOutputSize
+
+        val arrayOutputWidth = homeViewModel.arrayOutputWidth
+        val arrayOutputHeight = homeViewModel.arrayOutputHeight
+
+        val setOutputSize = mutableSetOf<String>()
+
+        for (i in arrayOutputWidth.indices) {
+            val t = arrayOutputWidth[i].toString() + " - " + arrayOutputHeight[i].toString()
+            setOutputSize.add(t)
+        }
+        val arrayOutputSize = setOutputSize.toTypedArray()
+
+        // get an index of the width closest to homeViewModel.arrayOutputWidth
+
+        var bestFitWidth = arrayOutputWidth[0];
+        arrayOutputWidth.forEach {
+            if ((it - resolutionWidth).absoluteValue < (bestFitWidth - resolutionWidth).absoluteValue) {
+            bestFitWidth = it
+        } }
+        val outputSizeIndex = arrayOutputWidth.indexOf(bestFitWidth)
+
+
 
         val spinnerOutputSize: Spinner = binding.spinnerOutputSize
 
         // Create an ArrayAdapter using a simple spinner layout
-        val aa = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfItemNames)
+        val aa = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOutputSize)
 
         // Set layout to use when the list of choices appear
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         // Set Adapter to Spinner
         spinnerOutputSize.setAdapter(aa)
+        spinnerOutputSize.setSelection(outputSizeIndex)
 
         spinnerOutputSize.onItemSelectedListener = object:
             AdapterView.OnItemSelectedListener {
@@ -168,17 +196,19 @@ class SetupFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                resolutionWidth = homeViewModel.arrayOutputWidth[position]
-                resolutionHeight = homeViewModel.arrayOutputHeight[position]
+                resolutionWidth = arrayOutputWidth[position]
+                resolutionHeight = arrayOutputHeight[position]
                 homeViewModel.resolutionWidth = resolutionWidth
                 homeViewModel.resolutionHeight = resolutionHeight
                 savePreferences("resolution_width", resolutionWidth)
                 savePreferences("resolution_height", resolutionHeight)
+                editResolutionWidth.setText(resolutionWidth.toString())
+                editResolutionHeight.setText(resolutionHeight.toString())
 
                 if (resolutionWidth < 1) resolutionWidth = 1
                 val ratio2 = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
                 val textHome = binding.textHome
-                textHome.text = "textHome.text position = $position; W x H = $resolutionWidth x $resolutionHeight; ratio = $ratio2%"
+                textHome.text = "$position: W = $resolutionWidth; H = $resolutionHeight; H / W = $ratio2%"
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -193,9 +223,10 @@ class SetupFragment : Fragment() {
         }
 
 
+        // Info spinner:
+
         val spinnerInfoOption: Spinner = binding.spinnerInfoOption
 
-        //spinnerInfoOption.setSelection(0)
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
             safeContext,
