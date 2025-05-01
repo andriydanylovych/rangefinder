@@ -191,14 +191,7 @@ class DatasetFragment : Fragment() {
         var snippetUV = snippetX
         if (schemaBlueRed) snippetUV = snippetX * 2 / 3
 
-//        OverlayView.snippetWidth = snippetUV
-//        OverlayView.snippetHeight = snippetY
-
-        // TO FIX THE BELOW !!!!!!!! MAYBE MOVE SELECTION OF viewWidth TO SETUP FRAGMENT ??
-        // var viewHeight = 1680  //y
-        var viewWidth = 1080  //x
-        var biggerDim = max(snippetUV, snippetY)
-        val step = scaleFactor //viewWidth / biggerDim // to set size of the snippet
+        val step = scaleFactor
 
         bitmap = Bitmap.createBitmap(snippetUV * step, snippetY * step, Bitmap.Config.ARGB_8888)
 
