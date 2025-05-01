@@ -1,5 +1,7 @@
 package com.prostologik.lv12
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
@@ -34,17 +36,16 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_setup
+                R.id.nav_home, R.id.nav_review, R.id.nav_dataset, R.id.nav_setup
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        //var homeFragmentInfo = HomeFragment.homeFragmentInfo
-        val note = HomeFragment.homeFragmentInfo
 
         binding.appBarMain.fab.setOnClickListener {
             view ->
+            val note = HomeFragment.buildHomeFragmentInfo()//homeFragmentInfo
             Snackbar.make(view, note, Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()

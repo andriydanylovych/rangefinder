@@ -28,10 +28,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        android:textSize="11sp"
+        style="@style/HomeTextViewItem"
         android:scrollbars = "vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_width"
+        android:contentDescription="@string/get_info"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="-135dp"
+        android:layout_marginEnd="-130dp"
+        android:layout_marginTop="135dp"
+        android:layout_marginBottom="135dp"
+        android:rotation="90"
+        android:valueFrom="28"
+        android:valueTo="128"
+        android:value="64"
+        android:layout_gravity="end"
+        android:stepSize="2"
+        app:layout_constraintBottom_toTopOf="@+id/slider_height"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/slider_height"
@@ -44,22 +62,6 @@
         android:stepSize="2"
         app:layout_constraintBottom_toTopOf="@+id/image_capture_button"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/slider_width"
-        android:contentDescription="@string/get_info"
-        android:layout_width="300dp"
-        android:layout_height="30dp"
-        android:rotation="90"
-        android:valueFrom="28"
-        android:valueTo="128"
-        android:value="64"
-        android:layout_gravity="end"
-        android:stepSize="2"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/slider_height"
-        app:layout_constraintLeft_toRightOf="@+id/slider_height"
         app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton

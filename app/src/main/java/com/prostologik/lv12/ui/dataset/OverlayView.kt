@@ -1,4 +1,4 @@
-package com.prostologik.lv12.ui.home
+package com.prostologik.lv12.ui.dataset
 
 import android.content.Context
 import android.graphics.Canvas
@@ -30,31 +30,22 @@ class OverlayView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val scaleFactor = height.toFloat() / imageWidth // width.toFloat() / imageHeight
+        //val scaleFactor = height.toFloat() / imageWidth // width.toFloat() / imageHeight
+        val scaleFactor = height.toFloat() / snippetWidth
 
-        if (analyzerOption == 0) { // Analyzer
-            val p = 28 * scaleFactor
 
-            canvas.drawLine(0.5f * (width - 2 * p), 0.5f * height, 0.5f * (width - p), 0.5f * height, myRedPaint)
-            canvas.drawLine(0.5f * (width + 2 * p), 0.5f * height, 0.5f * (width + p), 0.5f * height, myRedPaint)
-            canvas.drawLine(0.5f * width, 0.5f * (height - 2 * p), 0.5f * width, 0.5f * (height - p), myRedPaint)
-            canvas.drawLine(0.5f * width, 0.5f * (height + 2 * p), 0.5f * width, 0.5f * (height + p), myRedPaint)
-            //myRedPaint.textSize = 40F
-            val textToDraw = "h$height x w$width"
-            canvas.drawText(textToDraw, 100F, 150F, myRedPaint)
+            val sh = 280//snippetWidth * scaleFactor
+            val sw = 280//snippetHeight * scaleFactor
 
-        } else { // Snippet (analyzerOption == 0)
-
-            val sh = snippetWidth * scaleFactor
-            val sw = snippetHeight * scaleFactor
+            val s = patchSize * scaleFactor
             canvas.drawRect(
-                0.5f * (width - sw),
-                0.5f * (height - sh),
-                0.5f * (width + sw),
-                0.5f * (height + sh),
+                0.5f * (width - s),
+                0.5f * (height - s),
+                0.5f * (width + s),
+                0.5f * (height + s),
                 myRedPaint
             )
-        }
+
 
     }
 
@@ -70,6 +61,8 @@ class OverlayView : View {
 
         var imageWidth: Int = 640
         var imageHeight: Int = 480
+
+        var patchSize: Int = 28
 
         var snippetWidth: Int = 64
         var snippetHeight: Int = 64

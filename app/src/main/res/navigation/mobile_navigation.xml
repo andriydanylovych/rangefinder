@@ -12,16 +12,16 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
+        android:id="@+id/nav_review"
         android:name="com.prostologik.lv12.ui.review.ReviewFragment"
-        android:label="@string/menu_gallery"
+        android:label="@string/menu_review"
         tools:layout="@layout/fragment_review" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.prostologik.lv12.ui.objects.ObjectsFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_dataset"
+        android:name="com.prostologik.lv12.ui.dataset.DatasetFragment"
+        android:label="@string/menu_dataset"
+        tools:layout="@layout/fragment_dataset" />
 
     <fragment
         android:id="@+id/nav_setup"

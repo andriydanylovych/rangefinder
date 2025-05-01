@@ -91,10 +91,7 @@ class HomeFragment : Fragment() {
         OverlayView.snippetHeight = snippetHeight
         OverlayView.analyzerOption = analyzerOption
 
-        val patchWidth = homeViewModel.patchWidth
-        val patchHeight = homeViewModel.patchHeight
-        OverlayView.patchWidth = patchWidth
-        OverlayView.patchHeight = patchHeight
+        homeFragmentInfo = buildHomeFragmentInfo()
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -118,6 +115,7 @@ class HomeFragment : Fragment() {
             if (analyzerOption == 0) {
                 sliderWidth.visibility = View.INVISIBLE
                 sliderHeight.visibility = View.INVISIBLE
+                btnImage.visibility = View.INVISIBLE
             } else {
                 sliderWidth.value = snippetWidth.toFloat()
                 sliderWidth.addOnChangeListener { slider, _, _ ->
@@ -134,7 +132,7 @@ class HomeFragment : Fragment() {
                     takePhoto()
                 }
 
-                btnOption.visibility = View.VISIBLE
+                btnImage.visibility = View.VISIBLE
                 sliderWidth.visibility = View.VISIBLE
                 sliderHeight.visibility = View.VISIBLE
 
@@ -178,12 +176,6 @@ class HomeFragment : Fragment() {
 
     private fun getSharedPref() {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
-
-        val tryPatchWidth = sharedPref?.getInt("patch_width", 28)
-        if (tryPatchWidth != null) homeViewModel.patchWidth = tryPatchWidth
-
-        val tryPatchHeight = sharedPref?.getInt("patch_height", 28)
-        if (tryPatchHeight != null) homeViewModel.patchHeight = tryPatchHeight
 
         val trySnippetLayer = sharedPref?.getInt("saved_layer", 1)
         if (trySnippetLayer != null) homeViewModel.snippetLayer = trySnippetLayer
@@ -334,7 +326,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun getPhotoFileName(): String {
-        return SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+        val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+        return "$snippetLayer-$timestamp"
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -422,7 +415,7 @@ class HomeFragment : Fragment() {
                 }
             }.toTypedArray()
 
-        private var snippetLayer = 0
+        private var snippetLayer = 1
         private var snippetWidth = 64
         private var snippetHeight = 64
 
@@ -433,7 +426,12 @@ class HomeFragment : Fragment() {
         private var imageWidth = 640
         private var imageHeight = 480
 
-        var homeFragmentInfo = " Layer: $snippetLayer  WxH: $resolutionWidth x $resolutionHeight  :  $snippetWidth x $snippetHeight"
+        // doesn't do the trick
+        var homeFragmentInfo = " not yet populated "
+
+        fun buildHomeFragmentInfo(): String {
+            return "Layer: $snippetLayer  WxH: $resolutionWidth x $resolutionHeight"
+        }
     }
 
 }

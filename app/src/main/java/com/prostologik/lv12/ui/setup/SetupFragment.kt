@@ -44,12 +44,13 @@ class SetupFragment : Fragment() {
     ): View {
 
         var snippetLayer = homeViewModel.snippetLayer
-        var patchWidth = homeViewModel.patchWidth
-        var patchHeight = homeViewModel.patchHeight
+//        var patchWidth = homeViewModel.patchWidth
+//        var patchHeight = homeViewModel.patchHeight
 
         _binding = FragmentSetupBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        val textHome = binding.textHome
         val textBottom = binding.textBottom
 
         val radioGroupLayers = binding.radioGroupLayers
@@ -75,39 +76,6 @@ class SetupFragment : Fragment() {
             2 -> setLayerChecked(false, false, true)
         }
 
-        ///////////////// patch size setup
-
-        editPatchWidth = binding.editPatchWidth
-        //editPatchWidth.filters = arrayOf<InputFilter>(MinMaxFilter(16, 32))
-        editPatchHeight = binding.editPatchHeight
-        editPatchWidth.setText(patchWidth.toString())
-        editPatchWidth.addTextChangedListener {
-            val temp = Util.stringToInteger(editPatchWidth.text.toString(), 28)
-            if (temp > 9) {
-                patchWidth = Util.limitValue(temp, 16, 32)
-                if (patchWidth != temp) editPatchWidth.setText(patchWidth.toString())
-
-                homeViewModel.patchWidth = patchWidth
-                savePreferences("patch_width", patchWidth)
-
-                patchHeight = patchWidth
-                homeViewModel.patchHeight = patchHeight
-                savePreferences("patch_height", patchHeight)
-                editPatchHeight.setText(patchHeight.toString())
-            }
-        }
-
-        editPatchHeight.setText(patchHeight.toString())
-        editPatchHeight.addTextChangedListener {
-            val temp = Util.stringToInteger(editPatchHeight.text.toString(), 28)
-            if (temp > 9) {
-                patchHeight = Util.limitValue(temp, 16, 32)
-                if (patchHeight != temp) editPatchHeight.setText(patchHeight.toString())
-
-                homeViewModel.patchHeight = patchHeight
-                savePreferences("patch_height", patchHeight)
-            }
-        }
 
         ///////////////// camera setup
 
@@ -117,16 +85,9 @@ class SetupFragment : Fragment() {
         // KILL THE BELOW
 
         resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
-//        var ratio = 75
 
         val editResolutionWidth = binding.editResolutionWidth
         val editResolutionHeight = binding.editResolutionHeight
-//        val editRatio = binding.editRatio
-//        editRatio.setText(ratio.toString())
-//        editRatio.addTextChangedListener {
-//            ratio = Util.stringToInteger(editRatio.text.toString())
-//            ratio = Util.limitValue(ratio, 30, 300)
-//        }
 
         editResolutionWidth.setText(resolutionWidth.toString())
         editResolutionWidth.addTextChangedListener {
@@ -157,13 +118,13 @@ class SetupFragment : Fragment() {
         val arrayOutputWidth = homeViewModel.arrayOutputWidth
         val arrayOutputHeight = homeViewModel.arrayOutputHeight
 
-        val setOutputSize = mutableSetOf<String>()
+        val listOutputSize = mutableListOf<String>()
 
         for (i in arrayOutputWidth.indices) {
             val t = arrayOutputWidth[i].toString() + " - " + arrayOutputHeight[i].toString()
-            setOutputSize.add(t)
+            listOutputSize.add(t)
         }
-        val arrayOutputSize = setOutputSize.toTypedArray()
+        val arrayOutputSize = listOutputSize.toTypedArray()
 
         // get an index of the width closest to homeViewModel.arrayOutputWidth
 
@@ -207,7 +168,7 @@ class SetupFragment : Fragment() {
 
                 if (resolutionWidth < 1) resolutionWidth = 1
                 val ratio2 = Util.limitValue((resolutionHeight * 100) / resolutionWidth, 30, 300)
-                val textHome = binding.textHome
+                //val textHome = binding.textHome
                 textHome.text = "$position: W = $resolutionWidth; H = $resolutionHeight; H / W = $ratio2%"
             }
 
@@ -216,7 +177,7 @@ class SetupFragment : Fragment() {
                 homeViewModel.resolutionHeight = 480
                 val wLoc = homeViewModel.resolutionWidth
                 val hLoc = homeViewModel.resolutionHeight
-                val textHome = binding.textHome
+                //val textHome = binding.textHome
                 textHome.text = "NothingSelected: W x H = $wLoc x $hLoc"
             }
 
@@ -278,52 +239,3 @@ class SetupFragment : Fragment() {
     }
 
 }
-
-
-
-//    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-////        TODO("Not yet implemented")
-//        // An item is selected. You can retrieve the selected item using
-//        // parent.getItemAtPosition(pos).
-//        homeViewModel.setAnalyzerOption(id.toInt())
-//        savePreferences("analyzer_option", id.toInt())
-//
-//        val editAnalyzerOption = binding.editAnalyzerOption
-//        editAnalyzerOption.setText(id.toString())
-//
-//    }
-//
-//    override fun onNothingSelected(parent: AdapterView<*>?) {
-////        TODO("Not yet implemented")
-//    }
-
-// Custom class to define min and max for the edit text
-//    inner class MinMaxFilter() : InputFilter {
-//        private var intMin: Int = 0
-//        private var intMax: Int = 0
-//
-//        // Initialized
-//        constructor(minValue: Int, maxValue: Int) : this() {
-//            this.intMin = minValue
-//            this.intMax = maxValue
-//        }
-//
-//        override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dStart: Int, dEnd: Int): CharSequence? {
-//            try {
-//                val input = Integer.parseInt(dest.toString() + source.toString())
-//                if (isInRange(intMin, intMax, input)) {
-//                    return null
-//                }
-//            } catch (e: NumberFormatException) {
-//                e.printStackTrace()
-//            }
-//            return ""
-//        }
-//
-//        // Check if input c is in between min a and max b and
-//        // returns corresponding boolean
-//        private fun isInRange(a: Int, b: Int, c: Int): Boolean {
-//            return if (b > a) c in a..b else c in b..a
-//        }
-//    }
-//                    Toast.makeText(this@MainActivity, resolutionWidth, Toast.LENGTH_SHORT).show()

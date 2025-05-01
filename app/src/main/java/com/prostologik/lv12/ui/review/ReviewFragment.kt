@@ -29,6 +29,7 @@ class ReviewFragment : Fragment() {
     private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
         // "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
         // homeViewModel.photoDirectory.toString()
+    private lateinit var fileNamesArray: Array<String>
     private var fileName: String = "default"
 
     private lateinit var mImageView: ImageView
@@ -42,6 +43,7 @@ class ReviewFragment : Fragment() {
     ): View {
 
         photoDirectory = homeViewModel.photoDirectory
+        fileNamesArray = getFileNames(photoDirectory)
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
@@ -61,19 +63,38 @@ class ReviewFragment : Fragment() {
 
         btnDelete.setOnClickListener { deletePhoto() }
 
-        fun renderNext() {
-            fileName = getNextFileName(fileName, photoDirectory)
-            renderPhoto(photoDirectory, fileName)
-        }
 
-        renderNext()
 
-        btnNext.setOnClickListener { renderNext() }
+
+
+
+        renderNextImage()
+
+        btnNext.setOnClickListener { renderNextImage() }
 
         btnPrev.setOnClickListener {
-            fileName = getPrevFileName(fileName, photoDirectory)
-            renderPhoto(photoDirectory, fileName)
+            val currentFileIndex = fileNamesArray.indexOf(fileName)
+            var nextItemIndex = currentFileIndex - 1
+            if (nextItemIndex < 0) nextItemIndex = fileNamesArray.size - 1
+            renderImage(nextItemIndex)
         }
+
+
+
+
+//        fun renderNext() {
+//            fileName = getNextFileName(fileName, photoDirectory)
+//            renderPhoto(photoDirectory, fileName)
+//        }
+//
+//        renderNext()
+//
+//        btnNext.setOnClickListener { renderNext() }
+//
+//        btnPrev.setOnClickListener {
+//            fileName = getPrevFileName(fileName, photoDirectory)
+//            renderPhoto(photoDirectory, fileName)
+//        }
 
         val root: View = binding.root
         return root
@@ -86,6 +107,9 @@ class ReviewFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun renderPhoto(dir: String, file: String) {
+
+        var includesBlueRed = true
+        if (file.startsWith("0")) includesBlueRed = false
 
         val uri = Uri.parse("file://$dir/$file.jpg")
         // uri.toString() --> "file:///storage/emulated/0/Android/media/com.prostologik.lv12/image"
@@ -118,16 +142,8 @@ class ReviewFragment : Fragment() {
         for ((x, line) in linesOfPixels.withIndex()) {
             val pixels = line.split(",")
 
-            if (x == snippetUV) {
-                val y2 = Util.stringByteToPixel(pixels[snippetY / 2 - 2])
-                val y0 = Util.stringByteToPixel(pixels[snippetY / 2 - 1])
-                val y1 = Util.stringByteToPixel(pixels[snippetY / 2])
-                val y3 = Util.stringByteToPixel(pixels[snippetY / 2 + 1])
-                val d01 = y0 - y1
-                val d02 = y0 - y2
-                val d13 = y1 - y3
-                if (d01 * d01 > d02 * d02 + d13 * d13) schemaBlueRed = true //  && snippetX > snippetY
-            }
+            if (x == snippetUV && includesBlueRed) schemaBlueRed = true
+
             for (y in 0..< snippetY) {
 
                 if (schemaBlueRed) layer = if (y < snippetY / 2) { 1 } else { 2 }
@@ -148,48 +164,44 @@ class ReviewFragment : Fragment() {
 
     }
 
-    private fun getSortedJpgFiles(dir: String): List<File>? {
-        val filesAll = File(dir).listFiles()
-        filesAll?.sort()
-        return filesAll?.filter { it.name.substringAfter(".") == "jpg" }
-    }
-
-    private fun getNextFileName(currentFileName: String, dir: String): String {
-        val filesJpg = getSortedJpgFiles(dir)
-        var nextFileNameJpg = filesJpg?.first()?.name // in case it is the last one
-        val followingFiles = filesJpg?.filter { it.name > "$currentFileName.jpg" }
-        if(followingFiles?.isNotEmpty() == true) nextFileNameJpg = followingFiles.first().name
-
-        return nextFileNameJpg?.substringBefore(".") ?: "default"
-    }
-
-    private fun getPrevFileName(currentFileName: String, dir: String): String {
-        val filesJpg = getSortedJpgFiles(dir)
-        var prevFileNameJpg = filesJpg?.last()?.name
-        val previousFiles = filesJpg?.filter { it.name < "$currentFileName.jpg" }
-        if(previousFiles?.isNotEmpty() == true) prevFileNameJpg = previousFiles.last().name
-
-        return prevFileNameJpg?.substringBefore(".") ?: "default"
-    }
-
     @RequiresApi(Build.VERSION_CODES.P)
     private fun deletePhoto() {
+        val currentFileIndex = fileNamesArray.indexOf(fileName)
+
         val files = File(photoDirectory).listFiles()
         for (file in files!!) {
             if (file.name.substringBefore(".") == fileName) file.delete()
         }
 
-        fileName = getNextFileName(fileName, photoDirectory)
-        renderPhoto(photoDirectory, fileName)
+        fileNamesArray = getFileNames(photoDirectory)
+        var nextItemIndex = 0
+        if (currentFileIndex >= 0 && currentFileIndex < fileNamesArray.size - 1) nextItemIndex = currentFileIndex + 1
+        renderImage(nextItemIndex)
+
     }
 
-//    @RequiresApi(Build.VERSION_CODES.P)
-//    private fun processPhoto() {
-//
-//        val textView: TextView = binding.textReview
-//        val savedPhotoAnalyzer = SavedPhotoAnalyzer()
-//        //val uri = Uri.parse("file://$photoDirectory/$fileName.jpg")
-//        textView.text = savedPhotoAnalyzer.analyze()
-//    }
+    private fun getFileNames(dir: String, fileNameExtension: String = "jpg", fileNamePrefix: String = ""): Array<String> {
+        val filesAll = File(dir).listFiles()
+        filesAll?.sort()
+        val selectedExtensions = filesAll?.filter { it.name.substringAfter(".") == fileNameExtension }
+        val selectedFileNames = ArrayList<String>()
+        selectedExtensions?.forEach { f -> selectedFileNames.add(f.name.substringBefore(".")) }
+        return selectedFileNames.toTypedArray()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun renderImage(imageIndex: Int) {
+        fileName = fileNamesArray[imageIndex]
+        renderPhoto(photoDirectory, fileName)
+        //textView.text = fileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun renderNextImage() {
+        val currentFileIndex = fileNamesArray.indexOf(fileName)
+        var nextItemIndex = 0
+        if (currentFileIndex >= 0 && currentFileIndex < fileNamesArray.size - 1) nextItemIndex = currentFileIndex + 1
+        renderImage(nextItemIndex)
+    }
 
 }

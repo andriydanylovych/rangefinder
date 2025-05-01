@@ -18,10 +18,7 @@ class HomeViewModel : ViewModel() {
 
     var analyzerOption = 0
 
-    var snippetLayer = 0 // sharedPref
-
-    var patchWidth = 28 // sharedPref
-    var patchHeight = 28 // sharedPref
+    var snippetLayer = 1 // sharedPref
 
     var snippetWidth = 64
     var snippetHeight = 64
