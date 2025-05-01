@@ -1,7 +1,5 @@
 package com.prostologik.lv12
 
-import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity

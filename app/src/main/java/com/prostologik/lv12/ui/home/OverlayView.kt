@@ -21,9 +21,9 @@ class OverlayView : View {
     }
     private fun init() {
         myRedPaint = Paint().apply {
-            color = Color.RED;
-            strokeWidth = 3.0f;
-            style = Paint.Style.STROKE;
+            color = Color.RED
+            strokeWidth = 3.0f
+            style = Paint.Style.STROKE
             textSize = 40F
         }
     }

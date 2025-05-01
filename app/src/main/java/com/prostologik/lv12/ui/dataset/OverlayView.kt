@@ -21,21 +21,15 @@ class OverlayView : View {
     }
     private fun init() {
         myRedPaint = Paint().apply {
-            color = Color.RED;
-            strokeWidth = 3.0f;
-            style = Paint.Style.STROKE;
+            color = Color.RED
+            strokeWidth = 3.0f
+            style = Paint.Style.STROKE
             textSize = 40F
         }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //val scaleFactor = height.toFloat() / imageWidth // width.toFloat() / imageHeight
-        val scaleFactor = height.toFloat() / snippetWidth
-
-
-            val sh = 280//snippetWidth * scaleFactor
-            val sw = 280//snippetHeight * scaleFactor
 
             val s = patchSize * scaleFactor
             canvas.drawRect(
@@ -46,7 +40,6 @@ class OverlayView : View {
                 myRedPaint
             )
 
-
     }
 
 //    override fun onTouchEvent( event: MotionEvent): Boolean {
@@ -54,17 +47,9 @@ class OverlayView : View {
 //    }
 
     companion object {
-        var analyzerOption = 0
-
-        // var viewHeight = 1680
-        // var viewWidth = 1080
-
-        var imageWidth: Int = 640
-        var imageHeight: Int = 480
-
         var patchSize: Int = 28
-
-        var snippetWidth: Int = 64
-        var snippetHeight: Int = 64
+        var scaleFactor = 8
+//        var snippetWidth: Int = 64
+//        var snippetHeight: Int = 64
     }
 }

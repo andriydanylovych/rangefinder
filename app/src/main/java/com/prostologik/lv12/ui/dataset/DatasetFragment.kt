@@ -39,6 +39,8 @@ class DatasetFragment : Fragment() {
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
 
+    private val scaleFactor = 8
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         safeContext = context
@@ -53,6 +55,8 @@ class DatasetFragment : Fragment() {
 
         photoDirectory = homeViewModel.photoDirectory
         fileNamesArray = getFileNames(photoDirectory)
+
+        OverlayView.scaleFactor = scaleFactor
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
@@ -187,18 +191,17 @@ class DatasetFragment : Fragment() {
         var snippetUV = snippetX
         if (schemaBlueRed) snippetUV = snippetX * 2 / 3
 
-        OverlayView.snippetWidth = snippetUV
-        OverlayView.snippetHeight = snippetY
+//        OverlayView.snippetWidth = snippetUV
+//        OverlayView.snippetHeight = snippetY
 
+        // TO FIX THE BELOW !!!!!!!! MAYBE MOVE SELECTION OF viewWidth TO SETUP FRAGMENT ??
         // var viewHeight = 1680  //y
         var viewWidth = 1080  //x
         var biggerDim = max(snippetUV, snippetY)
-        val step = viewWidth / biggerDim // to set size of the snippet
+        val step = scaleFactor //viewWidth / biggerDim // to set size of the snippet
 
         bitmap = Bitmap.createBitmap(snippetUV * step, snippetY * step, Bitmap.Config.ARGB_8888)
-        //bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
 
-        var layer = 0
         for ((x, line) in linesOfPixels.withIndex()) {
             val pixels = line.split(",")
 
@@ -206,12 +209,12 @@ class DatasetFragment : Fragment() {
 
             for (y in 0..< snippetY) {
 
-                val color = Util.stringByteToColor(pixels[y], layer)
+                val color = Util.stringByteToColor(pixels[y], 0)
                 val size = step * step
                 val intArray = IntArray(size) { color }
 
                 bitmap.setPixels(intArray,0,step,(snippetUV - 1 - x) * step, y * step, step, step)
-                //bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
+
             }
         }
 

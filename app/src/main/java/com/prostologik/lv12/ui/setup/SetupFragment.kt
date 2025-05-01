@@ -10,8 +10,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
-import androidx.core.util.component1
-import androidx.core.util.component2
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,9 +26,6 @@ class SetupFragment : Fragment() {
     private val homeViewModel: HomeViewModel by activityViewModels()
 
     private lateinit var safeContext: Context
-
-    private lateinit var editPatchWidth: EditText
-    private lateinit var editPatchHeight: EditText
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -93,11 +88,11 @@ class SetupFragment : Fragment() {
         editResolutionWidth.addTextChangedListener {
             resolutionWidth = Util.stringToInteger(editResolutionWidth.text.toString())
             resolutionWidth = Util.limitValue(resolutionWidth, 1, 12800)
-            homeViewModel.resolutionWidth = resolutionWidth //setResolutionWidth(resolutionWidth)
+            homeViewModel.resolutionWidth = resolutionWidth
             savePreferences("resolution_width", resolutionWidth)
 
             resolutionHeight = (resolutionWidth * 3) / 4
-            homeViewModel.resolutionHeight = resolutionHeight //setResolutionHeight(resolutionHeight)
+            homeViewModel.resolutionHeight = resolutionHeight
             savePreferences("resolution_height", resolutionHeight)
             editResolutionHeight.setText(resolutionHeight.toString())
         }
@@ -106,7 +101,7 @@ class SetupFragment : Fragment() {
         editResolutionHeight.addTextChangedListener {
             resolutionHeight = Util.stringToInteger(editResolutionHeight.text.toString())
             resolutionHeight = Util.limitValue(resolutionHeight, 1, 9600)
-            homeViewModel.resolutionHeight = resolutionHeight //setResolutionHeight(resolutionHeight)
+            homeViewModel.resolutionHeight = resolutionHeight
             savePreferences("resolution_height", resolutionHeight)
         }
 
@@ -128,7 +123,7 @@ class SetupFragment : Fragment() {
 
         // get an index of the width closest to homeViewModel.arrayOutputWidth
 
-        var bestFitWidth = arrayOutputWidth[0];
+        var bestFitWidth = arrayOutputWidth[0]
         arrayOutputWidth.forEach {
             if ((it - resolutionWidth).absoluteValue < (bestFitWidth - resolutionWidth).absoluteValue) {
             bestFitWidth = it
