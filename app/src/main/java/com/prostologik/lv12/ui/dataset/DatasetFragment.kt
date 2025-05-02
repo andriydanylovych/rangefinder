@@ -20,7 +20,7 @@ import com.prostologik.lv12.databinding.FragmentDatasetBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
 import java.io.IOException
-import kotlin.math.max
+import kotlin.math.roundToInt
 
 class DatasetFragment : Fragment() {
 
@@ -38,6 +38,7 @@ class DatasetFragment : Fragment() {
     private var fileName: String = "default"
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
+    private var patchSize: Int = 0
 
     private val scaleFactor = 8
 
@@ -68,16 +69,21 @@ class DatasetFragment : Fragment() {
 
         _binding = FragmentDatasetBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
+        val overlayView = binding.overlayview
         val textView: TextView = binding.textDataset
 
         mImageView = binding.imageSnippet
 
+        val btnSave = binding.saveButton
         val btnDelete = binding.deleteButton
         val btnNext = binding.nextButton
         val btnPrev = binding.prevButton
 
-        btnDelete.setOnClickListener { textView.text = "clicked btnDelete" }
+        btnSave.setOnClickListener {
+            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
+            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
+            textView.text = "x=$x y=$y + patch=$patchSize"
+        }
 
         fun renderImage(imageIndex: Int) {
             fileName = fileNamesArray[imageIndex]
@@ -105,7 +111,7 @@ class DatasetFragment : Fragment() {
 
         // PatchSize spinner:
 
-        var patchSize: Int
+        //var patchSize: Int
 
         val arrayOfPatchSizes = arrayOf(16,18,20,22,24,26,28,30,32)
 
@@ -139,7 +145,6 @@ class DatasetFragment : Fragment() {
             ) {
                 patchSize = arrayOfPatchSizes[position]
                 OverlayView.patchSize = patchSize
-                val overlayView = binding.overlayview
                 overlayView.invalidate()
             }
 
@@ -148,9 +153,6 @@ class DatasetFragment : Fragment() {
             }
 
         }
-
-
-
 
         return root
     }
