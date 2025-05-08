@@ -18,6 +18,7 @@
     <string name="next">Next</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>
+    <string name="NEW">NEW</string>
 
     <string name="saved_layer">saved_layer</string>
     <string name="snippet_width">snippet_width</string>

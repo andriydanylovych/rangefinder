@@ -185,7 +185,6 @@ class HomeFragment : Fragment() {
 
         val tryResolutionHeight = sharedPref?.getInt("resolution_height", 480)
         if (tryResolutionHeight != null) homeViewModel.resolutionHeight = tryResolutionHeight
-
     }
 
     private fun requestPermissions() {

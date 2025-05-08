@@ -16,7 +16,7 @@ class HomeViewModel : ViewModel() {
 
     var modelAlreadyPopulated = false
 
-    var analyzerOption = 0
+    var analyzerOption = 1
 
     var snippetLayer = 1 // sharedPref
 

@@ -63,7 +63,7 @@ class OverlayView : View {
 //    }
 
     companion object {
-        var analyzerOption = 0
+        var analyzerOption = 1
 
         // var viewHeight = 1680
         // var viewWidth = 1080

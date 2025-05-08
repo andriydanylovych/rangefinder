@@ -42,10 +42,10 @@ class OverlayView : View {
             }
 
             canvas.drawRect(
-                clickX - s, // 0.5f * width
-                clickY - s, // 0.5f * height
-                clickX + s, // 0.5f * width
-                clickY + s, // 0.5f * height
+                clickX - s,
+                clickY - s,
+                clickX + s,
+                clickY + s,
                 myRedPaint
             )
 

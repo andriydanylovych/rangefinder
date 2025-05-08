@@ -9,7 +9,7 @@
 
     <Spinner
         android:id="@+id/spinnerPatchSize"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="48dp"
         android:minHeight="48dp"
@@ -25,20 +25,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <TextView
-        android:id="@+id/text_dataset"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerPatchSize"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-         />
-
     <ImageView
         android:id="@+id/imageSnippet"
         android:layout_width="wrap_content"
@@ -47,7 +33,7 @@
         android:background="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_dataset"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerPatchSize"
         />
 
     <com.prostologik.lv12.ui.dataset.OverlayView
@@ -60,15 +46,75 @@
         app:layout_constraintStart_toStartOf="@+id/imageSnippet"
         app:layout_constraintTop_toTopOf="@+id/imageSnippet" />
 
+    <TextView
+        android:id="@+id/textLabel"
+        android:labelFor="@+id/editLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:padding="17dp"
+        android:text="Label:"
+        tools:ignore="HardcodedText"
+        app:layout_constraintTop_toBottomOf="@+id/imageSnippet"
+        app:layout_constraintEnd_toStartOf="@+id/editLabel"
+        />
+
+    <EditText
+        android:id="@+id/editLabel"
+        android:hint="Label"
+        android:layout_width="84dp"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:ems="16"
+        android:padding="17dp"
+        android:textAlignment="center"
+        android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@+id/imageSnippet"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/textNew"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center|center"
+        android:labelFor="@+id/spinnerDataset"
+        android:textColor="#990000"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/spinnerDataset"
+        app:layout_constraintTop_toBottomOf="@+id/editLabel"
+        tools:ignore="HardcodedText" />
+
+    <Spinner
+        android:id="@+id/spinnerDataset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:gravity="center|center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="24sp"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/editLabel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
     <ImageButton
-        android:id="@+id/delete_button"
+        android:id="@+id/option_button"
         android:contentDescription="@string/delete"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/delete_24"
+        android:backgroundTint="#0000FF"
+        android:src="@drawable/cameraswitch_24"
         android:layout_margin="24dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/prev_button"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/next_button"
         />
 
     <ImageButton
@@ -78,8 +124,8 @@
         android:layout_height="64dp"
         android:src="@drawable/save_24"
         android:layout_margin="24dp"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/next_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/prev_button"
         />
 
     <ImageButton
