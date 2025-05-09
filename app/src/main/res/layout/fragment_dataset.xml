@@ -61,7 +61,6 @@
 
     <EditText
         android:id="@+id/editLabel"
-        android:hint="Label"
         android:layout_width="84dp"
         android:layout_height="wrap_content"
         android:autofillHints=""
@@ -111,7 +110,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:backgroundTint="#0000FF"
-        android:src="@drawable/cameraswitch_24"
+        android:src="@drawable/edit_24"
         android:layout_margin="24dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/next_button"

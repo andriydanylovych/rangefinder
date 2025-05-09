@@ -32,6 +32,7 @@ import androidx.core.util.component1
 import androidx.core.util.component2
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.prostologik.lv12.R
 import com.prostologik.lv12.databinding.FragmentHomeBinding
 import java.io.File
 import java.io.IOException
@@ -112,10 +113,12 @@ class HomeFragment : Fragment() {
         val sliderHeight = binding.sliderHeight
 
         fun renderView() {
+            var src: Int
             if (analyzerOption == 0) {
                 sliderWidth.visibility = View.INVISIBLE
                 sliderHeight.visibility = View.INVISIBLE
                 btnImage.visibility = View.INVISIBLE
+                src = R.drawable.camera_24
             } else {
                 sliderWidth.value = snippetWidth.toFloat()
                 sliderWidth.addOnChangeListener { slider, _, _ ->
@@ -137,7 +140,12 @@ class HomeFragment : Fragment() {
                 sliderHeight.visibility = View.VISIBLE
 
                 setSnippetWidthHeight()
+                src = R.drawable.visibility_24
             }
+
+            //var src: Int = if (analyzerOption == 0) R.drawable.camera_24 else R.drawable.visibility_24
+            btnOption.setImageResource(src)
+
         }
 
         renderView()
@@ -146,6 +154,7 @@ class HomeFragment : Fragment() {
             analyzerOption = if (analyzerOption == 0) 1 else 0
             homeViewModel.analyzerOption = analyzerOption
             OverlayView.analyzerOption = analyzerOption
+
             val overlayView = binding.overlayview
             overlayView.invalidate()
             renderView()

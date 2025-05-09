@@ -7,18 +7,23 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="delete">Delete</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="photo">Photo</string>
+    <string name="get_info">Info</string>
+    <string name="label">Label</string>
+
     <string name="menu_home">Camera</string>
     <string name="menu_review">Review</string>
     <string name="menu_dataset">Datasets</string>
     <string name="menu_setup">Setup</string>
 
-    <string name="take_photo">Take Photo</string>
-    <string name="photo">Photo</string>
-    <string name="get_info">Info</string>
     <string name="next">Next</string>
-    <string name="delete">Delete</string>
-    <string name="save">Save</string>
     <string name="NEW">NEW</string>
+
+    <string name="pixel">Pixel</string>
+
+    <string name="save">Save</string>
 
     <string name="saved_layer">saved_layer</string>
     <string name="snippet_width">snippet_width</string>

@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.R
 import com.prostologik.lv12.Util
+import com.prostologik.lv12.Util.limitValue
 import com.prostologik.lv12.Util.stringToInteger
 import com.prostologik.lv12.databinding.FragmentDatasetBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
@@ -45,6 +46,7 @@ class DatasetFragment : Fragment() {
     private lateinit var mImageView: ImageView
     private lateinit var bitmap: Bitmap
     private var patchSize: Int = 0
+    private var maxLabel: Int = 99999
     private lateinit var linesOfPixels: Array<String>
     private lateinit var linesOfPatches: Array<String>
     private var patchIndex = 0
@@ -86,20 +88,8 @@ class DatasetFragment : Fragment() {
 
         mImageView = binding.imageSnippet
 
-        val textNew = binding.textNew
-//        textNew.setOnClickListener {
-//            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
-//            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
-//            val msg = "x=$x y=$y + patch=$patchSize"
-//            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-//        }
-
         val editLabel = binding.editLabel
-        editLabel.setText("9")
-
-//        editLabel.addTextChangedListener {
-//            val temp = Util.stringToInteger(editLabel.text.toString())
-//        }
+        editLabel.setText("0")
 
         val btnSave = binding.saveButton
         val btnOption = binding.optionButton
@@ -110,7 +100,8 @@ class DatasetFragment : Fragment() {
             val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
             val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
 
-            val label = stringToInteger(editLabel.text.toString())
+            val label = limitValue(stringToInteger(editLabel.text.toString()), -1, maxLabel)
+            editLabel.setText(label.toString())
             val sb: StringBuilder = StringBuilder()
             sb.append(label)
 
@@ -120,27 +111,23 @@ class DatasetFragment : Fragment() {
             for (i in 0..< patchSize) {
                 val line = linesOfPixels[size - patchSize - x + i] // sizeI - patchSize- // 40-x + i
                 val pixels = line.split(",")
-
                 for (j in 0..< patchSize) {
-                    var d = pixels[y + j] // sizeJ - patchSize-
+                    val d = pixels[y + j] // sizeJ - patchSize-
                     sb.append(",$d")
                 }
             }
             sb.append("\n")
 
+            patchIndex = 0
             try {
                 val file = File("$photoDirectory/$datasetName.csv")
+                file.forEachLine { patchIndex++ } // to reference the freshly saved patch
                 file.appendText(sb.toString())
-                //val textNew = binding.textNew
-                //textNew.text = "$sizeI $patchSize"
             } catch (_: IOException) {}
 
-            val msg = "label=$label x=$x y=$y + patch=$patchSize"
+            val msg = "record=$patchIndex x=$x y=$y + patch=$patchSize"
             Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-
         }
-
-
 
         fun renderNextImage(step: Int = 1) {
             val size = fileNamesArray.size
@@ -177,29 +164,38 @@ class DatasetFragment : Fragment() {
             Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
         }
 
+        val spinnerPatchSize: Spinner = binding.spinnerPatchSize
+
         btnOption.setOnClickListener {
             dsSnippetOption = (dsSnippetOption + 1) % 2
-            var tint = R.color.purple_500
+            //var tint: Int
+            var src: Int
             if (dsSnippetOption == 0) { // 0=Dataset
-                tint = R.color.purple_500
+                //tint = R.color.purple_500
+                src = R.drawable.crop_24
+                buildDatasetSpinner(0)
                 renderNextPatch(0)
                 OverlayView.patchSize = 1
+                spinnerPatchSize.visibility = View.INVISIBLE
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
-                tint = R.color.teal_700
+                //tint = R.color.teal_700
+                src = R.drawable.edit_24
                 renderNextImage(0)
                 OverlayView.patchSize = patchSize
+                spinnerPatchSize.visibility = View.VISIBLE
+                buildDatasetSpinner(patchSize)
+                val textNew = binding.textNew
+                textNew.text = getString(R.string.label) + ":"
             }
 
             toastXY()
 
             OverlayView.clickX = -1f
             overlayView.invalidate()
-            btnOption.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(tint, null)))
+            //btnOption.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(tint, null)))
+            btnOption.setImageResource(src)
             // Color.RED 0xFFFF0000 btnOption.setBackgroundColor(white)
-
-
-
         }
 
         btnNext.setOnClickListener {
@@ -212,7 +208,20 @@ class DatasetFragment : Fragment() {
         }
 
         // PatchSize spinner:
+        buildPatchSizeSpinner()
 
+        // Dataset spinner:
+        buildDatasetSpinner(patchSize)
+
+        return root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun buildPatchSizeSpinner() {
         val arrayOfPatchSizes = arrayOf(16,18,20,22,24,26,28,30,32)
 
         val listOfPatchSizes = mutableListOf<String>()
@@ -247,6 +256,7 @@ class DatasetFragment : Fragment() {
                 savePreferencesInt("patch_size", patchSize)
                 OverlayView.patchSize = patchSize
                 OverlayView.clickX = -1f
+                val overlayView = binding.overlayview
                 overlayView.invalidate()
 
                 buildDatasetSpinner(patchSize)
@@ -257,28 +267,18 @@ class DatasetFragment : Fragment() {
             }
 
         }
-
-        // Dataset spinner:
-        buildDatasetSpinner(patchSize)
-
-        return root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun buildDatasetSpinner(patchSize: Int) {
-
+        // to list all datasets without NEW --> patchSize = 0 i.e. buildDatasetSpinner(0)
         val allDatasets = getFileNames(photoDirectory, "csv", "ds")
         val listOfDatasets = mutableListOf<String>()
         val listOfSeqNumbers = mutableListOf<Int>()
-        listOfDatasets.add("ds_99_28") // a placeholder
+        if (patchSize > 0) listOfDatasets.add("ds_99_28") // a placeholder for a NEW file name
         for (ds in allDatasets) {
             val bitsOfDatasetName = ds.split("_")
             if (bitsOfDatasetName.size < 3) continue
-            if (bitsOfDatasetName[2] != patchSize.toString()) continue
+            if (patchSize > 0 && bitsOfDatasetName[2] != patchSize.toString()) continue
             listOfDatasets.add(ds)
             listOfSeqNumbers.add(stringToInteger(bitsOfDatasetName[1], 0))
         }
@@ -287,10 +287,14 @@ class DatasetFragment : Fragment() {
         for (num in listOfSeqNumbers) {
             if (num == nextSeqNumber) nextSeqNumber++
         }
-        listOfDatasets[0] = "ds_$nextSeqNumber" + "_" + patchSize
+        if (patchSize > 0) listOfDatasets[0] = "ds_$nextSeqNumber" + "_" + patchSize // a NEW file name
+
+        // if (patchSize == 0 && arrayOfDatasets.size < 1) ??????????
 
         //val arrayOfDatasets = getFileNames(photoDirectory, "csv", "ds")
         val arrayOfDatasets = listOfDatasets.toTypedArray()
+
+        if (patchSize == 0 && arrayOfDatasets.indexOf(datasetName) < 0) datasetName = arrayOfDatasets[0]
 
         val spinnerDataset: Spinner = binding.spinnerDataset
         val textNew = binding.textNew
@@ -315,8 +319,11 @@ class DatasetFragment : Fragment() {
             ) {
                 datasetName = arrayOfDatasets[position]
                 savePreferencesString("dataset_name", datasetName) // "ds01_s28_m255"
-                if (position == 0) textNew.text = "NEW" else textNew.text = ""
-                // R.id.NEW
+                if (patchSize > 0 && position == 0) textNew.text = getString(R.string.NEW) else textNew.text = ""
+                patchIndex = 0
+                val bitsOfDatasetName = datasetName.split("_")
+                maxLabel = if (bitsOfDatasetName.size > 3) stringToInteger(bitsOfDatasetName[3], 99999) else 99999
+                // android.R.id.NEW android.R.layout.simple_spinner_item
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

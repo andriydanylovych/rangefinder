@@ -83,8 +83,7 @@
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="40dp"
-        android:backgroundTint="#0000FF"
-        android:src="@drawable/cameraswitch_24"
+        android:src="@drawable/visibility_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
