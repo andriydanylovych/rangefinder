@@ -113,7 +113,7 @@ class HomeFragment : Fragment() {
         val sliderHeight = binding.sliderHeight
 
         fun renderView() {
-            var src: Int
+            val src: Int
             if (analyzerOption == 0) {
                 sliderWidth.visibility = View.INVISIBLE
                 sliderHeight.visibility = View.INVISIBLE
@@ -167,7 +167,8 @@ class HomeFragment : Fragment() {
 
     private fun setSnippetWidthHeight() {
         val temp = snippetWidth * snippetHeight
-        textView.text = "WxH = $snippetWidth x $snippetHeight = $temp"
+        //textView.text = "WxH = $snippetWidth x $snippetHeight = $temp"
+        textView.text = getString(R.string.width_height, snippetWidth, snippetHeight, temp)
     }
 
     private fun processWidthHeight() {

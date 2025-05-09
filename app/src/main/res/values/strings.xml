@@ -7,6 +7,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="dataset_review">Dataset review</string>
     <string name="delete">Delete</string>
     <string name="take_photo">Take Photo</string>
     <string name="photo">Photo</string>
@@ -28,6 +29,8 @@
     <string name="saved_layer">saved_layer</string>
     <string name="snippet_width">snippet_width</string>
     <string name="snippet_height">snippet_height</string>
+
+    <string name="width_height">WxH = %1$d x %2$d = %3$d</string>
 
     <string-array name="info_options">
         <item>Camera</item>

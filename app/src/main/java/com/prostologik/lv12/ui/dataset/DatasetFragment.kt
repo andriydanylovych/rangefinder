@@ -1,9 +1,7 @@
 package com.prostologik.lv12.ui.dataset
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +11,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
@@ -169,7 +166,7 @@ class DatasetFragment : Fragment() {
         btnOption.setOnClickListener {
             dsSnippetOption = (dsSnippetOption + 1) % 2
             //var tint: Int
-            var src: Int
+            val src: Int
             if (dsSnippetOption == 0) { // 0=Dataset
                 //tint = R.color.purple_500
                 src = R.drawable.crop_24
@@ -186,7 +183,7 @@ class DatasetFragment : Fragment() {
                 spinnerPatchSize.visibility = View.VISIBLE
                 buildDatasetSpinner(patchSize)
                 val textNew = binding.textNew
-                textNew.text = getString(R.string.label) + ":"
+                textNew.text = "${getString(R.string.label)}:"
             }
 
             toastXY()
@@ -327,7 +324,7 @@ class DatasetFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                val temp = "NEW file"
+                //val temp = "NEW file"
             }
 
         }
