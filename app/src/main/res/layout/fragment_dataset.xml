@@ -82,6 +82,7 @@
         android:layout_marginBottom="12dp"
         android:gravity="center|center"
         android:labelFor="@+id/spinnerDataset"
+        android:contentDescription="@string/dataset_review"
         android:textColor="#990000"
         android:textSize="20sp"
         app:layout_constraintEnd_toStartOf="@+id/spinnerDataset"
@@ -129,7 +130,7 @@
 
     <ImageButton
         android:id="@+id/prev_button"
-        android:contentDescription="@string/save"
+        android:contentDescription="@string/prev"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="24dp"
@@ -141,7 +142,7 @@
 
     <ImageButton
         android:id="@+id/next_button"
-        android:contentDescription="@string/photo"
+        android:contentDescription="@string/next"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"

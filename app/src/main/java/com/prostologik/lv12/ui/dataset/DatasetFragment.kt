@@ -183,7 +183,7 @@ class DatasetFragment : Fragment() {
                 spinnerPatchSize.visibility = View.VISIBLE
                 buildDatasetSpinner(patchSize)
                 val textNew = binding.textNew
-                textNew.text = "${getString(R.string.label)}:"
+                textNew.text = getString(R.string.label)
             }
 
             toastXY()
