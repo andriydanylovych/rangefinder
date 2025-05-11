@@ -7,6 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".ui.dataset.DatasetFragment">
 
+    <TextView
+        android:id="@+id/textName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:padding="17dp"
+        android:text="@string/label"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/imageSnippet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:ignore="ContentDescription"
+        android:background="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textName"
+        />
+
+    <com.prostologik.lv12.ui.dataset.OverlayView
+        android:id="@+id/overlayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageSnippet"
+        app:layout_constraintEnd_toEndOf="@+id/imageSnippet"
+        app:layout_constraintStart_toStartOf="@+id/imageSnippet"
+        app:layout_constraintTop_toTopOf="@+id/imageSnippet" />
+
+
     <Spinner
         android:id="@+id/spinnerPatchSize"
         android:layout_width="wrap_content"
@@ -21,30 +55,10 @@
         android:textSize="24sp"
         android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageSnippet"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageSnippet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:ignore="ContentDescription"
-        android:background="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerPatchSize"
-        />
-
-    <com.prostologik.lv12.ui.dataset.OverlayView
-        android:id="@+id/overlayview"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:elevation="20dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageSnippet"
-        app:layout_constraintEnd_toEndOf="@+id/imageSnippet"
-        app:layout_constraintStart_toStartOf="@+id/imageSnippet"
-        app:layout_constraintTop_toTopOf="@+id/imageSnippet" />
 
     <TextView
         android:id="@+id/textLabel"
@@ -53,22 +67,21 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:padding="17dp"
-        android:text="Label:"
-        tools:ignore="HardcodedText"
-        app:layout_constraintTop_toBottomOf="@+id/imageSnippet"
+        android:text="@string/label"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerPatchSize"
         app:layout_constraintEnd_toStartOf="@+id/editLabel"
         />
 
     <EditText
         android:id="@+id/editLabel"
-        android:layout_width="84dp"
+        android:layout_width="128dp"
         android:layout_height="wrap_content"
         android:autofillHints=""
         android:ems="16"
         android:padding="17dp"
         android:textAlignment="center"
         android:inputType="number"
-        app:layout_constraintTop_toBottomOf="@+id/imageSnippet"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerPatchSize"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />

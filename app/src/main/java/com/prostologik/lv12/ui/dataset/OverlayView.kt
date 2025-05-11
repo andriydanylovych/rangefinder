@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 
 
 class OverlayView : View {
@@ -34,25 +33,40 @@ class OverlayView : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-            val s = (patchSize * scaleFactor).toFloat() / 2
+            val s = patchSize * scaleFactor
 
             if (clickX < 0) {
                 clickX = 0.5f * width
                 clickY = 0.5f * height
             }
 
-            canvas.drawRect(
-                clickX - s,
-                clickY - s,
-                clickX + s,
-                clickY + s,
-                myRedPaint
-            )
+            if (patchSize > 1) {
+                canvas.drawRect(
+                    clickX - s / 2,
+                    clickY - s / 2,
+                    clickX + s / 2,
+                    clickY + s / 2,
+                    myRedPaint
+                )
+            } else {
+                canvas.drawRect(
+                    clickX,
+                    clickY,
+                    clickX + s,
+                    clickY + s,
+                    myRedPaint
+                )
+            }
+
 
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         super.onTouchEvent(event)
+
+        fun roundToScale(f: Float, scale: Int): Float {
+            return ((f / scale).toInt() * scale).toFloat()
+        }
 
         when (event.action) {
 
@@ -62,18 +76,19 @@ class OverlayView : View {
                 var x = event.x
                 var y = event.y
 
-                val s: Float = (patchSize * scaleFactor).toFloat() / 2
+                val s = ((patchSize * scaleFactor) / 2).toFloat()
 
                 if (x < s) x = s
                 if (x > width - s) x = width - s
                 if (y < s) y = s
                 if (y > height - s) y = height - s
-                clickX = x
-                clickY = y
+                clickX = roundToScale(x, scaleFactor)
+                clickY = roundToScale(y, scaleFactor)
 
                 super.invalidate()
 
                 performClick()
+
                 return true
             }
         }

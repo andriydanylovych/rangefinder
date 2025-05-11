@@ -22,7 +22,9 @@
     <string name="next">Next</string>
     <string name="NEW">NEW</string>
 
-    <string name="pixel">Pixel</string>
+    <string name="patch_index">Patch # %1$d</string>
+
+    <string name="pixel">Pixel %1$d</string>
     <string name="prev">Previous</string>
 
     <string name="save">Save</string>

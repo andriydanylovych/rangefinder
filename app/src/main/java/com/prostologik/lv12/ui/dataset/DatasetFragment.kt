@@ -9,14 +9,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.R
 import com.prostologik.lv12.Util
+import com.prostologik.lv12.Util.byteToPixel
 import com.prostologik.lv12.Util.limitValue
 import com.prostologik.lv12.Util.stringToInteger
 import com.prostologik.lv12.databinding.FragmentDatasetBinding
@@ -28,28 +31,34 @@ import kotlin.math.roundToInt
 class DatasetFragment : Fragment() {
 
     private var _binding: FragmentDatasetBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private lateinit var safeContext: Context
 
     private val homeViewModel: HomeViewModel by activityViewModels()
 
-    private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
-    private lateinit var fileNamesArray: Array<String>
-    private var fileName: String = "default"
-    private var datasetName: String = "ds_01_s28_m255"
     private lateinit var mImageView: ImageView
+    private lateinit var overlayView: OverlayView
+    private lateinit var textName: TextView
+    private lateinit var textLabel: TextView
+    private lateinit var textNew: TextView
+    private lateinit var editLabel: EditText
+    private lateinit var spinnerPatchSize: Spinner
+
     private lateinit var bitmap: Bitmap
-    private var patchSize: Int = 0
-    private var maxLabel: Int = 99999
+    private lateinit var fileNamesArray: Array<String>
     private lateinit var linesOfPixels: Array<String>
     private lateinit var linesOfPatches: Array<String>
+
+    private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
+    private var fileName: String = "default"
+    private var datasetName: String = "ds_01_s28_m255"
+    private var patchSize: Int = 0
+    private var maxLabel: Int = 99999
     private var patchIndex = 0
     private var dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
-
     private val scaleFactor = 8
+    private val scalePatch = 24
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -62,6 +71,20 @@ class DatasetFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        _binding = FragmentDatasetBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+        mImageView = binding.imageSnippet
+        overlayView = binding.overlayView
+        textName = binding.textName
+        textLabel = binding.textLabel
+        textNew = binding.textNew
+        editLabel = binding.editLabel
+        spinnerPatchSize = binding.spinnerPatchSize
+        val btnSave = binding.saveButton
+        val btnOption = binding.optionButton
+        val btnNext = binding.nextButton
+        val btnPrev = binding.prevButton
 
         patchSize = getPreferencesInt("patch_size", 28)
         datasetName = getPreferencesString("dataset_name", "ds01_s28_m255")
@@ -79,51 +102,42 @@ class DatasetFragment : Fragment() {
             }
         }
 
-        _binding = FragmentDatasetBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        val overlayView = binding.overlayview
-
-        mImageView = binding.imageSnippet
-
-        val editLabel = binding.editLabel
+        textLabel.text = getString(R.string.label)
         editLabel.setText("0")
 
-        val btnSave = binding.saveButton
-        val btnOption = binding.optionButton
-        val btnNext = binding.nextButton
-        val btnPrev = binding.prevButton
-
         btnSave.setOnClickListener {
-            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
-            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
+            if (dsSnippetOption == 1) {
+                val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
+                val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
 
-            val label = limitValue(stringToInteger(editLabel.text.toString()), -1, maxLabel)
-            editLabel.setText(label.toString())
-            val sb: StringBuilder = StringBuilder()
-            sb.append(label)
+                val label = limitValue(stringToInteger(editLabel.text.toString()), -1, maxLabel)
+                editLabel.setText(label.toString())
+                val sb: StringBuilder = StringBuilder()
+                sb.append(label)
 
-            var size = linesOfPixels.size // includes UV!!
-            if (!fileName.startsWith("0")) size = size * 2 / 3
+                var size = linesOfPixels.size // includes UV!!
+                if (!fileName.startsWith("0")) size = size * 2 / 3
 
-            for (i in 0..< patchSize) {
-                val line = linesOfPixels[size - patchSize - x + i] // sizeI - patchSize- // 40-x + i
-                val pixels = line.split(",")
-                for (j in 0..< patchSize) {
-                    val d = pixels[y + j] // sizeJ - patchSize-
-                    sb.append(",$d")
+                for (i in 0..< patchSize) {
+                    val line = linesOfPixels[size - patchSize - x + i]
+                    val pixels = line.split(",")
+                    for (j in 0..< patchSize) {
+                        val d = pixels[y + j]
+                        sb.append(",$d")
+                    }
                 }
+                sb.append("\n")
+
+                patchIndex = 0
+                try {
+                    val file = File("$photoDirectory/$datasetName.csv")
+                    file.forEachLine { patchIndex++ } // to reference the freshly saved patch
+                    file.appendText(sb.toString())
+                } catch (_: IOException) {}
+
+                val msg = "record=$patchIndex x=$x y=$y + patch=$patchSize"
+                Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
             }
-            sb.append("\n")
-
-            patchIndex = 0
-            try {
-                val file = File("$photoDirectory/$datasetName.csv")
-                file.forEachLine { patchIndex++ } // to reference the freshly saved patch
-                file.appendText(sb.toString())
-            } catch (_: IOException) {}
-
-            val msg = "record=$patchIndex x=$x y=$y + patch=$patchSize"
-            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
         }
 
         fun renderNextImage(step: Int = 1) {
@@ -151,17 +165,21 @@ class DatasetFragment : Fragment() {
                 val size = linesOfPatches.size
                 patchIndex = (patchIndex + size + step) % size
                 renderPatch(linesOfPatches[patchIndex])
+                textName.text = getString(R.string.patch_index, patchIndex)
+                textLabel.text = getString(R.string.label)
             } catch (_: IOException) {}
         }
 
-        fun toastXY() {
-            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
-            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
-            val msg = "x=$x y=$y + patch=$patchSize"
-            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-        }
+//        fun toastXY() {
+//            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
+//            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
+//            val msg = "x=$x y=$y + patch=$patchSize"
+//            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+//        }
 
-        val spinnerPatchSize: Spinner = binding.spinnerPatchSize
+//        overlayView.setOnClickListener {
+//            toastXY()
+//        }
 
         btnOption.setOnClickListener {
             dsSnippetOption = (dsSnippetOption + 1) % 2
@@ -172,21 +190,22 @@ class DatasetFragment : Fragment() {
                 src = R.drawable.crop_24
                 buildDatasetSpinner(0)
                 renderNextPatch(0)
-                OverlayView.patchSize = 1
+                OverlayView.scaleFactor = scalePatch
+                OverlayView.patchSize = 1 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
+                btnSave.visibility = View.INVISIBLE
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
                 //tint = R.color.teal_700
                 src = R.drawable.edit_24
                 renderNextImage(0)
+                OverlayView.scaleFactor = scaleFactor
                 OverlayView.patchSize = patchSize
-                spinnerPatchSize.visibility = View.VISIBLE
                 buildDatasetSpinner(patchSize)
-                val textNew = binding.textNew
-                textNew.text = getString(R.string.label)
+                spinnerPatchSize.visibility = View.VISIBLE
+                btnSave.visibility = View.VISIBLE
+                textLabel.text = getString(R.string.label)
             }
-
-            toastXY()
 
             OverlayView.clickX = -1f
             overlayView.invalidate()
@@ -204,10 +223,8 @@ class DatasetFragment : Fragment() {
             else renderNextPatch(-1)
         }
 
-        // PatchSize spinner:
         buildPatchSizeSpinner()
 
-        // Dataset spinner:
         buildDatasetSpinner(patchSize)
 
         return root
@@ -228,8 +245,6 @@ class DatasetFragment : Fragment() {
             listOfPatchSizes.add("patch size: $t x $t")
         }
         val arrayOfPatchSizeNames = listOfPatchSizes.toTypedArray()
-
-        val spinnerPatchSize: Spinner = binding.spinnerPatchSize
 
         // Create an ArrayAdapter using a simple spinner layout
         val patchSizeAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfPatchSizeNames)
@@ -253,15 +268,12 @@ class DatasetFragment : Fragment() {
                 savePreferencesInt("patch_size", patchSize)
                 OverlayView.patchSize = patchSize
                 OverlayView.clickX = -1f
-                val overlayView = binding.overlayview
                 overlayView.invalidate()
 
                 buildDatasetSpinner(patchSize)
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                //patchSize = 28
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         }
     }
@@ -288,13 +300,11 @@ class DatasetFragment : Fragment() {
 
         // if (patchSize == 0 && arrayOfDatasets.size < 1) ??????????
 
-        //val arrayOfDatasets = getFileNames(photoDirectory, "csv", "ds")
         val arrayOfDatasets = listOfDatasets.toTypedArray()
 
         if (patchSize == 0 && arrayOfDatasets.indexOf(datasetName) < 0) datasetName = arrayOfDatasets[0]
 
         val spinnerDataset: Spinner = binding.spinnerDataset
-        val textNew = binding.textNew
 
         // Create an ArrayAdapter using a simple spinner layout
         val datasetAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfDatasets)
@@ -320,12 +330,9 @@ class DatasetFragment : Fragment() {
                 patchIndex = 0
                 val bitsOfDatasetName = datasetName.split("_")
                 maxLabel = if (bitsOfDatasetName.size > 3) stringToInteger(bitsOfDatasetName[3], 99999) else 99999
-                // android.R.id.NEW android.R.layout.simple_spinner_item
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                //val temp = "NEW file"
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         }
 
@@ -382,6 +389,10 @@ class DatasetFragment : Fragment() {
 
         mImageView.setImageBitmap(bitmap)
 
+        textName.text = file
+
+        overlayView.setOnClickListener {} // to silence the listener set in renderPatch
+
         return linesOfPixels.toTypedArray()
     }
 
@@ -390,9 +401,7 @@ class DatasetFragment : Fragment() {
 
         val pixels = patch.split(",")
 
-        //val patchSize = 28
-
-        val step = scaleFactor
+        val step = scalePatch
 
         bitmap = Bitmap.createBitmap(patchSize * step, patchSize * step, Bitmap.Config.ARGB_8888)
 
@@ -410,6 +419,21 @@ class DatasetFragment : Fragment() {
         }
 
         mImageView.setImageBitmap(bitmap)
+
+        editLabel.setText(pixels[0])
+
+        overlayView.setOnClickListener {
+            val x = (OverlayView.clickX / scalePatch - 0.5f).roundToInt()
+            val y = (OverlayView.clickY / scalePatch - 0.5f).roundToInt()
+//            val msg = "x$x y$y"
+//            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+//            editLabel.setText(pixels[x * patchSize + y].toString())
+            val index = limitValue((patchSize - 1 - x) * patchSize + y + 1, 1, pixels.size - 1)
+
+            val temp = byteToPixel(stringToInteger(pixels[index]).toByte()).toString()
+            editLabel.setText(temp)
+            textLabel.text = getString(R.string.pixel, index)
+        }
 
         return pixels.toTypedArray()
     }
@@ -436,7 +460,7 @@ class DatasetFragment : Fragment() {
         return sharedPref?.getInt(key, value) ?: value
     }
 
-    private fun savePreferencesInt(key: String, value: Int = 0) {
+    private fun savePreferencesInt(key: String, value: Int) {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
         with (sharedPref.edit()) {
             putInt(key, value)
@@ -444,7 +468,7 @@ class DatasetFragment : Fragment() {
         }
     }
 
-    private fun getPreferencesString(key: String, value: String = "ds01_s28_m255"): String {
+    private fun getPreferencesString(key: String, value: String = "ds_01_s28"): String {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
         return sharedPref?.getString(key, value) ?: value
     }
