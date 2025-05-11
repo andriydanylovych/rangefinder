@@ -119,6 +119,28 @@
         app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
+        android:id="@+id/save_button"
+        android:contentDescription="@string/save"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/save_24"
+        android:layout_margin="24dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/prev_button"
+        />
+
+    <ImageButton
+        android:id="@+id/delete_button"
+        android:contentDescription="@string/delete"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/delete_24"
+        android:layout_margin="24dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/prev_button"
+        />
+
+    <ImageButton
         android:id="@+id/option_button"
         android:contentDescription="@string/delete"
         android:layout_width="64dp"
@@ -128,17 +150,6 @@
         android:layout_margin="24dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/next_button"
-        />
-
-    <ImageButton
-        android:id="@+id/save_button"
-        android:contentDescription="@string/save"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/save_24"
-        android:layout_margin="24dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/prev_button"
         />
 
     <ImageButton

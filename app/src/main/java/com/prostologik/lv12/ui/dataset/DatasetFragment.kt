@@ -44,6 +44,7 @@ class DatasetFragment : Fragment() {
     private lateinit var textNew: TextView
     private lateinit var editLabel: EditText
     private lateinit var spinnerPatchSize: Spinner
+    private lateinit var spinnerDataset: Spinner
 
     private lateinit var bitmap: Bitmap
     private lateinit var fileNamesArray: Array<String>
@@ -81,10 +82,16 @@ class DatasetFragment : Fragment() {
         textNew = binding.textNew
         editLabel = binding.editLabel
         spinnerPatchSize = binding.spinnerPatchSize
+        spinnerDataset = binding.spinnerDataset
         val btnSave = binding.saveButton
+        val btnDelete = binding.deleteButton
         val btnOption = binding.optionButton
         val btnNext = binding.nextButton
         val btnPrev = binding.prevButton
+
+        dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
+        btnSave.visibility = View.VISIBLE
+        btnDelete.visibility = View.INVISIBLE
 
         patchSize = getPreferencesInt("patch_size", 28)
         datasetName = getPreferencesString("dataset_name", "ds01_s28_m255")
@@ -129,15 +136,27 @@ class DatasetFragment : Fragment() {
                 sb.append("\n")
 
                 patchIndex = 0
+                var msg = ""
                 try {
                     val file = File("$photoDirectory/$datasetName.csv")
-                    file.forEachLine { patchIndex++ } // to reference the freshly saved patch
-                    file.appendText(sb.toString())
-                } catch (_: IOException) {}
-
-                val msg = "record=$patchIndex x=$x y=$y + patch=$patchSize"
+                    if (file.exists()) {
+                        file.forEachLine { patchIndex++ } // to reference the freshly saved patch
+                        file.appendText(sb.toString())
+                    } else {
+                        file.writeText(sb.toString())
+                    }
+                    msg = "record=$patchIndex x=$x y=$y + size=$patchSize"
+                } catch (_: IOException) {
+                    msg = "not posted"
+                }
                 Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+            } else { // if (dsSnippetOption == 0)
+                // edit of label or pixel
             }
+        }
+
+        btnDelete.setOnClickListener {
+            deletePatch(photoDirectory, datasetName, patchIndex)
         }
 
         fun renderNextImage(step: Int = 1) {
@@ -152,23 +171,23 @@ class DatasetFragment : Fragment() {
 
         renderNextImage()
 
-        fun getPatchesFromDataset(file: File): Array<String> {
-            val temp = mutableListOf<String>()
-            file.forEachLine { line -> temp.add(line) }
-            return temp.toTypedArray()
-        }
+//        fun getPatchesFromDataset(file: File): Array<String> {
+//            val temp = mutableListOf<String>()
+//            file.forEachLine { line -> temp.add(line) }
+//            return temp.toTypedArray()
+//        }
 
-        fun renderNextPatch(step: Int = 1) {
-            try {
-                val file = File("$photoDirectory/$datasetName.csv")
-                if(file.exists()) linesOfPatches = getPatchesFromDataset(file)
-                val size = linesOfPatches.size
-                patchIndex = (patchIndex + size + step) % size
-                renderPatch(linesOfPatches[patchIndex])
-                textName.text = getString(R.string.patch_index, patchIndex)
-                textLabel.text = getString(R.string.label)
-            } catch (_: IOException) {}
-        }
+//        fun renderNextPatch(step: Int = 1) {
+//            try {
+//                val file = File("$photoDirectory/$datasetName.csv")
+//                if(file.exists()) linesOfPatches = getPatchesFromDataset(file)
+//                val size = linesOfPatches.size
+//                patchIndex = (patchIndex + size + step) % size
+//                renderPatch(linesOfPatches[patchIndex])
+//                textName.text = getString(R.string.patch_index, patchIndex)
+//                textLabel.text = getString(R.string.label)
+//            } catch (_: IOException) {}
+//        }
 
 //        fun toastXY() {
 //            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
@@ -193,7 +212,9 @@ class DatasetFragment : Fragment() {
                 OverlayView.scaleFactor = scalePatch
                 OverlayView.patchSize = 1 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
+                spinnerDataset.visibility = View.INVISIBLE
                 btnSave.visibility = View.INVISIBLE
+                btnDelete.visibility = View.VISIBLE
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
                 //tint = R.color.teal_700
@@ -203,7 +224,9 @@ class DatasetFragment : Fragment() {
                 OverlayView.patchSize = patchSize
                 buildDatasetSpinner(patchSize)
                 spinnerPatchSize.visibility = View.VISIBLE
+                spinnerDataset.visibility = View.INVISIBLE
                 btnSave.visibility = View.VISIBLE
+                btnDelete.visibility = View.INVISIBLE
                 textLabel.text = getString(R.string.label)
             }
 
@@ -233,6 +256,25 @@ class DatasetFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun renderNextPatch(step: Int = 1) {
+        try {
+            val file = File("$photoDirectory/$datasetName.csv")
+            if(file.exists()) linesOfPatches = getPatchesFromDataset(file)
+            val size = linesOfPatches.size
+            patchIndex = (patchIndex + size + step) % size
+            renderPatch(linesOfPatches[patchIndex])
+            textName.text = getString(R.string.patch_index, patchIndex)
+            textLabel.text = getString(R.string.label)
+        } catch (_: IOException) {}
+    }
+
+    private fun getPatchesFromDataset(file: File): Array<String> {
+        val temp = mutableListOf<String>()
+        file.forEachLine { line -> temp.add(line) }
+        return temp.toTypedArray()
     }
 
     private fun buildPatchSizeSpinner() {
@@ -304,7 +346,7 @@ class DatasetFragment : Fragment() {
 
         if (patchSize == 0 && arrayOfDatasets.indexOf(datasetName) < 0) datasetName = arrayOfDatasets[0]
 
-        val spinnerDataset: Spinner = binding.spinnerDataset
+        //val spinnerDataset: Spinner = binding.spinnerDataset
 
         // Create an ArrayAdapter using a simple spinner layout
         val datasetAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfDatasets)
@@ -436,6 +478,43 @@ class DatasetFragment : Fragment() {
         }
 
         return pixels.toTypedArray()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun deletePatch(fileDir: String, fileName: String, lineIndex: Int) {
+        try {
+            val file = File("$photoDirectory/$datasetName.csv")
+            var sb = ""
+            var i = 0
+            file.forEachLine { line ->
+                run {
+                    if (i != lineIndex) sb += "$line\n"
+                    i++
+                }
+            }
+            file.writeText(sb)
+            renderNextPatch(0)
+        } catch (_: IOException) {}
+    }
+
+    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, pixelIndex: Int, newValue: Int) {
+        try {
+            val file = File("$photoDirectory/$datasetName.csv")
+            var sb = ""
+            var i = 0
+            file.forEachLine { line -> run {
+                    if (i == lineIndex) sb += line
+                    else sb += line
+                    i++
+                }
+            }
+            file.writeText("") // to delete content
+            file.appendText(sb.toString())
+        } catch (_: IOException) {}
+
+    }
+
+    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, newPatch: String) {
     }
 
     private fun getFileNames(dir: String, fileNameExtension: String = "jpg", fileNamePrefix: String = ""): Array<String> {

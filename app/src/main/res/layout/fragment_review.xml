@@ -53,7 +53,7 @@
 
     <ImageButton
         android:id="@+id/prev_button"
-        android:contentDescription="@string/save"
+        android:contentDescription="@string/prev"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="24dp"
@@ -65,7 +65,7 @@
 
     <ImageButton
         android:id="@+id/next_button"
-        android:contentDescription="@string/photo"
+        android:contentDescription="@string/next"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginEnd="24dp"
