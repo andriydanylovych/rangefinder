@@ -13,6 +13,13 @@ object Util {
         }
     }
 
+    fun pixelToByteAsInt(p: Int): Int {
+        return if (p < 0) 0
+        else if (p > 255) -1
+        else if (p > 127) p - 256
+        else p
+    }
+
     fun byteToPixel(b: Byte): Int {
         val byteAsInt = b.toInt()
         return if (byteAsInt < -128) 0

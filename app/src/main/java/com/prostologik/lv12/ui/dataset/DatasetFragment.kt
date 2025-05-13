@@ -4,12 +4,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
@@ -21,12 +24,14 @@ import com.prostologik.lv12.R
 import com.prostologik.lv12.Util
 import com.prostologik.lv12.Util.byteToPixel
 import com.prostologik.lv12.Util.limitValue
+import com.prostologik.lv12.Util.pixelToByteAsInt
 import com.prostologik.lv12.Util.stringToInteger
 import com.prostologik.lv12.databinding.FragmentDatasetBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
 import java.io.IOException
 import kotlin.math.roundToInt
+
 
 class DatasetFragment : Fragment() {
 
@@ -46,6 +51,10 @@ class DatasetFragment : Fragment() {
     private lateinit var spinnerPatchSize: Spinner
     private lateinit var spinnerDataset: Spinner
 
+    private lateinit var btnSave: ImageButton
+    private lateinit var btnDelete: ImageButton
+    private lateinit var btnOption: ImageButton
+
     private lateinit var bitmap: Bitmap
     private lateinit var fileNamesArray: Array<String>
     private lateinit var linesOfPixels: Array<String>
@@ -57,6 +66,7 @@ class DatasetFragment : Fragment() {
     private var patchSize: Int = 0
     private var maxLabel: Int = 99999
     private var patchIndex = 0
+    private var pixelIndex = 0
     private var dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
     private val scaleFactor = 8
     private val scalePatch = 24
@@ -83,9 +93,9 @@ class DatasetFragment : Fragment() {
         editLabel = binding.editLabel
         spinnerPatchSize = binding.spinnerPatchSize
         spinnerDataset = binding.spinnerDataset
-        val btnSave = binding.saveButton
-        val btnDelete = binding.deleteButton
-        val btnOption = binding.optionButton
+        btnSave = binding.saveButton
+        btnDelete = binding.deleteButton
+        btnOption = binding.optionButton
         val btnNext = binding.nextButton
         val btnPrev = binding.prevButton
 
@@ -112,6 +122,24 @@ class DatasetFragment : Fragment() {
         textLabel.text = getString(R.string.label)
         editLabel.setText("0")
 
+//        editLabel.setOnClickListener { // setOnClickListener
+//            btnSave.visibility = View.VISIBLE
+//            btnDelete.visibility = View.INVISIBLE
+//        }
+
+        editLabel.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (dsSnippetOption == 0) {
+                    btnSave.visibility = View.VISIBLE
+                    btnDelete.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        })
+
         btnSave.setOnClickListener {
             if (dsSnippetOption == 1) {
                 val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
@@ -135,23 +163,43 @@ class DatasetFragment : Fragment() {
                 }
                 sb.append("\n")
 
-                patchIndex = 0
-                var msg = ""
+                var lineCount = 0
+                var msg: String
                 try {
                     val file = File("$photoDirectory/$datasetName.csv")
                     if (file.exists()) {
-                        file.forEachLine { patchIndex++ } // to reference the freshly saved patch
+                        file.forEachLine { lineCount++ } // to reference the freshly saved patch
+                        patchIndex = lineCount
                         file.appendText(sb.toString())
                     } else {
                         file.writeText(sb.toString())
                     }
+                    textNew.text = "" // to suppress NEW if it was there
+                    btnOption.visibility = View.VISIBLE
                     msg = "record=$patchIndex x=$x y=$y + size=$patchSize"
                 } catch (_: IOException) {
                     msg = "not posted"
                 }
                 Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
             } else { // if (dsSnippetOption == 0)
-                // edit of label or pixel
+                // edit label or pixel
+                var value = stringToInteger(editLabel.text.toString())
+
+                // check if value is in the allowed range
+                if (pixelIndex == 0 && value < -1) value = -1
+
+                // pixelToByteAsInt(value) // convert 255 to -128
+                if (pixelIndex > 0) value = pixelToByteAsInt(value)
+
+                editDataset(photoDirectory, datasetName, patchIndex, pixelIndex, value)
+
+                if (pixelIndex > 0) renderNextPatch(0)
+
+                Toast.makeText(safeContext, "saved value $value", Toast.LENGTH_SHORT).show()
+                btnSave.visibility = View.INVISIBLE
+                btnDelete.visibility = View.VISIBLE
+
+
             }
         }
 
@@ -171,63 +219,31 @@ class DatasetFragment : Fragment() {
 
         renderNextImage()
 
-//        fun getPatchesFromDataset(file: File): Array<String> {
-//            val temp = mutableListOf<String>()
-//            file.forEachLine { line -> temp.add(line) }
-//            return temp.toTypedArray()
-//        }
-
-//        fun renderNextPatch(step: Int = 1) {
-//            try {
-//                val file = File("$photoDirectory/$datasetName.csv")
-//                if(file.exists()) linesOfPatches = getPatchesFromDataset(file)
-//                val size = linesOfPatches.size
-//                patchIndex = (patchIndex + size + step) % size
-//                renderPatch(linesOfPatches[patchIndex])
-//                textName.text = getString(R.string.patch_index, patchIndex)
-//                textLabel.text = getString(R.string.label)
-//            } catch (_: IOException) {}
-//        }
-
-//        fun toastXY() {
-//            val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
-//            val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
-//            val msg = "x=$x y=$y + patch=$patchSize"
-//            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-//        }
-
-//        overlayView.setOnClickListener {
-//            toastXY()
-//        }
-
         btnOption.setOnClickListener {
             dsSnippetOption = (dsSnippetOption + 1) % 2
             //var tint: Int
             val src: Int
             if (dsSnippetOption == 0) { // 0=Dataset
-                //tint = R.color.purple_500
+                // tint = R.color.purple_500
                 src = R.drawable.crop_24
-                buildDatasetSpinner(0)
-                renderNextPatch(0)
                 OverlayView.scaleFactor = scalePatch
                 OverlayView.patchSize = 1 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
                 spinnerDataset.visibility = View.INVISIBLE
-                btnSave.visibility = View.INVISIBLE
-                btnDelete.visibility = View.VISIBLE
+                renderNextPatch(0)
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
-                //tint = R.color.teal_700
+                // tint = R.color.teal_700
                 src = R.drawable.edit_24
-                renderNextImage(0)
                 OverlayView.scaleFactor = scaleFactor
                 OverlayView.patchSize = patchSize
                 buildDatasetSpinner(patchSize)
                 spinnerPatchSize.visibility = View.VISIBLE
-                spinnerDataset.visibility = View.INVISIBLE
+                spinnerDataset.visibility = View.VISIBLE
                 btnSave.visibility = View.VISIBLE
                 btnDelete.visibility = View.INVISIBLE
                 textLabel.text = getString(R.string.label)
+                renderNextImage(0)
             }
 
             OverlayView.clickX = -1f
@@ -266,8 +282,11 @@ class DatasetFragment : Fragment() {
             val size = linesOfPatches.size
             patchIndex = (patchIndex + size + step) % size
             renderPatch(linesOfPatches[patchIndex])
-            textName.text = getString(R.string.patch_index, patchIndex)
+            textName.text = getString(R.string.dataset_patch_index, datasetName, patchIndex)
             textLabel.text = getString(R.string.label)
+            btnSave.visibility = View.INVISIBLE
+            btnDelete.visibility = View.VISIBLE
+            pixelIndex = 0
         } catch (_: IOException) {}
     }
 
@@ -322,14 +341,15 @@ class DatasetFragment : Fragment() {
 
     private fun buildDatasetSpinner(patchSize: Int) {
         // to list all datasets without NEW --> patchSize = 0 i.e. buildDatasetSpinner(0)
+
         val allDatasets = getFileNames(photoDirectory, "csv", "ds")
         val listOfDatasets = mutableListOf<String>()
         val listOfSeqNumbers = mutableListOf<Int>()
-        if (patchSize > 0) listOfDatasets.add("ds_99_28") // a placeholder for a NEW file name
+        listOfDatasets.add("ds_99_28") // a placeholder for a NEW file name if (patchSize > 0)
         for (ds in allDatasets) {
             val bitsOfDatasetName = ds.split("_")
             if (bitsOfDatasetName.size < 3) continue
-            if (patchSize > 0 && bitsOfDatasetName[2] != patchSize.toString()) continue
+            if (bitsOfDatasetName[2] != patchSize.toString()) continue // && patchSize > 0
             listOfDatasets.add(ds)
             listOfSeqNumbers.add(stringToInteger(bitsOfDatasetName[1], 0))
         }
@@ -338,15 +358,11 @@ class DatasetFragment : Fragment() {
         for (num in listOfSeqNumbers) {
             if (num == nextSeqNumber) nextSeqNumber++
         }
-        if (patchSize > 0) listOfDatasets[0] = "ds_$nextSeqNumber" + "_" + patchSize // a NEW file name
-
-        // if (patchSize == 0 && arrayOfDatasets.size < 1) ??????????
+        listOfDatasets[0] = "ds_$nextSeqNumber" + "_" + patchSize // a NEW file name if (patchSize > 0)
 
         val arrayOfDatasets = listOfDatasets.toTypedArray()
 
-        if (patchSize == 0 && arrayOfDatasets.indexOf(datasetName) < 0) datasetName = arrayOfDatasets[0]
-
-        //val spinnerDataset: Spinner = binding.spinnerDataset
+        //if (patchSize == 0 && arrayOfDatasets.indexOf(datasetName) < 0) datasetName = arrayOfDatasets[0]
 
         // Create an ArrayAdapter using a simple spinner layout
         val datasetAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfDatasets)
@@ -367,8 +383,14 @@ class DatasetFragment : Fragment() {
                 id: Long
             ) {
                 datasetName = arrayOfDatasets[position]
-                savePreferencesString("dataset_name", datasetName) // "ds01_s28_m255"
-                if (patchSize > 0 && position == 0) textNew.text = getString(R.string.NEW) else textNew.text = ""
+                savePreferencesString("dataset_name", datasetName) // "ds_1_28_255"
+                if (position == 0) {
+                    textNew.text = getString(R.string.NEW)
+                    btnOption.visibility = View.INVISIBLE
+                } else {
+                    textNew.text = ""
+                    btnOption.visibility = View.VISIBLE
+                } // patchSize > 0 &&
                 patchIndex = 0
                 val bitsOfDatasetName = datasetName.split("_")
                 maxLabel = if (bitsOfDatasetName.size > 3) stringToInteger(bitsOfDatasetName[3], 99999) else 99999
@@ -425,7 +447,6 @@ class DatasetFragment : Fragment() {
                 val intArray = IntArray(size) { color }
 
                 bitmap.setPixels(intArray,0,step,(snippetUV - 1 - x) * step, y * step, step, step)
-
             }
         }
 
@@ -456,7 +477,6 @@ class DatasetFragment : Fragment() {
                 val intArray = IntArray(size) { color }
 
                 bitmap.setPixels(intArray,0,step,(patchSize - 1 - x) * step, y * step, step, step)
-
             }
         }
 
@@ -467,55 +487,66 @@ class DatasetFragment : Fragment() {
         overlayView.setOnClickListener {
             val x = (OverlayView.clickX / scalePatch - 0.5f).roundToInt()
             val y = (OverlayView.clickY / scalePatch - 0.5f).roundToInt()
-//            val msg = "x$x y$y"
-//            Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
-//            editLabel.setText(pixels[x * patchSize + y].toString())
-            val index = limitValue((patchSize - 1 - x) * patchSize + y + 1, 1, pixels.size - 1)
 
-            val temp = byteToPixel(stringToInteger(pixels[index]).toByte()).toString()
+            pixelIndex = limitValue((patchSize - 1 - x) * patchSize + y + 1, 1, pixels.size - 1)
+
+            val temp = byteToPixel(stringToInteger(pixels[pixelIndex]).toByte()).toString()
             editLabel.setText(temp)
-            textLabel.text = getString(R.string.pixel, index)
+            textLabel.text = getString(R.string.pixel, pixelIndex)
         }
 
         return pixels.toTypedArray()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun deletePatch(fileDir: String, fileName: String, lineIndex: Int) {
+    private fun deletePatch(fileDir: String, dsName: String, lineIndex: Int) {
         try {
-            val file = File("$photoDirectory/$datasetName.csv")
-            var sb = ""
-            var i = 0
-            file.forEachLine { line ->
-                run {
-                    if (i != lineIndex) sb += "$line\n"
-                    i++
+            val file = File("$fileDir/$dsName.csv")
+            if (file.exists()) {
+                val sb: StringBuilder = StringBuilder()
+                var i = 0
+                file.forEachLine { line ->
+                    run {
+                        if (i != lineIndex) sb.append("$line\n")
+                        i++
+                    }
+                }
+                if (i > 1) {
+                    file.writeText(sb.toString()) // to avoid ending without any patches
+                    renderNextPatch(0)
+                } else {
+                    Toast.makeText(safeContext, "at least one patch must remain in a dataset", Toast.LENGTH_SHORT).show()
                 }
             }
-            file.writeText(sb)
-            renderNextPatch(0)
         } catch (_: IOException) {}
     }
 
-    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, pixelIndex: Int, newValue: Int) {
+    private fun editDataset(fileDir: String, dsName: String, lineIndex: Int, pixelIndex: Int, newValue: Int) {
         try {
-            val file = File("$photoDirectory/$datasetName.csv")
-            var sb = ""
+            val file = File("$fileDir/$dsName.csv")
+            val sb: StringBuilder = StringBuilder()
             var i = 0
             file.forEachLine { line -> run {
-                    if (i == lineIndex) sb += line
-                    else sb += line
+                    if (i == lineIndex) {
+                        val pixels = line.split(",")
+                        for (j in pixels.indices) {
+                            if (j > 0) sb.append(",")
+                            if (j == pixelIndex) sb.append(newValue)
+                            else sb.append(pixels[j])
+                        }
+                        sb.append("\n")
+                    }
+                    else sb.append("$line\n")
                     i++
                 }
             }
-            file.writeText("") // to delete content
-            file.appendText(sb.toString())
+            file.writeText(sb.toString())
         } catch (_: IOException) {}
 
     }
 
-    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, newPatch: String) {
-    }
+//    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, newPatch: String) {
+//    }
 
     private fun getFileNames(dir: String, fileNameExtension: String = "jpg", fileNamePrefix: String = ""): Array<String> {
         val filesAll = File(dir).listFiles()
