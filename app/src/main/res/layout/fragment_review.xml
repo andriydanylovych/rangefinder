@@ -44,7 +44,9 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/delete_24"
-        android:layout_marginStart="24dp"
+        android:backgroundTint="#000000"
+        android:background="@drawable/button_shape"
+        android:layout_marginStart="@dimen/button_margin"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_review"
@@ -56,10 +58,11 @@
         android:contentDescription="@string/prev"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="@dimen/button_margin"
         android:layout_marginBottom="64dp"
         android:backgroundTint="#00FF00"
         android:src="@drawable/prev_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 
@@ -68,10 +71,11 @@
         android:contentDescription="@string/next"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="@dimen/button_margin"
         android:layout_marginBottom="64dp"
         android:backgroundTint="#00FF00"
         android:src="@drawable/next_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

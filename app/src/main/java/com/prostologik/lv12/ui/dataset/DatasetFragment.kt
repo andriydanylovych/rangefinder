@@ -210,7 +210,8 @@ class DatasetFragment : Fragment() {
         fun renderNextImage(step: Int = 1) {
             val size = fileNamesArray.size
             val currentFileIndex = fileNamesArray.indexOf(fileName)
-            val nextItemIndex = (currentFileIndex + size + step) % size
+            val nextItemIndex = if (size > 0) (currentFileIndex + size + step) % size else 0
+            //val nextItemIndex = (currentFileIndex + size + step) % size
             fileName = fileNamesArray[nextItemIndex]
             linesOfPixels = renderSnippet(photoDirectory, fileName)
             OverlayView.clickX = -1f
@@ -227,7 +228,7 @@ class DatasetFragment : Fragment() {
                 // tint = R.color.purple_500
                 src = R.drawable.crop_24
                 OverlayView.scaleFactor = scalePatch
-                OverlayView.patchSize = 1 // scalePatch
+                OverlayView.patchSize = 0 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
                 spinnerDataset.visibility = View.INVISIBLE
                 renderNextPatch(0)
@@ -278,22 +279,25 @@ class DatasetFragment : Fragment() {
     fun renderNextPatch(step: Int = 1) {
         try {
             val file = File("$photoDirectory/$datasetName.csv")
-            if(file.exists()) linesOfPatches = getPatchesFromDataset(file)
+            if (file.exists()) {
+                val temp = mutableListOf<String>()
+                file.forEachLine { line -> temp.add(line) }
+                linesOfPatches = temp.toTypedArray() //getPatchesFromDataset(file)
+            } else arrayOf("")
             val size = linesOfPatches.size
-            patchIndex = (patchIndex + size + step) % size
-            renderPatch(linesOfPatches[patchIndex])
+            if (size > 0) {
+                patchIndex = (patchIndex + size + step) % size
+                renderPatch(linesOfPatches[patchIndex])
+            } else {
+                renderPatch("")
+            }
+
             textName.text = getString(R.string.dataset_patch_index, datasetName, patchIndex)
             textLabel.text = getString(R.string.label)
             btnSave.visibility = View.INVISIBLE
             btnDelete.visibility = View.VISIBLE
             pixelIndex = 0
         } catch (_: IOException) {}
-    }
-
-    private fun getPatchesFromDataset(file: File): Array<String> {
-        val temp = mutableListOf<String>()
-        file.forEachLine { line -> temp.add(line) }
-        return temp.toTypedArray()
     }
 
     private fun buildPatchSizeSpinner() {
@@ -462,7 +466,13 @@ class DatasetFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun renderPatch(patch: String): Array<String> {
 
-        val pixels = patch.split(",")
+        val temp = patchSize * patchSize + 1
+        var pixels = (Array(temp) { "0" }).toList()
+        try {
+            if (patch != "") pixels = patch.split(",")
+        } catch (_: IOException) {}
+
+        Toast.makeText(safeContext, "pixels.size = ${pixels.size}", Toast.LENGTH_SHORT).show()
 
         val step = scalePatch
 
@@ -484,14 +494,17 @@ class DatasetFragment : Fragment() {
 
         editLabel.setText(pixels[0])
 
+        OverlayView.patchSize = 0
+        overlayView.invalidate()
+
         overlayView.setOnClickListener {
             val x = (OverlayView.clickX / scalePatch - 0.5f).roundToInt()
             val y = (OverlayView.clickY / scalePatch - 0.5f).roundToInt()
 
             pixelIndex = limitValue((patchSize - 1 - x) * patchSize + y + 1, 1, pixels.size - 1)
 
-            val temp = byteToPixel(stringToInteger(pixels[pixelIndex]).toByte()).toString()
-            editLabel.setText(temp)
+            val pxValue = byteToPixel(stringToInteger(pixels[pixelIndex]).toByte()).toString()
+            editLabel.setText(pxValue)
             textLabel.text = getString(R.string.pixel, pixelIndex)
         }
 
@@ -511,11 +524,12 @@ class DatasetFragment : Fragment() {
                         i++
                     }
                 }
-                if (i > 1) {
+                if (true) { // i > 1
                     file.writeText(sb.toString()) // to avoid ending without any patches
                     renderNextPatch(0)
                 } else {
-                    Toast.makeText(safeContext, "at least one patch must remain in a dataset", Toast.LENGTH_SHORT).show()
+                    file.delete()
+                    // go back to snippet view
                 }
             }
         } catch (_: IOException) {}

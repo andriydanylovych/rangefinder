@@ -85,6 +85,7 @@ class OverlayView : View {
                 clickX = roundToScale(x, scaleFactor)
                 clickY = roundToScale(y, scaleFactor)
 
+                if (patchSize == 0) patchSize = 1
                 super.invalidate()
 
                 performClick()

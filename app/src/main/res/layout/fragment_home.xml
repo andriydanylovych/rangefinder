@@ -69,10 +69,10 @@
         android:contentDescription="@string/take_photo"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginBottom="40dp"
+        android:layout_margin="@dimen/button_margin"
         android:backgroundTint="#00FF00"
         android:src="@drawable/shot_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 
@@ -81,9 +81,9 @@
         android:contentDescription="@string/dataset_review"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="40dp"
+        android:layout_margin="@dimen/button_margin"
         android:src="@drawable/visibility_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

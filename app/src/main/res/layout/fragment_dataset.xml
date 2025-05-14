@@ -11,7 +11,7 @@
         android:id="@+id/textName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:padding="17dp"
         android:text="@string/label"
         app:layout_constraintTop_toTopOf="parent"
@@ -124,9 +124,10 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/save_24"
-        android:layout_margin="24dp"
+        android:background="@drawable/button_shape"
+        android:layout_margin="@dimen/button_margin"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/prev_button"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <ImageButton
@@ -135,9 +136,11 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/delete_24"
-        android:layout_margin="24dp"
+        android:backgroundTint="#000000"
+        android:background="@drawable/button_shape"
+        android:layout_margin="@dimen/button_margin"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/prev_button"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <ImageButton
@@ -147,9 +150,10 @@
         android:layout_height="64dp"
         android:backgroundTint="#0000FF"
         android:src="@drawable/edit_24"
-        android:layout_margin="24dp"
+        android:background="@drawable/button_shape"
+        android:layout_margin="@dimen/button_margin"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/next_button"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <ImageButton
@@ -157,10 +161,10 @@
         android:contentDescription="@string/prev"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_margin="@dimen/button_margin"
         android:backgroundTint="#00FF00"
         android:src="@drawable/prev_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 
@@ -169,10 +173,10 @@
         android:contentDescription="@string/next"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_margin="@dimen/button_margin"
         android:backgroundTint="#00FF00"
         android:src="@drawable/next_24"
+        android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
