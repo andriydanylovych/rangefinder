@@ -27,9 +27,9 @@
         android:id="@+id/text_home"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
         style="@style/HomeTextViewItem"
         android:scrollbars = "vertical"
+        android:background="@drawable/rounded_edges"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,10 +67,10 @@
     <ImageButton
         android:id="@+id/image_capture_button"
         android:contentDescription="@string/take_photo"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
         android:layout_margin="@dimen/button_margin"
-        android:backgroundTint="#00FF00"
+        android:backgroundTint="@color/green"
         android:src="@drawable/shot_24"
         android:background="@drawable/button_shape"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -79,8 +79,8 @@
     <ImageButton
         android:id="@+id/option_button"
         android:contentDescription="@string/dataset_review"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
         android:layout_margin="@dimen/button_margin"
         android:src="@drawable/visibility_24"
         android:background="@drawable/button_shape"

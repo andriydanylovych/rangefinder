@@ -3,6 +3,7 @@
     <style name="HomeTextViewItem" parent="@android:style/Widget.TextView" >
         <item name="android:textSize" >14sp</item>
         <item name="android:padding" >8sp</item>
+        <item name="android:layout_margin" >8sp</item>
         <item name="android:textStyle" >bold</item>
         <item name="android:textAlignment" >center</item>
     </style>

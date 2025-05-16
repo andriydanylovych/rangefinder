@@ -20,49 +20,46 @@
         >
 
     <TextView
-        android:id="@+id/labelLayer"
-        android:labelFor="@+id/radioGroupLayers"
-        android:layout_width="wrap_content"
+        android:id="@+id/version"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_size"
         android:textAlignment="center"
-        android:text="Select YUV layers:"
-        tools:ignore="HardcodedText"
+        android:layout_marginBottom="24dp"
+        android:text="@string/version"
         />
-
 
     <RadioGroup
         android:id="@+id/radioGroupLayers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:tag="Option"
-        android:text="Layer selection"
-        tools:ignore="HardcodedText">
+        android:background="@drawable/rounded_edges"
+        android:text="@string/layers"
+        tools:ignore="HardcodedText"
+        >
 
         <RadioButton
             android:id="@+id/radioLayerY"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Y"
+            android:text="Layer Y"
             />
 
         <RadioButton
             android:id="@+id/radioLayerU"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Y + U"
+            android:text="Layers Y + U"
             />
 
         <RadioButton
             android:id="@+id/radioLayerV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Y + V"
+            android:text="Layers Y + V"
             />
 
     </RadioGroup>
-
 
     <View
         android:layout_width="match_parent"
@@ -71,51 +68,46 @@
         android:layout_marginBottom="24dp"
         android:background="#334455"/>
 
-
-
-
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:gravity="center|center"
         android:textSize="20sp"
-        android:text="Resolution Width x Height:"
-        tools:ignore="HardcodedText"
+        android:text="@string/resolution"
         />
 
-        <Spinner
-            android:id="@+id/spinnerOutputSize"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center|center"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:textSize="20sp"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            />
+    <Spinner
+        android:id="@+id/spinnerOutputSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|center"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/rounded_edges"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        />
 
-        <TextView
-            android:id="@+id/text_home"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:background="#FFFFFF"
-            android:textSize="11sp"
-            style="@style/SpinnerTextViewItem"
-            />
+    <TextView
+        android:id="@+id/text_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="24dp"
+        android:textSize="@dimen/text_size"
+        style="@style/SpinnerTextViewItem"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center|center"
         android:orientation="horizontal"
-        android:background="#22BCD4"
+        android:background="@drawable/rounded_edges"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
@@ -124,7 +116,7 @@
 
         <EditText
             android:id="@+id/editResolutionWidth"
-            android:hint="Resolution Width"
+            android:hint="@string/width"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -149,7 +141,7 @@
 
         <EditText
             android:id="@+id/editResolutionHeight"
-            android:hint="Resolution Height"
+            android:hint="@string/height"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -200,7 +192,7 @@
         android:id="@+id/text_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_edges"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="24dp"
         android:textSize="11sp"

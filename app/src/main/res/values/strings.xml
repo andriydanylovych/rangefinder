@@ -13,7 +13,10 @@
     <string name="take_photo">Take Photo</string>
     <string name="photo">Photo</string>
     <string name="get_info">Info</string>
+
+    <string name="height">Height</string>
     <string name="label">Label</string>
+    <string name="layers">Layers:</string>
 
     <string name="menu_home">Camera</string>
     <string name="menu_review">Review</string>
@@ -28,11 +31,15 @@
     <string name="pixel">Pixel %1$d</string>
     <string name="prev">Previous</string>
 
+    <string name="resolution">Resolution Width x Height:</string>
     <string name="save">Save</string>
 
     <string name="saved_layer">saved_layer</string>
     <string name="snippet_width">snippet_width</string>
     <string name="snippet_height">snippet_height</string>
+
+    <string name="version">Version: 0.1</string>
+    <string name="width">Width</string>
 
     <string name="width_height">WxH = %1$d x %2$d = %3$d</string>
 
@@ -45,6 +52,12 @@
         <item>352 x 288</item>
         <item>640 x 480</item>
         <item>800 x 600</item>
+    </string-array>
+
+    <string-array name="layers">
+        <item>Y</item>
+        <item>Y + U</item>
+        <item>Y + V</item>
     </string-array>
 
 </resources>

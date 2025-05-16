@@ -30,6 +30,8 @@ import com.prostologik.lv12.databinding.FragmentDatasetBinding
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
 import java.io.IOException
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 
@@ -55,10 +57,10 @@ class DatasetFragment : Fragment() {
     private lateinit var btnDelete: ImageButton
     private lateinit var btnOption: ImageButton
 
-    private lateinit var bitmap: Bitmap
+    //private lateinit var bitmap: Bitmap
     private lateinit var fileNamesArray: Array<String>
-    private lateinit var linesOfPixels: Array<String>
-    private lateinit var linesOfPatches: Array<String>
+    private lateinit var lineOfSnippetPixels: Array<String>
+    private lateinit var listOfPatches: Array<String>
 
     private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
     private var fileName: String = "default"
@@ -68,8 +70,8 @@ class DatasetFragment : Fragment() {
     private var patchIndex = 0
     private var pixelIndex = 0
     private var dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
-    private val scaleFactor = 8
-    private val scalePatch = 24
+    private var scaleFactor = 8 // will be recalculated
+    private var scalePatch = 24 // will be recalculated
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -109,13 +111,11 @@ class DatasetFragment : Fragment() {
         photoDirectory = homeViewModel.photoDirectory
         fileNamesArray = getFileNames(photoDirectory)
 
-        OverlayView.scaleFactor = scaleFactor
-
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
             if (temp != "") {
                 fileName = temp
-                linesOfPixels = renderSnippet(photoDirectory, fileName)
+                lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
             }
         }
 
@@ -140,21 +140,27 @@ class DatasetFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         })
 
+        fun scaleBack(click: Float): Int {
+            return (click / scaleFactor - patchSize * 0.5f).roundToInt()
+        }
+
         btnSave.setOnClickListener {
             if (dsSnippetOption == 1) {
-                val x = (OverlayView.clickX / scaleFactor - patchSize * 0.5f).roundToInt()
-                val y = (OverlayView.clickY / scaleFactor - patchSize * 0.5f).roundToInt()
+                val x = scaleBack(OverlayView.clickX)
+                val y = scaleBack(OverlayView.clickY)
 
                 val label = limitValue(stringToInteger(editLabel.text.toString()), -1, maxLabel)
                 editLabel.setText(label.toString())
                 val sb: StringBuilder = StringBuilder()
                 sb.append(label)
 
-                var size = linesOfPixels.size // includes UV!!
-                if (!fileName.startsWith("0")) size = size * 2 / 3
+//                var size = lineOfSnippetPixels.size // potentially includes UV!!
+//                if (!fileName.startsWith("0")) size = size * 2 / 3
+
+                val size = yLayerLines(lineOfSnippetPixels)
 
                 for (i in 0..< patchSize) {
-                    val line = linesOfPixels[size - patchSize - x + i]
+                    val line = lineOfSnippetPixels[size - patchSize - x + i]
                     val pixels = line.split(",")
                     for (j in 0..< patchSize) {
                         val d = pixels[y + j]
@@ -164,7 +170,6 @@ class DatasetFragment : Fragment() {
                 sb.append("\n")
 
                 var lineCount = 0
-                var msg: String
                 try {
                     val file = File("$photoDirectory/$datasetName.csv")
                     if (file.exists()) {
@@ -176,11 +181,9 @@ class DatasetFragment : Fragment() {
                     }
                     textNew.text = "" // to suppress NEW if it was there
                     btnOption.visibility = View.VISIBLE
-                    msg = "record=$patchIndex x=$x y=$y + size=$patchSize"
-                } catch (_: IOException) {
-                    msg = "not posted"
-                }
-                Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+                    val msg = "record=$patchIndex x=$x y=$y + size=$patchSize"
+                    Toast.makeText(safeContext, msg, Toast.LENGTH_SHORT).show()
+                } catch (_: IOException) {}
             } else { // if (dsSnippetOption == 0)
                 // edit label or pixel
                 var value = stringToInteger(editLabel.text.toString())
@@ -195,7 +198,7 @@ class DatasetFragment : Fragment() {
 
                 if (pixelIndex > 0) renderNextPatch(0)
 
-                Toast.makeText(safeContext, "saved value $value", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(safeContext, "saved value $value", Toast.LENGTH_SHORT).show()
                 btnSave.visibility = View.INVISIBLE
                 btnDelete.visibility = View.VISIBLE
 
@@ -213,7 +216,7 @@ class DatasetFragment : Fragment() {
             val nextItemIndex = if (size > 0) (currentFileIndex + size + step) % size else 0
             //val nextItemIndex = (currentFileIndex + size + step) % size
             fileName = fileNamesArray[nextItemIndex]
-            linesOfPixels = renderSnippet(photoDirectory, fileName)
+            lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
             OverlayView.clickX = -1f
             overlayView.invalidate()
         }
@@ -227,7 +230,6 @@ class DatasetFragment : Fragment() {
             if (dsSnippetOption == 0) { // 0=Dataset
                 // tint = R.color.purple_500
                 src = R.drawable.crop_24
-                OverlayView.scaleFactor = scalePatch
                 OverlayView.patchSize = 0 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
                 spinnerDataset.visibility = View.INVISIBLE
@@ -236,7 +238,6 @@ class DatasetFragment : Fragment() {
             else { // if (dsSnippetOption == 1) // 1=Snippet
                 // tint = R.color.teal_700
                 src = R.drawable.edit_24
-                OverlayView.scaleFactor = scaleFactor
                 OverlayView.patchSize = patchSize
                 buildDatasetSpinner(patchSize)
                 spinnerPatchSize.visibility = View.VISIBLE
@@ -275,6 +276,12 @@ class DatasetFragment : Fragment() {
         _binding = null
     }
 
+    private fun yLayerLines(lineOfSnippetPixels: Array<String>): Int {
+        var size = lineOfSnippetPixels.size // potentially includes UV!!
+        if (!fileName.startsWith("0")) size = size * 2 / 3
+        return size
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun renderNextPatch(step: Int = 1) {
         try {
@@ -282,12 +289,12 @@ class DatasetFragment : Fragment() {
             if (file.exists()) {
                 val temp = mutableListOf<String>()
                 file.forEachLine { line -> temp.add(line) }
-                linesOfPatches = temp.toTypedArray() //getPatchesFromDataset(file)
+                listOfPatches = temp.toTypedArray() //getPatchesFromDataset(file)
             } else arrayOf("")
-            val size = linesOfPatches.size
+            val size = listOfPatches.size
             if (size > 0) {
                 patchIndex = (patchIndex + size + step) % size
-                renderPatch(linesOfPatches[patchIndex])
+                renderPatch(listOfPatches[patchIndex])
             } else {
                 renderPatch("")
             }
@@ -409,40 +416,36 @@ class DatasetFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun renderSnippet(dir: String, file: String): Array<String> {
 
-        var schemaBlueRed = true
-        if (file.startsWith("0")) schemaBlueRed = false
-
-        val linesOfPixels = mutableListOf<String>()
+        val lineOfSnippetPixels = mutableListOf<String>()
 
         try {
             val fileCsv = File("$dir/$file.csv")
 
             if(fileCsv.exists()) {
                 fileCsv.forEachLine { line ->
-                    linesOfPixels.add(line)
+                    lineOfSnippetPixels.add(line)
                 }
             }
         } catch (_: IOException) {}
 
-        // to get snippet dimensions
-        var snippetY = 2
-        var snippetX = 3
-        if (linesOfPixels.size > 0) {
-            val firstLine = linesOfPixels[0].split(",")
-            snippetY = firstLine.size
-            snippetX = linesOfPixels.size
-        }
-        var snippetUV = snippetX
-        if (schemaBlueRed) snippetUV = snippetX * 2 / 3
+        if (lineOfSnippetPixels.size < 1) return lineOfSnippetPixels.toTypedArray()
+        // ELABORATE !!!!!!
 
+
+        // to get snippet dimensions:
+        val snippetY = lineOfSnippetPixels[0].split(",").size
+        val snippetX = yLayerLines(lineOfSnippetPixels.toTypedArray())
+
+        scaleFactor = calculateImageScale(snippetX, snippetY) //scale
+        OverlayView.scaleFactor = scaleFactor
         val step = scaleFactor
 
-        bitmap = Bitmap.createBitmap(snippetUV * step, snippetY * step, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
 
-        for ((x, line) in linesOfPixels.withIndex()) {
+        for ((x, line) in lineOfSnippetPixels.withIndex()) {
             val pixels = line.split(",")
 
-            if (x == snippetUV) break
+            if (x == snippetX) break
 
             for (y in 0..< snippetY) {
 
@@ -450,7 +453,7 @@ class DatasetFragment : Fragment() {
                 val size = step * step
                 val intArray = IntArray(size) { color }
 
-                bitmap.setPixels(intArray,0,step,(snippetUV - 1 - x) * step, y * step, step, step)
+                bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
             }
         }
 
@@ -460,7 +463,15 @@ class DatasetFragment : Fragment() {
 
         overlayView.setOnClickListener {} // to silence the listener set in renderPatch
 
-        return linesOfPixels.toTypedArray()
+        return lineOfSnippetPixels.toTypedArray()
+    }
+
+    private fun calculateImageScale(x: Int, y: Int): Int {
+        val width: Int = context?.resources?.displayMetrics?.widthPixels ?: 0
+        val height: Int = context?.resources?.displayMetrics?.heightPixels ?: 0
+        val minDim = min(width, height)
+        val maxSnippetDim = max(x, y)
+        return if (maxSnippetDim > 0) (minDim * 4 / 5) / maxSnippetDim else 1
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -472,11 +483,13 @@ class DatasetFragment : Fragment() {
             if (patch != "") pixels = patch.split(",")
         } catch (_: IOException) {}
 
-        Toast.makeText(safeContext, "pixels.size = ${pixels.size}", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(safeContext, "pixels.size = ${pixels.size}", Toast.LENGTH_SHORT).show()
 
+        scalePatch = calculateImageScale(patchSize, patchSize) //scale
+        OverlayView.scaleFactor = scalePatch
         val step = scalePatch
 
-        bitmap = Bitmap.createBitmap(patchSize * step, patchSize * step, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(patchSize * step, patchSize * step, Bitmap.Config.ARGB_8888)
 
         for (x in 0..< patchSize) {
 
