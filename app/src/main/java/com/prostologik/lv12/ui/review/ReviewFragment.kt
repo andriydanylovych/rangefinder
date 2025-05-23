@@ -14,9 +14,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.prostologik.lv12.Util
 import com.prostologik.lv12.databinding.FragmentReviewBinding
+import com.prostologik.lv12.ui.dataset.OverlayView
 import com.prostologik.lv12.ui.home.HomeViewModel
 import java.io.File
 import java.io.IOException
+import kotlin.math.max
+import kotlin.math.min
 
 class ReviewFragment : Fragment() {
 
@@ -63,38 +66,19 @@ class ReviewFragment : Fragment() {
 
         btnDelete.setOnClickListener { deletePhoto() }
 
-
-
-
-
+        fun renderNextImage(step: Int = 1) {
+            val size = fileNamesArray.size
+            val currentFileIndex = fileNamesArray.indexOf(fileName)
+            // if (currentFileIndex == -1) ????????
+            val nextItemIndex = if (size > 0) (currentFileIndex + size + step) % size else 0
+            renderImage(nextItemIndex)
+        }
 
         renderNextImage()
 
         btnNext.setOnClickListener { renderNextImage() }
 
-        btnPrev.setOnClickListener {
-            val currentFileIndex = fileNamesArray.indexOf(fileName)
-            var nextItemIndex = currentFileIndex - 1
-            if (nextItemIndex < 0) nextItemIndex = fileNamesArray.size - 1
-            renderImage(nextItemIndex)
-        }
-
-
-
-
-//        fun renderNext() {
-//            fileName = getNextFileName(fileName, photoDirectory)
-//            renderPhoto(photoDirectory, fileName)
-//        }
-//
-//        renderNext()
-//
-//        btnNext.setOnClickListener { renderNext() }
-//
-//        btnPrev.setOnClickListener {
-//            fileName = getPrevFileName(fileName, photoDirectory)
-//            renderPhoto(photoDirectory, fileName)
-//        }
+        btnPrev.setOnClickListener { renderNextImage(-1) }
 
         val root: View = binding.root
         return root
@@ -111,14 +95,17 @@ class ReviewFragment : Fragment() {
         var includesBlueRed = true
         if (file.startsWith("0")) includesBlueRed = false
 
-        val uri = Uri.parse("file://$dir/$file.jpg")
-        // uri.toString() --> "file:///storage/emulated/0/Android/media/com.prostologik.lv12/image"
-
-        val imageView: ImageView = binding.imageView
-        imageView.setImageURI(uri)
+        if (File("$dir/$file.jpg").exists()) {
+            try {
+                val uri = Uri.parse("file://$dir/$file.jpg")
+                // uri.toString() --> "file:///storage/emulated/0/Android/media/com.prostologik.lv12/image"
+                val imageView: ImageView = binding.imageView
+                imageView.setImageURI(uri)
+            } catch (_: IOException) {}
+        }
 
         val linesOfPixels = mutableListOf<String>()
-        val step = 6 // to set size of the snippet
+        //val step = 6 // to set size of the snippet
 
         try {
             val fileCsv = File("$dir/$file.csv")
@@ -130,11 +117,17 @@ class ReviewFragment : Fragment() {
             }
         } catch (_: IOException) {}
 
+        if (linesOfPixels.size < 1) {
+            linesOfPixels.add("0,0,0")
+            linesOfPixels.add("0,0,0")
+            linesOfPixels.add("0,0,0")
+        }
         // to get snippet dimensions
         val firstLine = linesOfPixels[0].split(",")
         val snippetY = firstLine.size
         val snippetX = linesOfPixels.size
-        val snippetUV = snippetX * 2 / 3 // bug: snippetX - snippetY / 2
+        val snippetUV = if (!file.startsWith("0")) (snippetX * 2 / 3) else snippetX
+        val step = calculateImageScale(snippetX, snippetY)
 
         bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
         var schemaBlueRed = false
@@ -191,17 +184,18 @@ class ReviewFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun renderImage(imageIndex: Int) {
-        fileName = fileNamesArray[imageIndex]
-        renderPhoto(photoDirectory, fileName)
-        //textView.text = fileName
+        val size = fileNamesArray.size
+        if (imageIndex in 0..<size) {
+            fileName = fileNamesArray[imageIndex]
+            renderPhoto(photoDirectory, fileName)
+        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun renderNextImage() {
-        val currentFileIndex = fileNamesArray.indexOf(fileName)
-        var nextItemIndex = 0
-        if (currentFileIndex >= 0 && currentFileIndex < fileNamesArray.size - 1) nextItemIndex = currentFileIndex + 1
-        renderImage(nextItemIndex)
+    private fun calculateImageScale(x: Int, y: Int): Int {
+        val width: Int = context?.resources?.displayMetrics?.widthPixels ?: 0
+        val height: Int = context?.resources?.displayMetrics?.heightPixels ?: 0
+        val minDim = min(width, height)
+        val maxSnippetDim = max(x, y)
+        return if (maxSnippetDim > 0) minDim / (maxSnippetDim * 2) else 1
     }
-
 }

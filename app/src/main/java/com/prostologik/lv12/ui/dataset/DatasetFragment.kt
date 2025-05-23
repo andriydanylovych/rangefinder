@@ -52,12 +52,12 @@ class DatasetFragment : Fragment() {
     private lateinit var editLabel: EditText
     private lateinit var spinnerPatchSize: Spinner
     private lateinit var spinnerDataset: Spinner
+    private lateinit var spinnerLabel: Spinner
 
     private lateinit var btnSave: ImageButton
     private lateinit var btnDelete: ImageButton
     private lateinit var btnOption: ImageButton
 
-    //private lateinit var bitmap: Bitmap
     private lateinit var fileNamesArray: Array<String>
     private lateinit var lineOfSnippetPixels: Array<String>
     private lateinit var listOfPatches: Array<String>
@@ -65,6 +65,7 @@ class DatasetFragment : Fragment() {
     private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
     private var fileName: String = "default"
     private var datasetName: String = "ds_01_s28_m255"
+    private var textLabels: String = ""
     private var patchSize: Int = 0
     private var maxLabel: Int = 99999
     private var patchIndex = 0
@@ -72,6 +73,7 @@ class DatasetFragment : Fragment() {
     private var dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
     private var scaleFactor = 8 // will be recalculated
     private var scalePatch = 24 // will be recalculated
+    //private var xViewEcho = true
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -95,6 +97,7 @@ class DatasetFragment : Fragment() {
         editLabel = binding.editLabel
         spinnerPatchSize = binding.spinnerPatchSize
         spinnerDataset = binding.spinnerDataset
+        spinnerLabel = binding.spinnerLabel
         btnSave = binding.saveButton
         btnDelete = binding.deleteButton
         btnOption = binding.optionButton
@@ -102,36 +105,55 @@ class DatasetFragment : Fragment() {
         val btnPrev = binding.prevButton
 
         dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
-        btnSave.visibility = View.VISIBLE
-        btnDelete.visibility = View.INVISIBLE
+        showSaveHideDelete(true)
 
-        patchSize = getPreferencesInt("patch_size", 28)
-        datasetName = getPreferencesString("dataset_name", "ds01_s28_m255")
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+        patchSize = sharedPref?.getInt("patch_size", 28) ?: 28
+                //getPreferencesInt("patch_size", 28)
+        datasetName = sharedPref?.getString("dataset_name", "ds01_s28_m255") ?: "ds01_s28_m255"
+                //getPreferencesString("dataset_name", "ds01_s28_m255")
+        textLabels = sharedPref?.getString("text_labels", "ds01_s28_m255,0,1,2,,,,,7\n") ?: "ds01_s28_m255,0,1,2,,,,,7\n"
 
         photoDirectory = homeViewModel.photoDirectory
         fileNamesArray = getFileNames(photoDirectory)
+        //Toast.makeText(safeContext, "fileNamesArray = $fileNamesArray", Toast.LENGTH_SHORT).show()
 
         homeViewModel.photoFileName.observe(viewLifecycleOwner) {
             val temp: String = it ?: ""
             if (temp != "") {
-                fileName = temp
-                lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
+                val file = File("$photoDirectory/$temp.jpg")
+                if (file.exists()) {
+                    fileName = temp
+                    lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
+                }
             }
         }
+
+        buildPatchSizeSpinner()
+        buildDatasetSpinner(patchSize)
+        buildLabelSpinner()
 
         textLabel.text = getString(R.string.label)
         editLabel.setText("0")
 
-//        editLabel.setOnClickListener { // setOnClickListener
-//            btnSave.visibility = View.VISIBLE
-//            btnDelete.visibility = View.INVISIBLE
-//        }
+        editLabel.setOnClickListener {
+            if (dsSnippetOption == 0) showSaveHideDelete(true)
+        }
 
         editLabel.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                if (dsSnippetOption == 0) {
-                    btnSave.visibility = View.VISIBLE
-                    btnDelete.visibility = View.INVISIBLE
+
+                if (s.isNotEmpty() && pixelIndex == 0) { // Label but not Pixel
+                    var editLabelValue = -1
+                    try {
+                        editLabelValue = limitValue(s.toString().toInt(), 0, 10)
+                    } catch (_: IOException) {}
+
+                    val spinnerLabelValue = spinnerLabel.getSelectedItem()
+
+                    if (spinnerLabelValue == editLabelValue) return
+
+                    if (editLabelValue > -1) spinnerLabel.setSelection(editLabelValue)
                 }
             }
 
@@ -152,12 +174,10 @@ class DatasetFragment : Fragment() {
                 val y = scaleBack(OverlayView.clickY)
 
                 val label = limitValue(stringToInteger(editLabel.text.toString()), -1, maxLabel)
+
                 editLabel.setText(label.toString())
                 val sb: StringBuilder = StringBuilder()
                 sb.append(label)
-
-//                var size = lineOfSnippetPixels.size // potentially includes UV!!
-//                if (!fileName.startsWith("0")) size = size * 2 / 3
 
                 val size = yLayerLines(lineOfSnippetPixels)
 
@@ -180,6 +200,7 @@ class DatasetFragment : Fragment() {
                         file.appendText(sb.toString())
                     } else {
                         file.writeText(sb.toString())
+                        buildDatasetSpinner(patchSize) // to add a "NEW file" to the menu
                     }
                     textNew.text = "" // to suppress NEW if it was there
                     btnOption.visibility = View.VISIBLE
@@ -201,10 +222,7 @@ class DatasetFragment : Fragment() {
                 if (pixelIndex > 0) renderNextPatch(0)
 
                 //Toast.makeText(safeContext, "saved value $value", Toast.LENGTH_SHORT).show()
-                btnSave.visibility = View.INVISIBLE
-                btnDelete.visibility = View.VISIBLE
-
-
+                showSaveHideDelete(false)
             }
         }
 
@@ -214,13 +232,15 @@ class DatasetFragment : Fragment() {
 
         fun renderNextImage(step: Int = 1) {
             val size = fileNamesArray.size
-            val currentFileIndex = fileNamesArray.indexOf(fileName)
-            val nextItemIndex = if (size > 0) (currentFileIndex + size + step) % size else 0
-            //val nextItemIndex = (currentFileIndex + size + step) % size
-            fileName = fileNamesArray[nextItemIndex]
-            lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
-            OverlayView.clickX = -1f
-            overlayView.invalidate()
+            if (size > 0) {
+                val currentFileIndex = fileNamesArray.indexOf(fileName)
+                // if (currentFileIndex == -1) ????????
+                val nextItemIndex = (currentFileIndex + size + step) % size
+                fileName = fileNamesArray[nextItemIndex]
+                lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
+                OverlayView.clickX = -1f
+                overlayView.invalidate()
+            }
         }
 
         renderNextImage()
@@ -228,10 +248,9 @@ class DatasetFragment : Fragment() {
         btnOption.setOnClickListener {
             dsSnippetOption = (dsSnippetOption + 1) % 2
             //var tint: Int
-            val src: Int
             if (dsSnippetOption == 0) { // 0=Dataset
                 // tint = R.color.purple_500
-                src = R.drawable.crop_24
+                btnOption.setImageResource(R.drawable.crop_24)
                 OverlayView.patchSize = 0 // scalePatch
                 spinnerPatchSize.visibility = View.INVISIBLE
                 spinnerDataset.visibility = View.INVISIBLE
@@ -239,43 +258,55 @@ class DatasetFragment : Fragment() {
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
                 // tint = R.color.teal_700
-                src = R.drawable.edit_24
+                btnOption.setImageResource(R.drawable.edit_24)
                 OverlayView.patchSize = patchSize
-                buildDatasetSpinner(patchSize)
                 spinnerPatchSize.visibility = View.VISIBLE
                 spinnerDataset.visibility = View.VISIBLE
-                btnSave.visibility = View.VISIBLE
-                btnDelete.visibility = View.INVISIBLE
                 textLabel.text = getString(R.string.label)
                 renderNextImage(0)
             }
+            showSaveHideDelete(dsSnippetOption == 1)
 
             OverlayView.clickX = -1f
             overlayView.invalidate()
             //btnOption.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(tint, null)))
-            btnOption.setImageResource(src)
             // Color.RED 0xFFFF0000 btnOption.setBackgroundColor(white)
         }
 
         btnNext.setOnClickListener {
             if (dsSnippetOption == 1) renderNextImage(1)
-            else renderNextPatch(1)
+            else {
+                renderNextPatch(1)
+            }
         }
         btnPrev.setOnClickListener {
             if (dsSnippetOption == 1) renderNextImage(-1)
-            else renderNextPatch(-1)
+            else {
+                renderNextPatch(-1)
+            }
         }
 
-        buildPatchSizeSpinner()
-
-        buildDatasetSpinner(patchSize)
-
         return root
+    }
+
+    private fun showSaveHideDelete(b: Boolean) {
+        if (b) {
+            btnSave.visibility = View.VISIBLE
+            btnDelete.visibility = View.GONE
+        } else {
+            btnSave.visibility = View.GONE
+            btnDelete.visibility = View.VISIBLE
+        }
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun getLabelsForDataset(dsName: String): Array<String> {
+        return arrayOf()
     }
 
     private fun createMnist() {
@@ -293,6 +324,11 @@ class DatasetFragment : Fragment() {
         } catch (_: IOException) {
             Toast.makeText(safeContext, "mnist exists", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun createDummySnippet(): Array<String> {
+        val s = "0,0,0,0"
+        return arrayOf(s, s, s, s)
     }
 
     private fun yLayerLines(lineOfSnippetPixels: Array<String>): Int {
@@ -320,8 +356,8 @@ class DatasetFragment : Fragment() {
 
             textName.text = getString(R.string.dataset_patch_index, datasetName, patchIndex)
             textLabel.text = getString(R.string.label)
-            btnSave.visibility = View.INVISIBLE
-            btnDelete.visibility = View.VISIBLE
+            showSaveHideDelete(false)
+            spinnerLabel.visibility = View.VISIBLE
             pixelIndex = 0
         } catch (_: IOException) {}
     }
@@ -356,7 +392,14 @@ class DatasetFragment : Fragment() {
                 id: Long
             ) {
                 patchSize = arrayOfPatchSizes[position]
-                savePreferencesInt("patch_size", patchSize)
+                //savePreferencesInt("patch_size", patchSize)
+
+                val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+                with (sharedPref.edit()) {
+                    putInt("patch_size", patchSize)
+                    apply()
+                }
+
                 OverlayView.patchSize = patchSize
                 OverlayView.clickX = -1f
                 overlayView.invalidate()
@@ -365,7 +408,6 @@ class DatasetFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-
         }
     }
 
@@ -375,7 +417,7 @@ class DatasetFragment : Fragment() {
         val allDatasets = getFileNames(photoDirectory, "csv", "ds")
         val listOfDatasets = mutableListOf<String>()
         val listOfSeqNumbers = mutableListOf<Int>()
-        listOfDatasets.add("ds_99_28") // a placeholder for a NEW file name if (patchSize > 0)
+        listOfDatasets.add("") // a placeholder for a NEW file name if (patchSize > 0)
         for (ds in allDatasets) {
             val bitsOfDatasetName = ds.split("_")
             if (bitsOfDatasetName.size < 3) continue
@@ -402,7 +444,11 @@ class DatasetFragment : Fragment() {
 
         // Set Adapter to Spinner
         spinnerDataset.setAdapter(datasetAdapter)
-        spinnerDataset.setSelection(arrayOfDatasets.indexOf(datasetName))
+        // if there are some datasets other than NEW, offer one of those as default
+        var index = arrayOfDatasets.indexOf(datasetName)
+        val size = arrayOfDatasets.size
+        if (index < 0 && size > 1) index = 1
+        spinnerDataset.setSelection(index)
 
         spinnerDataset.onItemSelectedListener = object:
             AdapterView.OnItemSelectedListener {
@@ -425,12 +471,51 @@ class DatasetFragment : Fragment() {
                 val bitsOfDatasetName = datasetName.split("_")
                 maxLabel = if (bitsOfDatasetName.size > 3) stringToInteger(bitsOfDatasetName[3], 99999) else 99999
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-
         }
-
     }
+
+    private fun buildLabelSpinner() {
+        val arrayOfLabels = arrayOf("0","1","2","3","4","5","6","7","8","9","> 9")
+        val listOfLabels = mutableListOf<String>()
+
+        for (i in arrayOfLabels.indices) {
+            val t = arrayOfLabels[i]
+            listOfLabels.add("label: $t")
+        }
+        val arrayOfPatchSizeNames = listOfLabels.toTypedArray()
+
+        // Create an ArrayAdapter using a simple spinner layout
+        val labelAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfPatchSizeNames)
+
+        // Set layout to use when the list of choices appear
+        labelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        // Set Adapter to Spinner
+        spinnerLabel.setAdapter(labelAdapter)
+
+        spinnerLabel.onItemSelectedListener = object:
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val editLabelValue = stringToInteger(editLabel.text.toString())
+
+                if (position == editLabelValue) return
+
+                if (position < arrayOfLabels.size - 1 || editLabelValue < arrayOfLabels.size - 1) {
+                    editLabel.setText(position.toString())
+                    if (dsSnippetOption == 0) showSaveHideDelete(true)
+                }
+
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun renderSnippet(dir: String, file: String): Array<String> {
@@ -447,9 +532,7 @@ class DatasetFragment : Fragment() {
             }
         } catch (_: IOException) {}
 
-        if (lineOfSnippetPixels.size < 1) return lineOfSnippetPixels.toTypedArray()
-        // ELABORATE !!!!!!
-
+        if (lineOfSnippetPixels.size < 1) return createDummySnippet()
 
         // to get snippet dimensions:
         val snippetY = lineOfSnippetPixels[0].split(",").size
@@ -530,6 +613,7 @@ class DatasetFragment : Fragment() {
         overlayView.invalidate()
 
         overlayView.setOnClickListener {
+            spinnerLabel.visibility = View.GONE
             val x = (OverlayView.clickX / scalePatch - 0.5f).roundToInt()
             val y = (OverlayView.clickY / scalePatch - 0.5f).roundToInt()
 
@@ -556,13 +640,8 @@ class DatasetFragment : Fragment() {
                         i++
                     }
                 }
-                if (true) { // i > 1
-                    file.writeText(sb.toString()) // to avoid ending without any patches
-                    renderNextPatch(0)
-                } else {
-                    file.delete()
-                    // go back to snippet view
-                }
+                file.writeText(sb.toString())
+                renderNextPatch(0)
             }
         } catch (_: IOException) {}
     }
@@ -595,8 +674,8 @@ class DatasetFragment : Fragment() {
 //    }
 
     private fun getFileNames(dir: String, fileNameExtension: String = "jpg", fileNamePrefix: String = ""): Array<String> {
-        val filesAll = File(dir).listFiles()
-        filesAll?.sort()
+        val filesAll = File(dir).listFiles() ?: return arrayOf() //arrayOf("")
+        filesAll.sort()
 
         val selectedExtensions = filesAll?.filter { it.name.substringAfter(".") == fileNameExtension }
 
@@ -611,18 +690,18 @@ class DatasetFragment : Fragment() {
         return selectedFileNames.toTypedArray()
     }
 
-    private fun getPreferencesInt(key: String, value: Int = 0): Int {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
-        return sharedPref?.getInt(key, value) ?: value
-    }
+//    private fun getPreferencesInt(key: String, value: Int = 0): Int {
+//        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+//        return sharedPref?.getInt(key, value) ?: value
+//    }
 
-    private fun savePreferencesInt(key: String, value: Int) {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        with (sharedPref.edit()) {
-            putInt(key, value)
-            apply()
-        }
-    }
+//    private fun savePreferencesInt(key: String, value: Int) {
+//        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+//        with (sharedPref.edit()) {
+//            putInt(key, value)
+//            apply()
+//        }
+//    }
 
     private fun getPreferencesString(key: String, value: String = "ds_01_s28"): String {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)

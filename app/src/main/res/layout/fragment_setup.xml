@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center|start"
         android:orientation="vertical"
-        android:background="#00BCD4"
+        android:background="@drawable/gradient_drawable"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
@@ -27,12 +27,15 @@
         android:textAlignment="center"
         android:layout_marginBottom="24dp"
         android:text="@string/version"
+        android:textColor="#FFFFFF"
         />
 
     <RadioGroup
         android:id="@+id/radioGroupLayers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
         android:background="@drawable/rounded_edges"
         android:text="@string/layers"
         tools:ignore="HardcodedText"
@@ -64,8 +67,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_marginBottom="24dp"
+        android:layout_margin="24dp"
         android:background="#334455"/>
 
     <TextView
@@ -73,6 +75,7 @@
         android:layout_height="wrap_content"
         android:gravity="center|center"
         android:textSize="20sp"
+        android:textColor="#FFFFFF"
         android:text="@string/resolution"
         />
 
@@ -160,21 +163,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_marginBottom="24dp"
+        android:layout_margin="24dp"
         android:background="#334455"/>
-
-    <TextView
-        android:id="@+id/labelInfoOption"
-        android:labelFor="@id/spinnerInfoOption"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:textSize="20sp"
-        android:text="Tech details:"
-        tools:ignore="HardcodedText"
-        />
 
     <Spinner
         android:id="@+id/spinnerInfoOption"
@@ -182,6 +172,7 @@
         android:layout_height="wrap_content"
         android:gravity="center|center"
         android:textAlignment="center"
+        android:background="@drawable/rounded_edges"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="24dp"

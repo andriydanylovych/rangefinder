@@ -31,10 +31,11 @@
     <string name="pixel">Pixel %1$d</string>
     <string name="prev">Previous</string>
 
-    <string name="resolution">Resolution Width x Height:</string>
+    <string name="resolution">Width x Height:</string>
     <string name="save">Save</string>
 
     <string name="saved_layer">saved_layer</string>
+    <string name="snippet">Snippet</string>
     <string name="snippet_width">snippet_width</string>
     <string name="snippet_height">snippet_height</string>
 
@@ -44,8 +45,8 @@
     <string name="width_height">WxH = %1$d x %2$d = %3$d</string>
 
     <string-array name="info_options">
-        <item>Camera</item>
-        <item>Other</item>
+        <item>Camera parameters</item>
+        <item>Storage parameters</item>
     </string-array>
 
     <string-array name="output_size">

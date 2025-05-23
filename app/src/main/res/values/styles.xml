@@ -9,7 +9,7 @@
     </style>
     <style name="SpinnerTextViewItem" parent="@android:style/Widget.TextView" >
         <item name="android:textSize" >8sp</item>
-        <item name="android:textStyle" >bold</item>
+        <item name="android:textColor" >#FFFFFF</item>
         <item name="android:textAlignment" >center</item>
     </style>
 </resources>

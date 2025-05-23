@@ -444,3 +444,11 @@ class HomeFragment : Fragment() {
     }
 
 }
+
+/* TODO
+* To add Label text description with a drop-down selection
+* To check if a patch already exists in a dataset before adding it
+* Add a set of masks to the Home Fragment analysis view
+* Go back to original setup "as shipped"
+* Delete a dataset if there are no patches (potentially not needed, as we might not want to lose text descriptions)
+* */
