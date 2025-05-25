@@ -17,6 +17,7 @@
     <string name="height">Height</string>
     <string name="label">Label</string>
     <string name="layers">Layers:</string>
+    <string name="label_name">Label name</string>
 
     <string name="menu_home">Camera</string>
     <string name="menu_review">Review</string>

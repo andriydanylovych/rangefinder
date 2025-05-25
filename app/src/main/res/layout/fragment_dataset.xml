@@ -58,6 +58,36 @@
         app:layout_constraintRight_toRightOf="parent"
         />
 
+    <TextView
+        android:id="@+id/textLabelTag"
+        android:labelFor="@+id/editLabelTag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size"
+        android:padding="16dp"
+        android:layout_marginVertical="32dp"
+        android:text="@string/label_name"
+        app:layout_constraintTop_toBottomOf="@+id/textName"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editLabelTag"
+        />
+
+    <EditText
+        android:id="@+id/editLabelTag"
+        android:layout_width="128dp"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:textSize="@dimen/text_size"
+        android:textAlignment="center"
+        android:padding="16dp"
+        android:layout_marginVertical="32dp"
+        android:inputType="text"
+        android:maxLength="10"
+        app:layout_constraintTop_toBottomOf="@+id/textName"
+        app:layout_constraintStart_toEndOf="@+id/textLabelTag"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
     <Spinner
         android:id="@+id/spinnerPatchSize"
         android:layout_width="wrap_content"
@@ -70,7 +100,7 @@
         android:layout_marginTop="12dp"
         android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/textName"
+        app:layout_constraintTop_toBottomOf="@+id/editLabelTag"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -123,20 +153,6 @@
         app:layout_constraintStart_toStartOf="@+id/imageSnippet"
         app:layout_constraintTop_toTopOf="@+id/imageSnippet" />
 
-    <TextView
-        android:id="@+id/textLabel"
-        android:labelFor="@+id/editLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/text_size"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/label"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/prev_button"
-        app:layout_constraintEnd_toStartOf="@+id/editLabel"
-        />
-
     <Spinner
         android:id="@+id/spinnerLabel"
         android:layout_width="wrap_content"
@@ -150,6 +166,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <TextView
+        android:id="@+id/textLabel"
+        android:labelFor="@+id/editLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/prev_button"
+        app:layout_constraintEnd_toStartOf="@+id/editLabel"
+        />
 
     <EditText
         android:id="@+id/editLabel"

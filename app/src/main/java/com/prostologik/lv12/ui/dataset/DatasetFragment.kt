@@ -47,6 +47,8 @@ class DatasetFragment : Fragment() {
     private lateinit var mImageView: ImageView
     private lateinit var overlayView: OverlayView
     private lateinit var textName: TextView
+    private lateinit var textLabelTag: TextView
+    private lateinit var editLabelTag: EditText
     private lateinit var textLabel: TextView
     private lateinit var textNew: TextView
     private lateinit var editLabel: EditText
@@ -61,10 +63,11 @@ class DatasetFragment : Fragment() {
     private lateinit var fileNamesArray: Array<String>
     private lateinit var lineOfSnippetPixels: Array<String>
     private lateinit var listOfPatches: Array<String>
+    private lateinit var listOfLabels: MutableList<String>
 
     private var photoDirectory: String = "/storage/emulated/0/Android/media/com.prostologik.lv12/image"
     private var fileName: String = "default"
-    private var datasetName: String = "ds_01_s28_m255"
+    private var datasetName: String = "ds_1_28"
     private var textLabels: String = ""
     private var patchSize: Int = 0
     private var maxLabel: Int = 99999
@@ -73,7 +76,6 @@ class DatasetFragment : Fragment() {
     private var dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
     private var scaleFactor = 8 // will be recalculated
     private var scalePatch = 24 // will be recalculated
-    //private var xViewEcho = true
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -92,6 +94,8 @@ class DatasetFragment : Fragment() {
         mImageView = binding.imageSnippet
         overlayView = binding.overlayView
         textName = binding.textName
+        textLabelTag = binding.textLabelTag
+        editLabelTag = binding.editLabelTag
         textLabel = binding.textLabel
         textNew = binding.textNew
         editLabel = binding.editLabel
@@ -106,13 +110,20 @@ class DatasetFragment : Fragment() {
 
         dsSnippetOption = 1 // 0 - DataSets, 1 - Snippets
         showSaveHideDelete(true)
+        showSpinnersHideLabelTitle(true)
 
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
         patchSize = sharedPref?.getInt("patch_size", 28) ?: 28
                 //getPreferencesInt("patch_size", 28)
-        datasetName = sharedPref?.getString("dataset_name", "ds01_s28_m255") ?: "ds01_s28_m255"
-                //getPreferencesString("dataset_name", "ds01_s28_m255")
-        textLabels = sharedPref?.getString("text_labels", "ds01_s28_m255,0,1,2,,,,,7\n") ?: "ds01_s28_m255,0,1,2,,,,,7\n"
+        datasetName = sharedPref?.getString("dataset_name", "ds_1_28") ?: "ds_1_28"
+
+        val mnistLabels = "ds_784_28_mnist,zero,one,two,three,four,five,six,seven,eight,nine"
+        textLabels = sharedPref?.getString("dataset_labels", mnistLabels) ?: mnistLabels
+        listOfLabels = getListOfLabels(textLabels, datasetName).toMutableList()
+
+        editLabelTag.setOnClickListener {
+            if (dsSnippetOption == 0 && pixelIndex == 0) showSaveHideDelete(true)
+        }
 
         photoDirectory = homeViewModel.photoDirectory
         fileNamesArray = getFileNames(photoDirectory)
@@ -131,7 +142,7 @@ class DatasetFragment : Fragment() {
 
         buildPatchSizeSpinner()
         buildDatasetSpinner(patchSize)
-        buildLabelSpinner()
+        buildLabelSpinner(listOfLabels)
 
         textLabel.text = getString(R.string.label)
         editLabel.setText("0")
@@ -146,14 +157,13 @@ class DatasetFragment : Fragment() {
                 if (s.isNotEmpty() && pixelIndex == 0) { // Label but not Pixel
                     var editLabelValue = -1
                     try {
-                        editLabelValue = limitValue(s.toString().toInt(), 0, 10)
+                        editLabelValue = limitValue(s.toString().toInt(), 0, maxLabel)
                     } catch (_: IOException) {}
 
                     val spinnerLabelValue = spinnerLabel.getSelectedItem()
-
                     if (spinnerLabelValue == editLabelValue) return
-
-                    if (editLabelValue > -1) spinnerLabel.setSelection(editLabelValue)
+                    if (editLabelValue > -1 && editLabelValue < listOfLabels.size) spinnerLabel.setSelection(editLabelValue)
+                    if (editLabelValue >= listOfLabels.size) spinnerLabel.setSelection(listOfLabels.size) // "Other"
                 }
             }
 
@@ -167,6 +177,8 @@ class DatasetFragment : Fragment() {
         }
 
         createMnist()
+        textLabels = saveListOfLabels(textLabels, datasetName,
+            arrayOf("zero","one","two","tree","four","five","six","seven","eight","nine"))
 
         btnSave.setOnClickListener {
             if (dsSnippetOption == 1) {
@@ -211,8 +223,23 @@ class DatasetFragment : Fragment() {
                 // edit label or pixel
                 var value = stringToInteger(editLabel.text.toString())
 
+                val tag = editLabelTag.text.toString()
+
+                if (pixelIndex == 0 && value >= 0) { // Label but not Pixel
+                    if (value < listOfLabels.size) {
+                        listOfLabels[value] = tag
+                    } else if (value == listOfLabels.size) {
+                        listOfLabels.add(value,tag)
+                    }
+                    if (value < listOfLabels.size) { // listOfLabels.size increased by added element
+                        buildLabelSpinner(listOfLabels)
+                        spinnerLabel.setSelection(value)
+                        textLabels = saveListOfLabels(textLabels, datasetName, listOfLabels.toTypedArray())
+                    }
+                }
+
                 // check if value is in the allowed range
-                if (pixelIndex == 0 && value < -1) value = -1
+                if (pixelIndex == 0 && value < 0) value = 0
 
                 // pixelToByteAsInt(value) // convert 255 to -128
                 if (pixelIndex > 0) value = pixelToByteAsInt(value)
@@ -234,7 +261,6 @@ class DatasetFragment : Fragment() {
             val size = fileNamesArray.size
             if (size > 0) {
                 val currentFileIndex = fileNamesArray.indexOf(fileName)
-                // if (currentFileIndex == -1) ????????
                 val nextItemIndex = (currentFileIndex + size + step) % size
                 fileName = fileNamesArray[nextItemIndex]
                 lineOfSnippetPixels = renderSnippet(photoDirectory, fileName)
@@ -252,20 +278,17 @@ class DatasetFragment : Fragment() {
                 // tint = R.color.purple_500
                 btnOption.setImageResource(R.drawable.crop_24)
                 OverlayView.patchSize = 0 // scalePatch
-                spinnerPatchSize.visibility = View.INVISIBLE
-                spinnerDataset.visibility = View.INVISIBLE
                 renderNextPatch(0)
             }
             else { // if (dsSnippetOption == 1) // 1=Snippet
                 // tint = R.color.teal_700
                 btnOption.setImageResource(R.drawable.edit_24)
                 OverlayView.patchSize = patchSize
-                spinnerPatchSize.visibility = View.VISIBLE
-                spinnerDataset.visibility = View.VISIBLE
                 textLabel.text = getString(R.string.label)
                 renderNextImage(0)
             }
             showSaveHideDelete(dsSnippetOption == 1)
+            showSpinnersHideLabelTitle(dsSnippetOption == 1)
 
             OverlayView.clickX = -1f
             overlayView.invalidate()
@@ -275,15 +298,11 @@ class DatasetFragment : Fragment() {
 
         btnNext.setOnClickListener {
             if (dsSnippetOption == 1) renderNextImage(1)
-            else {
-                renderNextPatch(1)
-            }
+            else renderNextPatch(1)
         }
         btnPrev.setOnClickListener {
             if (dsSnippetOption == 1) renderNextImage(-1)
-            else {
-                renderNextPatch(-1)
-            }
+            else renderNextPatch(-1)
         }
 
         return root
@@ -297,7 +316,30 @@ class DatasetFragment : Fragment() {
             btnSave.visibility = View.GONE
             btnDelete.visibility = View.VISIBLE
         }
+    }
 
+    private fun showSpinnersHideLabelTitle(b: Boolean) {
+        if (b) {
+            spinnerPatchSize.visibility = View.VISIBLE
+            spinnerDataset.visibility = View.VISIBLE
+            textLabelTag.visibility = View.GONE
+            editLabelTag.visibility = View.GONE
+        } else {
+            spinnerPatchSize.visibility = View.GONE
+            spinnerDataset.visibility = View.GONE
+            textLabelTag.visibility = View.VISIBLE
+            editLabelTag.visibility = View.VISIBLE
+        }
+    }
+
+    private fun showLabelTag(b: Boolean) {
+        if (b) {
+            textLabelTag.visibility = View.VISIBLE
+            editLabelTag.visibility = View.VISIBLE
+        } else {
+            textLabelTag.visibility = View.INVISIBLE
+            editLabelTag.visibility = View.INVISIBLE
+        }
     }
 
     override fun onDestroyView() {
@@ -305,30 +347,29 @@ class DatasetFragment : Fragment() {
         _binding = null
     }
 
-    private fun getLabelsForDataset(dsName: String): Array<String> {
-        return arrayOf()
-    }
-
-    private fun createMnist() {
-        val sb: StringBuilder = StringBuilder()
-        try {
-            val file = File("$photoDirectory/ds_784_28_9_mnist.csv")
-            if (!file.exists()) {
-                sb.append("7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,185,159,151,60,36,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,222,254,254,254,254,241,198,198,198,198,198,198,198,198,170,52,0,0,0,0,0,0,0,0,0,0,0,0,67,114,72,114,163,227,254,225,254,254,254,250,229,254,254,140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,66,14,67,67,67,59,21,236,254,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,83,253,209,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,233,255,83,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,129,254,238,44,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,59,249,254,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,254,187,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,205,248,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,126,254,182,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,75,251,240,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,221,254,166,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,203,254,219,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,254,254,77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,224,254,115,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,254,254,52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,242,254,254,52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,254,254,219,40,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,254,207,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
-                sb.append("2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,116,125,171,255,255,150,93,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,169,253,253,253,253,253,253,218,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,169,253,253,253,213,142,176,253,253,122,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,250,253,210,32,12,0,6,206,253,140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,77,251,210,25,0,0,0,122,248,253,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,18,0,0,0,0,209,253,253,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,117,247,253,198,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,76,247,253,231,63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,253,253,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,176,246,253,159,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,234,253,233,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,253,253,141,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,78,248,253,189,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,200,253,253,141,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,134,253,253,173,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,248,253,253,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,248,253,253,43,20,20,20,20,5,0,5,20,20,37,150,150,150,147,10,0,0,0,0,0,0,0,0,0,248,253,253,253,253,253,253,253,168,143,166,253,253,253,253,253,253,253,123,0,0,0,0,0,0,0,0,0,174,253,253,253,253,253,253,253,253,253,253,253,249,247,247,169,117,117,57,0,0,0,0,0,0,0,0,0,0,118,123,123,123,166,253,253,253,155,123,123,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
-                sb.append("1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,254,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,87,252,82,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,135,241,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,244,150,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,254,63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,202,223,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,254,216,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95,254,195,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,140,254,77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,57,237,205,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,124,255,165,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,171,254,81,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,232,215,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,120,254,159,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,151,254,142,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,228,254,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,251,254,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,141,254,205,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,215,254,121,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,198,176,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
-                sb.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,150,253,202,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,197,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,190,251,251,251,253,169,109,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,253,251,251,251,251,253,251,251,220,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,182,255,253,253,253,253,234,222,253,253,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,63,221,253,251,251,251,147,77,62,128,251,251,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,231,251,253,251,220,137,10,0,0,31,230,251,243,113,5,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,253,188,20,0,0,0,0,0,109,251,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,201,30,0,0,0,0,0,0,31,200,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,37,253,253,0,0,0,0,0,0,0,0,32,202,255,253,164,0,0,0,0,0,0,0,0,0,0,0,0,140,251,251,0,0,0,0,0,0,0,0,109,251,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,0,21,63,231,251,253,230,30,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,0,144,251,251,251,221,61,0,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,182,221,251,251,251,180,0,0,0,0,0,0,0,0,0,0,0,0,0,0,218,253,253,73,73,228,253,253,255,253,253,253,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,113,251,251,253,251,251,251,251,253,251,251,251,147,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,230,251,253,251,251,251,251,253,230,189,35,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,62,142,253,251,251,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,72,174,251,173,71,72,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
-                file.writeText(sb.toString())
-            }
-            Toast.makeText(safeContext, "mnist created", Toast.LENGTH_SHORT).show()
-        } catch (_: IOException) {
-            Toast.makeText(safeContext, "mnist exists", Toast.LENGTH_SHORT).show()
+    private fun getListOfLabels(datasetLabels: String, datasetName: String): List<String> {
+        // datasetLabels -> all datasets split by semicolons. Inndividual labels split by comas.
+        // ds_1_28,zero,one;ds_784_28_mnist,zero,one,two,three,four,five,six,seven,eight,nine
+        val dsList = datasetLabels.split(";")
+        for (ds in dsList) {
+            val dsNameLabelList = ds.split(",")
+            if (dsNameLabelList[0] == datasetName) return dsNameLabelList.subList(1,dsNameLabelList.size)
         }
+        return listOf("zero","one") //splitLabels(default).toMutableList()
     }
 
-    private fun createDummySnippet(): Array<String> {
-        val s = "0,0,0,0"
-        return arrayOf(s, s, s, s)
+    private fun saveListOfLabels(datasetLabels: String, datasetName: String, listOfLabels: Array<String>): String {
+        val sb: StringBuilder = StringBuilder()
+        sb.append(datasetName)
+        for (label in listOfLabels) sb.append(",$label")
+        val dsList = datasetLabels.split(";")
+        for (ds in dsList) {
+            val dsNameLabelList = ds.split(",")
+            if (dsNameLabelList[0] != datasetName) sb.append(";$ds")
+        }
+        val textLabels = sb.toString()
+        savePreferencesString("dataset_labels", textLabels)
+        return textLabels
     }
 
     private fun yLayerLines(lineOfSnippetPixels: Array<String>): Int {
@@ -373,13 +414,10 @@ class DatasetFragment : Fragment() {
         }
         val arrayOfPatchSizeNames = listOfPatchSizes.toTypedArray()
 
-        // Create an ArrayAdapter using a simple spinner layout
         val patchSizeAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfPatchSizeNames)
 
-        // Set layout to use when the list of choices appear
         patchSizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        // Set Adapter to Spinner
         spinnerPatchSize.setAdapter(patchSizeAdapter)
         spinnerPatchSize.setSelection(arrayOfPatchSizes.indexOf(patchSize))
 
@@ -468,25 +506,24 @@ class DatasetFragment : Fragment() {
                     btnOption.visibility = View.VISIBLE
                 } // patchSize > 0 &&
                 patchIndex = 0
-                val bitsOfDatasetName = datasetName.split("_")
-                maxLabel = if (bitsOfDatasetName.size > 3) stringToInteger(bitsOfDatasetName[3], 99999) else 99999
+
+                listOfLabels = getListOfLabels(textLabels, datasetName).toMutableList()
+                buildLabelSpinner(listOfLabels)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    private fun buildLabelSpinner() {
-        val arrayOfLabels = arrayOf("0","1","2","3","4","5","6","7","8","9","> 9")
-        val listOfLabels = mutableListOf<String>()
+    private fun buildLabelSpinner(lst: MutableList<String>) {
 
-        for (i in arrayOfLabels.indices) {
-            val t = arrayOfLabels[i]
-            listOfLabels.add("label: $t")
-        }
-        val arrayOfPatchSizeNames = listOfLabels.toTypedArray()
+        val temp = lst.mapIndexed { idx, value -> "$idx $value" }.toMutableList()
+        val ttt: MutableList<String> = temp
+        ttt.add("Other")
+        val arrayOfLabels = ttt.toTypedArray()
 
         // Create an ArrayAdapter using a simple spinner layout
-        val labelAdapter = ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfPatchSizeNames)
+        val labelAdapter =
+            ArrayAdapter(safeContext, android.R.layout.simple_spinner_item, arrayOfLabels)
 
         // Set layout to use when the list of choices appear
         labelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -494,7 +531,7 @@ class DatasetFragment : Fragment() {
         // Set Adapter to Spinner
         spinnerLabel.setAdapter(labelAdapter)
 
-        spinnerLabel.onItemSelectedListener = object:
+        spinnerLabel.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -506,12 +543,17 @@ class DatasetFragment : Fragment() {
 
                 if (position == editLabelValue) return
 
-                if (position < arrayOfLabels.size - 1 || editLabelValue < arrayOfLabels.size - 1) {
+                if (position < ttt.size - 1 || editLabelValue < ttt.size - 1) {
                     editLabel.setText(position.toString())
+                    if (position < lst.size) {
+                        editLabelTag.setText(lst[position])
+                    } else {
+                        editLabelTag.setText("")
+                    }
                     if (dsSnippetOption == 0) showSaveHideDelete(true)
                 }
-
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
@@ -539,8 +581,8 @@ class DatasetFragment : Fragment() {
         val snippetX = yLayerLines(lineOfSnippetPixels.toTypedArray())
 
         scaleFactor = calculateImageScale(snippetX, snippetY) //scale
-        OverlayView.scaleFactor = scaleFactor
         val step = scaleFactor
+        OverlayView.scaleFactor = step
 
         val bitmap = Bitmap.createBitmap(snippetX * step, snippetY * step, Bitmap.Config.ARGB_8888)
 
@@ -552,8 +594,8 @@ class DatasetFragment : Fragment() {
             for (y in 0..< snippetY) {
 
                 val color = Util.stringByteToColor(pixels[y], 0)
-                val size = step * step
-                val intArray = IntArray(size) { color }
+                //val size = step * step
+                val intArray = IntArray(step * step) { color }
 
                 bitmap.setPixels(intArray,0,step,(snippetX - 1 - x) * step, y * step, step, step)
             }
@@ -588,8 +630,8 @@ class DatasetFragment : Fragment() {
         //Toast.makeText(safeContext, "pixels.size = ${pixels.size}", Toast.LENGTH_SHORT).show()
 
         scalePatch = calculateImageScale(patchSize, patchSize) //scale
-        OverlayView.scaleFactor = scalePatch
         val step = scalePatch
+        OverlayView.scaleFactor = step
 
         val bitmap = Bitmap.createBitmap(patchSize * step, patchSize * step, Bitmap.Config.ARGB_8888)
 
@@ -598,8 +640,8 @@ class DatasetFragment : Fragment() {
             for (y in 0..< patchSize) {
 
                 val color = Util.stringByteToColor(pixels[1 + x * patchSize + y], 0)
-                val size = step * step
-                val intArray = IntArray(size) { color }
+                //val size = step * step
+                val intArray = IntArray(step * step) { color }
 
                 bitmap.setPixels(intArray,0,step,(patchSize - 1 - x) * step, y * step, step, step)
             }
@@ -608,6 +650,18 @@ class DatasetFragment : Fragment() {
         mImageView.setImageBitmap(bitmap)
 
         editLabel.setText(pixels[0])
+
+        val labelValue: Int = stringToInteger(pixels[0], 0)
+        if (labelValue < listOfLabels.size) {
+            editLabelTag.setText(listOfLabels[labelValue])
+            //showLabelTag(true)
+        } else if (labelValue == listOfLabels.size) {
+            editLabelTag.setText("")
+            //showLabelTag(true)
+        } //else {
+            //showLabelTag(false)
+        //}
+        showLabelTag(labelValue <= listOfLabels.size)
 
         OverlayView.patchSize = 0
         overlayView.invalidate()
@@ -623,7 +677,6 @@ class DatasetFragment : Fragment() {
             editLabel.setText(pxValue)
             textLabel.text = getString(R.string.pixel, pixelIndex)
         }
-
         return pixels.toTypedArray()
     }
 
@@ -670,9 +723,6 @@ class DatasetFragment : Fragment() {
 
     }
 
-//    private fun editDataset(fileDir: String, fileName: String, lineIndex: Int, newPatch: String) {
-//    }
-
     private fun getFileNames(dir: String, fileNameExtension: String = "jpg", fileNamePrefix: String = ""): Array<String> {
         val filesAll = File(dir).listFiles() ?: return arrayOf() //arrayOf("")
         filesAll.sort()
@@ -703,10 +753,10 @@ class DatasetFragment : Fragment() {
 //        }
 //    }
 
-    private fun getPreferencesString(key: String, value: String = "ds_01_s28"): String {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
-        return sharedPref?.getString(key, value) ?: value
-    }
+//    private fun getPreferencesString(key: String, value: String = "ds_01_s28"): String {
+//        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+//        return sharedPref?.getString(key, value) ?: value
+//    }
 
     private fun savePreferencesString(key: String, value: String) {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
@@ -716,5 +766,51 @@ class DatasetFragment : Fragment() {
         }
     }
 
+    private fun createDummySnippet(): Array<String> {
+        val s = "0,0,0,0"
+        return arrayOf(s, s, s, s)
+    }
+
+    private fun createMnist() {
+        val sb: StringBuilder = StringBuilder()
+        try {
+            val file = File("$photoDirectory/ds_784_28_mnist.csv")
+            if (!file.exists()) {
+                sb.append(transpose("7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,185,159,151,60,36,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,222,254,254,254,254,241,198,198,198,198,198,198,198,198,170,52,0,0,0,0,0,0,0,0,0,0,0,0,67,114,72,114,163,227,254,225,254,254,254,250,229,254,254,140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,66,14,67,67,67,59,21,236,254,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,83,253,209,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,233,255,83,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,129,254,238,44,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,59,249,254,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,254,187,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,205,248,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,126,254,182,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,75,251,240,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,221,254,166,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,203,254,219,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,254,254,77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,224,254,115,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,254,254,52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,242,254,254,52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,254,254,219,40,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,254,207,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"))
+                sb.append("\n")
+                sb.append(transpose("2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,116,125,171,255,255,150,93,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,169,253,253,253,253,253,253,218,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,169,253,253,253,213,142,176,253,253,122,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,250,253,210,32,12,0,6,206,253,140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,77,251,210,25,0,0,0,122,248,253,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,18,0,0,0,0,209,253,253,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,117,247,253,198,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,76,247,253,231,63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,253,253,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,176,246,253,159,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,234,253,233,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,253,253,141,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,78,248,253,189,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,200,253,253,141,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,134,253,253,173,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,248,253,253,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,248,253,253,43,20,20,20,20,5,0,5,20,20,37,150,150,150,147,10,0,0,0,0,0,0,0,0,0,248,253,253,253,253,253,253,253,168,143,166,253,253,253,253,253,253,253,123,0,0,0,0,0,0,0,0,0,174,253,253,253,253,253,253,253,253,253,253,253,249,247,247,169,117,117,57,0,0,0,0,0,0,0,0,0,0,118,123,123,123,166,253,253,253,155,123,123,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"))
+                sb.append("\n")
+                sb.append(transpose("1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,254,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,87,252,82,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,135,241,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,244,150,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,254,63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,202,223,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,254,216,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95,254,195,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,140,254,77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,57,237,205,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,124,255,165,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,171,254,81,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,232,215,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,120,254,159,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,151,254,142,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,228,254,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,251,254,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,141,254,205,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,215,254,121,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,198,176,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"))
+                sb.append("\n")
+                sb.append(transpose("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,150,253,202,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,197,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,190,251,251,251,253,169,109,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,253,251,251,251,251,253,251,251,220,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,182,255,253,253,253,253,234,222,253,253,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,63,221,253,251,251,251,147,77,62,128,251,251,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,231,251,253,251,220,137,10,0,0,31,230,251,243,113,5,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,253,188,20,0,0,0,0,0,109,251,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,37,251,251,201,30,0,0,0,0,0,0,31,200,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,37,253,253,0,0,0,0,0,0,0,0,32,202,255,253,164,0,0,0,0,0,0,0,0,0,0,0,0,140,251,251,0,0,0,0,0,0,0,0,109,251,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,0,21,63,231,251,253,230,30,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,0,144,251,251,251,221,61,0,0,0,0,0,0,0,0,0,0,0,0,0,217,251,251,0,0,0,0,0,182,221,251,251,251,180,0,0,0,0,0,0,0,0,0,0,0,0,0,0,218,253,253,73,73,228,253,253,255,253,253,253,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,113,251,251,253,251,251,251,251,253,251,251,251,147,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,230,251,253,251,251,251,251,253,230,189,35,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,62,142,253,251,251,251,251,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,72,174,251,173,71,72,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"))
+                sb.append("\n")
+                sb.append(transpose("4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,224,0,0,0,0,0,0,0,70,29,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,231,0,0,0,0,0,0,0,148,168,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,195,231,0,0,0,0,0,0,0,96,210,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,252,134,0,0,0,0,0,0,0,114,252,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,236,217,12,0,0,0,0,0,0,0,192,252,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,168,247,53,0,0,0,0,0,0,0,18,255,253,21,0,0,0,0,0,0,0,0,0,0,0,0,0,84,242,211,0,0,0,0,0,0,0,0,141,253,189,5,0,0,0,0,0,0,0,0,0,0,0,0,0,169,252,106,0,0,0,0,0,0,0,32,232,250,66,0,0,0,0,0,0,0,0,0,0,0,0,0,15,225,252,0,0,0,0,0,0,0,0,134,252,211,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,252,164,0,0,0,0,0,0,0,0,169,252,167,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,204,209,18,0,0,0,0,0,0,22,253,253,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,169,252,199,85,85,85,85,129,164,195,252,252,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,41,170,245,252,252,252,252,232,231,251,252,252,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,49,84,84,84,84,0,0,161,252,252,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,127,252,252,45,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,253,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,127,252,252,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,135,252,244,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,232,236,111,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,179,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"))
+                sb.append("\n")
+
+//                sb.append("7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,140,106,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,170,254,254,209,83,44,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,254,236,253,255,238,62,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,229,21,83,233,254,254,187,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,250,59,0,22,129,249,254,248,182,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,254,67,0,0,0,59,133,205,254,240,166,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,254,67,0,0,0,0,0,9,126,251,254,219,77,1,0,0,0,0,0,0,0,0,0,0,0,0,0,198,254,67,0,0,0,0,0,0,0,75,221,254,254,115,52,52,40,0,0,0,0,0,0,0,0,0,0,198,225,14,0,0,0,0,0,0,0,0,19,203,254,254,254,254,219,18,0,0,0,0,0,0,0,0,0,198,254,66,0,0,0,0,0,0,0,0,0,3,38,224,254,254,254,207,0,0,0,0,0,0,0,0,36,241,227,17,0,0,0,0,0,0,0,0,0,0,0,31,133,242,254,254,0,0,0,0,0,0,0,0,60,254,163,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,121,121,0,0,0,0,0,0,0,0,151,254,114,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,159,254,72,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,185,254,114,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,222,67,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
+//                sb.append("2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,123,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,147,253,117,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,150,253,117,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,150,253,169,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,150,253,247,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,253,247,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,253,249,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,253,253,123,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,166,253,123,0,0,0,0,0,0,0,0,0,30,122,140,65,65,10,0,0,0,0,0,0,0,0,0,0,143,253,155,0,0,0,0,0,0,0,0,93,218,253,253,253,253,198,63,0,0,0,0,0,0,0,0,5,168,253,253,0,0,0,0,0,0,0,0,150,253,253,206,248,253,253,231,144,12,0,0,0,0,0,0,20,253,253,253,0,0,0,0,0,0,0,0,255,253,176,6,122,209,247,253,253,159,35,0,0,0,0,0,20,253,253,253,0,0,0,0,0,0,0,0,255,253,142,0,0,0,117,247,253,253,233,141,12,0,0,0,20,253,253,166,0,0,0,0,0,0,0,0,171,253,213,12,0,0,0,76,128,246,253,253,189,141,12,0,20,253,253,123,0,0,0,0,0,0,0,0,125,253,253,32,0,0,0,0,0,176,234,253,253,253,173,25,43,253,253,123,0,0,0,0,0,0,0,0,116,253,253,210,25,0,0,0,0,0,25,198,248,253,253,253,253,253,253,123,0,0,0,0,0,0,0,0,0,169,253,253,210,18,0,0,0,0,0,0,78,200,253,253,253,253,253,118,0,0,0,0,0,0,0,0,0,0,169,250,251,31,0,0,0,0,0,0,0,19,134,248,248,248,174,0,0,0,0,0,0,0,0,0,0,0,0,52,77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
+//                sb.append("1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,109,82,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,252,241,150,63,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,87,135,244,254,223,216,195,77,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,84,202,254,254,254,205,165,81,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,95,140,237,255,254,215,159,142,66,66,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,57,124,171,232,254,254,254,254,205,121,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,120,151,228,251,254,254,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,141,215,198,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
+//                sb.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,35,35,164,35,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,113,251,251,253,251,230,61,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,105,243,253,253,255,253,253,221,180,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,51,253,251,251,251,200,202,251,251,251,251,253,147,10,0,0,0,0,0,0,0,0,0,0,0,0,0,62,220,253,251,230,109,31,32,109,231,251,251,253,251,35,0,0,0,0,0,0,0,0,0,0,0,0,0,109,251,253,128,31,0,0,0,0,63,251,251,253,251,189,0,0,0,0,0,0,0,0,0,0,31,107,107,169,251,222,62,0,0,0,0,0,21,144,221,253,251,230,107,30,0,0,0,0,0,0,0,0,202,253,253,253,253,234,77,0,0,0,0,0,0,0,182,255,253,253,253,72,0,0,0,0,0,0,0,0,253,251,251,251,251,253,147,10,0,0,0,0,0,0,0,253,251,251,251,71,0,0,0,0,0,0,0,0,150,251,251,251,251,253,251,137,0,0,0,0,0,0,0,253,251,251,251,173,0,0,0,0,0,0,0,0,11,37,197,251,251,253,251,220,20,0,0,0,0,0,0,228,251,251,251,251,0,0,0,0,0,0,0,0,0,0,21,190,251,253,251,251,188,30,0,0,0,0,0,73,251,251,251,174,0,0,0,0,0,0,0,0,0,0,0,110,253,255,253,253,253,201,0,0,0,0,0,73,253,253,253,72,0,0,0,0,0,0,0,0,0,0,0,0,0,182,221,251,251,251,253,251,251,251,251,253,251,251,142,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,63,231,251,251,253,251,251,251,251,253,251,230,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,37,37,37,140,217,217,217,218,113,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n")
+                file.writeText(sb.toString())
+                //savePreferencesString("dataset_labels", "ds_784_28_mnist,zero,one,two,three,four,five,six,seven,eight,nine")
+                Toast.makeText(safeContext, "mnist created", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(safeContext, "mnist exists", Toast.LENGTH_SHORT).show()
+            }
+        } catch (_: IOException) {}
+    }
+
+    private fun transpose(s: String): String {
+        val sList = s.split(",")
+        val sb: StringBuilder = StringBuilder()
+        sb.append(sList[0])
+        for (i in 27 downTo 0) {//27 downTo 0
+            for (j in 0..27) {
+                val index = limitValue(1 + j * 28 + i, 1, 784)
+                sb.append(",${ sList[index] }") // (27 - j)
+            }
+        }
+        return sb.toString()
+    }
 
 }
